@@ -1,0 +1,47 @@
+/* Direzione C — "Segnavia": massimo contrasto per l'uso all'aperto, bordi spessi, numeri grandi, rosso segnavia. */
+.skin-c{
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface-2:#EEF0EC;--ink:#0A0F0C;--ink-2:#3C4640;--line:#0A0F0C;--line-soft:#0A0F0C2E;--line-w:2px;
+  --accent:#C4122F;--on-accent:#FFFFFF;--btn-b:#0A0F0C;--ok:#0A0F0C;--on-ok:#FFFFFF;
+  --r-card:14px;--r-ctl:10px;--r-chip:8px;--r-btn:14px;--r-fab:16px;--shadow:none;--fab-shadow:0 4px 0 #0A0F0C;--fab-border:2px solid #0A0F0C;
+  --f-display:"Archivo",sans-serif;--f-body:"Archivo",sans-serif;--f-label:"Archivo",sans-serif;--body-size:16.500px;
+  --display-size:40px;--display-weight:800;--display-stretch:100%;--display-lh:1;--display-ls:-.025em;--display-case:none;
+  --title-weight:800;--title-stretch:92%;--title-size:27px;--h1-size:30px;--title-ls:-.015em;--title-case:none;
+  --num-weight:800;--num-stretch:92%;--num-size:27px;
+  --label-size:12.500px;--label-weight:600;--label-ls:0;--label-case:none;
+  --bar-h:12px;--bar-b:2px solid #0A0F0C;
+  --nav-b:2px solid #0A0F0C;--nav-bg:#FFFFFF;--nav-on-bg:#0A0F0C;--nav-on-ink:#FFFFFF;
+  --map-land:#F1F0E6;--map-wood:#D3E0C0;--map-ct:#8C6A3E;--map-water:#2F7FA8;--map-trail:#0A0F0C;--map-case:#FFFFFF;--map-route:#C4122F;--prof-fill:#0A0F0C26;
+}
+.skin-c.dark{
+  --bg:#000000;--surface:#000000;--surface-2:#1B211D;--ink:#FFFFFF;--ink-2:#C6CDC7;--line:#FFFFFF;--line-soft:#FFFFFF40;
+  --accent:#FF5266;--on-accent:#000000;--btn-b:#FFFFFF;--ok:#FFFFFF;--on-ok:#000000;--fab-shadow:0 4px 0 #FFFFFF;--fab-border:2px solid #FFFFFF;
+  --bar-b:2px solid #FFFFFF;--nav-b:2px solid #FFFFFF;--nav-bg:#000000;--nav-on-bg:#FFFFFF;--nav-on-ink:#000000;
+  --map-land:#141A16;--map-wood:#1E2C1B;--map-ct:#C7A877;--map-water:#62B4DC;--map-trail:#FFFFFF;--map-case:#000000;--map-route:#FF5266;--prof-fill:#FFFFFF33;
+}
+/* segnavia rosso-bianco-rosso come marchio di sezione */
+.skin-c .hero-top .label,.skin-c .section-h h3{display:flex;align-items:center;gap:9px;color:var(--ink);font-weight:800}
+.skin-c .hero-top .label::before,.skin-c .section-h h3::before{content:"";width:22px;height:16px;border-radius:2px;border:1.500px solid var(--ink);background:linear-gradient(var(--accent) 0 33%,var(--bg) 33% 67%,var(--accent) 67%)}
+.skin-c .hero{padding:15px}
+.skin-c .hero-wx{border:2px solid var(--line);background:none;font-size:15px}
+.skin-c .stats{gap:0;border:2px solid var(--line);border-radius:var(--r-ctl)}
+.skin-c .stats>div{padding:9px 11px}
+.skin-c .stats>div+div{border-left:2px solid var(--line)}
+.skin-c .prep-row{font-size:15px;font-weight:600}
+.skin-c .trips li{border-bottom:2px solid var(--line-soft)}
+.skin-c .trip-main b{font-size:17px;font-weight:800}
+.skin-c .trip-main span{font-size:14.500px}
+.skin-c .status{font-size:13px;font-weight:700;border-width:2px}
+.skin-c .pill{font-size:13.500px;font-weight:700}
+.skin-c .fab{height:60px;font-size:17px;font-weight:800}
+.skin-c .nav-l{font-size:12px}
+.skin-c .nav-ic{border-radius:10px}
+.skin-c .stats4{grid-template-columns:repeat(4,1fr);border:2px solid var(--line);border-radius:var(--r-ctl)}
+.skin-c .stats4>div{padding:8px 9px}
+.skin-c .stats4>div+div{border-left:2px solid var(--line)}
+.skin-c .stats4 b{font-size:19px}
+.skin-c .stats4 span{font-size:11.500px}
+.skin-c .wx-row{border-top:2px solid var(--line-soft)}
+.skin-c .wx-row .what{font-size:15.500px}
+.skin-c .btn{font-size:18px;font-weight:800;height:60px}
+.skin-c .btn.primary{box-shadow:0 4px 0 var(--ink)}
+.skin-c .logo{stroke-width:2.600}

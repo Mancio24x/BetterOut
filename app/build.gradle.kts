@@ -53,7 +53,10 @@ android {
         }
         release {
             // Senza le variabili della chiave (cioè fuori dal flusso di rilascio) l'APK release esce non firmato.
-            isMinifyEnabled = false
+            // R8 toglie il codice non usato e ottimizza: l'app parte e scorre meglio. Le risorse non vengono tolte,
+            // perché alcune etichette sono cercate per nome.
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
         }
     }

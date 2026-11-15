@@ -84,6 +84,7 @@ class WeatherViewModel(private val trips: TripRepository, private val routes: Ro
                         _state.update { it.copy(loading = false, climateFailed = true) }
                     }
                 }
+                Plan.Past -> _state.update { it.copy(report = weather.lastSaved(tripId)) }
                 else -> Unit
             }
         }

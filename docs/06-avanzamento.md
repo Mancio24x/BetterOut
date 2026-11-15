@@ -20,6 +20,20 @@ Aggiornato il 15 novembre 2026.
 
 L'APK attuale gestisce uscite, inventario, checklist dello zaino, percorsi e meteo, tutto salvato sul telefono. Le impostazioni mostrano ancora un testo provvisorio. Creazione e modifica dell'uscita usano un'unica pagina, non i sei passi delle bozze. L'interfaccia è solo in italiano e i pesi sono mostrati in chilogrammi (grammi sotto il chilo): la scelta dell'unità arriva con le impostazioni.
 
+## Versione 0.3.0: nuova struttura dell'app
+
+Richiesta dall'utente dopo la prima prova sul telefono, e diversa dalle bozze iniziali (`design/`), che restano come riferimento visivo:
+
+- **Barra in basso a tre tasti**: Uscite · Home (bussola, al centro, schermata iniziale) · Attrezzatura. Le impostazioni si aprono dalla rotellina in alto a destra; mappa e archivio dei percorsi dall'icona della mappa in Home e dalle impostazioni.
+- **Home**: vuota con il pulsante tondo "+" finché non c'è un itinerario; poi mostra in grande il prossimo (quello programmato più vicino, altrimenti l'ultima bozza) con mappa e percorso, statistiche, meteo, zaino e dettagli. Dopo il salvataggio di una nuova uscita si torna qui.
+- **Le tue uscite**: tutte le uscite una dopo l'altra, a pillole, con nome, quota massima, temperatura e distanza. Toccandone una si apre con mappa, meteo, esportazione GPX, attrezzatura e il collegamento al dettaglio completo. Non ci sono più i filtri per stato.
+- **Meteo delle uscite passate**: resta l'ultima previsione salvata, dichiarata come "tempo previsto, non misurato". La temperatura della pillola viene da lì (partenza, primo giorno).
+- **Impostazioni**: tema (di sistema, chiaro, nero AMOLED), importazione GPX, archivio dei percorsi, versione e fonti.
+- **Attrezzatura**: elenco con simbolo e nome; sotto gli oggetti già compilati, 17 oggetti proposti (zaino, scarpe, borraccia…) che si aggiungono con un tocco inserendo peso e volume. Tolti ricerca e filtri per categoria dall'elenco.
+- **Fluidità**: la build dei rilasci è ora ottimizzata con R8 (prima non lo era); l'APK arm64 scende a 16 MB.
+
+Non ancora fatto di quanto richiesto: scelta della lingua (serve la traduzione inglese di tutti i testi), esportazione e importazione di tutti i dati (backup), meteo misurato a posteriori per le uscite passate.
+
 ## Mappe e GPX: cosa c'è e cosa manca
 
 Fatto e provato sull'emulatore (dettaglio in `07-compilazione-collaudo.md`):

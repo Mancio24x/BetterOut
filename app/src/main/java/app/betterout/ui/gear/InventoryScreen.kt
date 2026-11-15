@@ -50,6 +50,13 @@ import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.theme.AppIcons
 import app.betterout.ui.theme.AppIcons2
 import app.betterout.ui.theme.AppIcons3
+import app.betterout.ui.theme.AppIcons5
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import app.betterout.domain.GearKind
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
 import app.betterout.ui.trips.currentLocale
 
 /** Filtra per nome o categoria, senza distinguere maiuscole. */
@@ -59,49 +66,70 @@ fun filterItems(items: List<GearItem>, categories: List<GearCategory>, query: St
     return items.filter { (categoryId == null || it.categoryId == categoryId) && (q.isEmpty() || it.name.lowercase().contains(q) || names[it.categoryId].orEmpty().lowercase().contains(q)) }
 }
 
+/** Un oggetto proposto: simbolo, nome e uso già impostati; peso e volume li mette l'utente. */
+class GearPreset(val nameRes: Int, val icon: ImageVector, val function: GearFunction = GearFunction.ALTRO, val kind: GearKind = GearKind.BASE)
+
+val GearPresets = listOf(
+    GearPreset(R.string.modello_zaino, AppIcons.Backpack, GearFunction.ZAINO),
+    GearPreset(R.string.modello_scarpe, AppIcons5.Boot, kind = GearKind.INDOSSATO),
+    GearPreset(R.string.modello_borraccia, AppIcons5.Bottle, GearFunction.CONTENITORE_ACQUA),
+    GearPreset(R.string.modello_maglietta, AppIcons5.Shirt, GearFunction.MAGLIETTA, GearKind.INDOSSATO),
+    GearPreset(R.string.modello_cambi, AppIcons5.Layers),
+    GearPreset(R.string.modello_calze, AppIcons5.Sock, GearFunction.CALZE),
+    GearPreset(R.string.modello_torcia, AppIcons5.Torch, GearFunction.FRONTALE),
+    GearPreset(R.string.modello_cibo, AppIcons5.Food, kind = GearKind.CONSUMABILE),
+    GearPreset(R.string.modello_fornello, AppIcons5.Flame, GearFunction.FORNELLO),
+    GearPreset(R.string.modello_cappello, AppIcons5.Hat, GearFunction.BERRETTO),
+    GearPreset(R.string.modello_occhiali, AppIcons5.Glasses, GearFunction.OCCHIALI_SOLE),
+    GearPreset(R.string.modello_coltello, AppIcons5.Knife),
+    GearPreset(R.string.modello_giacca, AppIcons5.Jacket, GearFunction.GUSCIO_PIOGGIA),
+    GearPreset(R.string.modello_primo_soccorso, AppIcons5.FirstAid, GearFunction.PRIMO_SOCCORSO),
+    GearPreset(R.string.modello_sacco_a_pelo, AppIcons5.SleepingBag, GearFunction.SACCO_LETTO),
+    GearPreset(R.string.modello_tenda, AppIcons5.Tent, GearFunction.RIPARO),
+    GearPreset(R.string.modello_powerbank, AppIcons5.Battery, GearFunction.POWERBANK),
+)
+
+/** L'oggetto proposto a cui corrisponde un oggetto dell'inventario: stesso nome, oppure stesso uso. */
+fun presetIndexFor(item: GearItem, presetNames: List<String>): Int? =
+    presetNames.indexOfFirst { it.equals(item.name.trim(), ignoreCase = true) }.takeIf { it >= 0 }
+        ?: GearPresets.indexOfFirst { it.function != GearFunction.ALTRO && it.function == item.function }.takeIf { it >= 0 }
+
+/** Attrezzatura: prima gli oggetti già compilati, poi quelli proposti ancora da aggiungere. Ogni riga ha simbolo e nome. */
 @Composable
-fun InventoryScreen(vm: InventoryViewModel, onNew: () -> Unit, onOpen: (String) -> Unit) {
+fun InventoryScreen(vm: InventoryViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, onPreset: (Int) -> Unit, header: @Composable () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
-    var query by rememberSaveable { mutableStateOf("") }
-    var categoryId by rememberSaveable { mutableStateOf<String?>(null) }
+    val names = GearPresets.map { stringResource(it.nameRes) }
     Box(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-            Row(Modifier.padding(top = 14.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.nav_attrezzatura), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f).semantics { heading() })
-                if (state.items.isNotEmpty()) Text(stringResource(R.string.inventario_riepilogo, pluralStringResource(R.plurals.conteggio_oggetti, state.items.size, state.items.size), weight(state.items.sumOf { (it.weightGrams ?: 0).toLong() })), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            when {
-                state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                state.items.isEmpty() -> {
-                    Spacer(Modifier.weight(1f))
-                    EmptyState(AppIcons.Backpack, stringResource(R.string.inventario_vuoto_titolo), stringResource(R.string.inventario_vuoto_testo)) { PrimaryButton(stringResource(R.string.nuovo_oggetto), onNew, icon = AppIcons2.Plus) }
-                    Spacer(Modifier.weight(1.4f))
-                }
-                else -> {
-                    OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth(), singleLine = true, shape = CircleShape, placeholder = { Text(stringResource(R.string.inventario_cerca)) }, leadingIcon = { Icon(AppIcons3.Search, contentDescription = null) })
-                    Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 8.dp)) {
-                        ChoiceChips(listOf<Pair<String?, String>>(null to stringResource(R.string.filtro_tutte)) + state.categories.filter { c -> state.items.any { it.categoryId == c.id } }.map { it.id to it.name }, categoryId, { categoryId = it })
-                    }
-                    val shown = filterItems(state.items, state.categories, query, categoryId)
-                    if (shown.isEmpty()) Text(stringResource(R.string.inventario_nessun_risultato), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 24.dp))
-                    LazyColumn(contentPadding = PaddingValues(bottom = 96.dp)) {
-                        state.categories.forEach { category ->
-                            val inCategory = shown.filter { it.categoryId == category.id }.sortedBy { it.name.lowercase() }
-                            if (inCategory.isNotEmpty()) {
-                                item(key = "h" + category.id) {
-                                    Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 2.dp)) {
-                                        Text(category.name, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f).semantics { heading() })
-                                        Text(pluralStringResource(R.plurals.conteggio_oggetti, inCategory.size, inCategory.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                }
-                                items(inCategory, key = { it.id }) { GearRow(it) { onOpen(it.id) } }
+        Column(Modifier.fillMaxSize()) {
+            header()
+            if (state.loading) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            else {
+                val items = state.items.sortedBy { it.name.lowercase() }
+                val used = items.mapNotNull { presetIndexFor(it, names) }.toSet()
+                // Dopo un'aggiunta l'elenco torna in cima, dove compare l'oggetto nuovo.
+                val listState = rememberLazyListState()
+                LaunchedEffect(items.size) { listState.scrollToItem(0) }
+                LazyColumn(state = listState, contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 104.dp)) {
+                    if (items.isNotEmpty()) {
+                        item(key = "tuoi") {
+                            Row(Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp)) {
+                                Text(stringResource(R.string.attrezzatura_tua), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f).semantics { heading() })
+                                Text(stringResource(R.string.inventario_riepilogo, pluralStringResource(R.plurals.conteggio_oggetti, items.size, items.size), weight(items.sumOf { (it.weightGrams ?: 0).toLong() })), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
+                        items(items, key = { it.id }) { item ->
+                            GearRow(presetIndexFor(item, names)?.let { GearPresets[it].icon } ?: AppIcons5.Box, item.name, gearSubtitle(item), item.weightGrams?.let { weight(it.toLong()) } ?: "—") { onOpen(item.id) }
+                        }
+                    }
+                    val missing = GearPresets.indices.filter { it !in used }
+                    if (missing.isNotEmpty()) {
+                        item(key = "proposti") { Text(stringResource(R.string.attrezzatura_da_aggiungere), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 16.dp, bottom = 2.dp).semantics { heading() }) }
+                        items(missing, key = { "m$it" }) { i -> GearRow(GearPresets[i].icon, names[i], stringResource(R.string.attrezzatura_tocca), null) { onPreset(i) } }
                     }
                 }
             }
         }
-        if (state.items.isNotEmpty()) AddFab(stringResource(R.string.nuovo_oggetto), onNew, Modifier.align(Alignment.BottomEnd).padding(16.dp))
+        AddFab(stringResource(R.string.nuovo_oggetto), onNew, Modifier.align(Alignment.BottomEnd).padding(16.dp))
     }
 }
 
@@ -118,15 +146,16 @@ fun gearSubtitle(item: GearItem): String {
 }
 
 @Composable
-private fun GearRow(item: GearItem, onClick: () -> Unit) {
-    Surface(Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(18.dp)).clickable(role = Role.Button, onClick = onClick), shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
-        Row(Modifier.heightIn(min = 60.dp).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun GearRow(icon: ImageVector, name: String, subtitle: String, weight: String?, onClick: () -> Unit) {
+    Surface(Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(22.dp)).clickable(role = Role.Button, onClick = onClick), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
+        Row(Modifier.heightIn(min = 68.dp).padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceVariant) { Box(Modifier.size(46.dp), contentAlignment = Alignment.Center) { Icon(icon, contentDescription = null, modifier = Modifier.size(26.dp)) } }
             Column(Modifier.weight(1f)) {
-                Text(item.name, style = MaterialTheme.typography.titleMedium)
-                Text(gearSubtitle(item), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(name, style = MaterialTheme.typography.titleMedium)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(item.weightGrams?.let { weight(it.toLong()) } ?: "—", style = MaterialTheme.typography.titleSmall)
-            Icon(AppIcons2.Chevron, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (weight != null) Text(weight, style = MaterialTheme.typography.titleSmall)
+            Icon(if (weight != null) AppIcons2.Chevron else AppIcons2.Plus, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

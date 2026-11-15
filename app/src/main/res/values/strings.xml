@@ -523,4 +523,50 @@
         <item>O</item>
         <item>NO</item>
     </string-array>
+
+    <!-- Home, uscite a pillole, impostazioni, attrezzatura proposta -->
+    <string name="nav_home">Home</string>
+    <string name="home_itinerario">Itinerario</string>
+    <string name="home_vuota">Nessun itinerario in programma. Tocca + per crearne uno.</string>
+    <string name="home_mappa_percorsi">Mappa e percorsi</string>
+    <string name="le_tue_uscite">Le tue uscite</string>
+    <string name="uscite_vuote">Qui compaiono le tue uscite, una dopo l’altra. Creane una dalla Home.</string>
+    <string name="apri_uscita">Apri l’uscita</string>
+    <string name="pillola_aperta">aperta</string>
+    <string name="pillola_chiusa">chiusa</string>
+    <string name="pillola_zaino">Attrezzatura dell’uscita</string>
+    <string name="stat_quota_max">quota max</string>
+    <string name="stat_temperatura">temperatura</string>
+    <string name="meteo_salvata_il">Ultima previsione salvata il %1$s: è il tempo che era previsto, non quello misurato.</string>
+    <string name="impostazioni_tema">Tema</string>
+    <string name="tema_sistema">Di sistema</string>
+    <string name="tema_chiaro">Chiaro</string>
+    <string name="tema_nero">Nero AMOLED</string>
+    <string name="tema_nota">“Di sistema” segue il tema chiaro o scuro del telefono.</string>
+    <string name="impostazioni_dati">Dati e file GPX</string>
+    <string name="impostazioni_percorsi">Mappa e archivio dei percorsi</string>
+    <string name="impostazioni_percorsi_testo">Da ogni percorso salvato puoi esportare il file GPX</string>
+    <string name="impostazioni_info">Informazioni</string>
+    <string name="impostazioni_versione">BetterOut %1$s</string>
+    <string name="impostazioni_fonti">Meteo e quote: Open-Meteo (CC BY 4.0). Mappe: OpenFreeMap, © OpenMapTiles, dati © OpenStreetMap. Sentieri: BRouter su dati OpenStreetMap. Tutti i dati restano sul telefono.</string>
+    <string name="attrezzatura_tua">La tua attrezzatura</string>
+    <string name="attrezzatura_da_aggiungere">Da aggiungere</string>
+    <string name="attrezzatura_tocca">Tocca per inserire peso e volume</string>
+    <string name="modello_zaino">Zaino</string>
+    <string name="modello_scarpe">Scarpe</string>
+    <string name="modello_borraccia">Borraccia</string>
+    <string name="modello_maglietta">Maglietta</string>
+    <string name="modello_cambi">Cambi</string>
+    <string name="modello_calze">Calze</string>
+    <string name="modello_torcia">Torcia</string>
+    <string name="modello_cibo">Cibo</string>
+    <string name="modello_fornello">Fornello</string>
+    <string name="modello_cappello">Cappello</string>
+    <string name="modello_occhiali">Occhiali</string>
+    <string name="modello_coltello">Coltello</string>
+    <string name="modello_giacca">Giacca antipioggia</string>
+    <string name="modello_primo_soccorso">Primo soccorso</string>
+    <string name="modello_sacco_a_pelo">Sacco a pelo</string>
+    <string name="modello_tenda">Tenda</string>
+    <string name="modello_powerbank">Powerbank</string>
 </resources>

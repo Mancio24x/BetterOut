@@ -51,7 +51,6 @@ import app.betterout.ui.map.RouteEditorViewModel
 import app.betterout.ui.map.RoutesViewModel
 import app.betterout.ui.map.TripRouteCard
 import app.betterout.ui.map.TripRouteScreen
-import app.betterout.ui.trips.HomeScreen
 import app.betterout.ui.weather.TripWeatherCard
 import app.betterout.ui.weather.WeatherScreen
 import app.betterout.ui.weather.WeatherViewModel
@@ -59,16 +58,32 @@ import app.betterout.ui.trips.TripDetailScreen
 import app.betterout.ui.trips.TripDetailViewModel
 import app.betterout.ui.trips.TripEditScreen
 import app.betterout.ui.trips.TripEditViewModel
-import app.betterout.ui.trips.TripListScreen
 import app.betterout.ui.trips.TripsViewModel
 import app.betterout.ui.theme.AppIcons
+import app.betterout.ui.theme.AppIcons3
+import app.betterout.ui.theme.AppIcons5
+import app.betterout.data.GearItem
+import app.betterout.data.Trip
+import app.betterout.ui.components.PrimaryButton
+import app.betterout.ui.components.SecondaryButton
+import app.betterout.ui.gear.GearPresets
+import app.betterout.ui.gear.shareTextFile
+import app.betterout.ui.home.HomeScreen
+import app.betterout.ui.home.SettingsScreen
+import app.betterout.ui.home.TabHeader
+import app.betterout.ui.home.TripMap
+import app.betterout.ui.home.TripsScreen
+import app.betterout.ui.map.gpxFileName
+import androidx.compose.foundation.layout.height
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 enum class Tab(val route: String, @param:StringRes val label: Int, val icon: ImageVector) {
     Uscite("uscite", R.string.nav_uscite, AppIcons.Mountain),
-    Mappa("mappa", R.string.nav_mappa, AppIcons.Map),
+    Home("home", R.string.nav_home, AppIcons5.Compass),
     Attrezzatura("attrezzatura", R.string.nav_attrezzatura, AppIcons.Backpack),
-    Impostazioni("impostazioni", R.string.nav_impostazioni, AppIcons.Settings),
 }
+
+private const val MAPPA = "mappa"
 
 @Composable
 fun BetterOutApp() {
@@ -76,7 +91,7 @@ fun BetterOutApp() {
     val entry by nav.currentBackStackEntryAsState()
     val app = LocalContext.current.applicationContext as BetterOutApplication
     val route = entry?.destination?.route
-    val showTabs = Tab.entries.any { it.route == route }
+    val showTabs = route == MAPPA || Tab.entries.any { it.route == route }
     val scope = rememberCoroutineScope()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -107,21 +122,39 @@ fun BetterOutApp() {
         },
     ) { padding ->
         // Le schermate di secondo livello gestiscono da sole barre e margini di sistema.
-        NavHost(nav, startDestination = Tab.Uscite.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
-            composable(Tab.Uscite.route) {
-                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onSeeAll = { nav.navigate("uscite/elenco") })
+        NavHost(nav, startDestination = Tab.Home.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
+            val settings = { nav.navigate("impostazioni") }
+            // Il percorso di un'uscita si può aggiungere dal suo dettaglio o dalla Home: si torna da dove si era partiti.
+            val backToTrip = { if (!nav.popBackStack("uscita/{id}", inclusive = false)) nav.popBackStack(Tab.Home.route, inclusive = false) }
+            // Mappa, percorso e meteo di un'uscita: gli stessi pezzi in Home, nel dettaglio e nelle pillole aperte.
+            val tripDetails: @Composable (Trip, Boolean) -> Unit = { trip, withActions ->
+                TripMap(app.routes, trip.routeId, Modifier.height(260.dp))
+                if (withActions) TripRouteCard(trip, app.routes, onOpenRoute = { nav.navigate("percorso/$it") }, onChoose = { nav.navigate("uscita/${trip.id}/percorso") }, onRemove = { scope.launch { app.routes.setTripRoute(trip.id, null) } })
+                TripWeatherCard(viewModel(key = "meteo-${trip.id}", factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, trip.id)), onOpen = { nav.navigate("uscita/${trip.id}/meteo") })
             }
-            composable("uscite/elenco") {
-                TripListScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onBack = { nav.popBackStack() }, onOpen = { nav.navigate("uscita/$it") })
+            composable(Tab.Home.route) {
+                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onPack = { nav.navigate("uscita/$it/zaino") }, onMap = { nav.navigate(MAPPA) }, onSettings = settings) { trip -> tripDetails(trip, true) }
+            }
+            composable(Tab.Uscite.route) {
+                val routes by viewModel<RoutesViewModel>(factory = RoutesViewModel.factory(app.routes)).routes.collectAsStateWithLifecycle()
+                val context = LocalContext.current
+                val manualNote = stringResource(R.string.gpx_nota_manuale)
+                val chooser = stringResource(R.string.condividi_con)
+                TripsScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), routes.orEmpty(), app.weather, onSettings = settings) { trip ->
+                    tripDetails(trip, false)
+                    val route = routes?.firstOrNull { it.id == trip.routeId }
+                    if (route != null) SecondaryButton(stringResource(R.string.esporta_gpx), { scope.launch { app.routes.gpx(route.id, manualNote)?.let { shareTextFile(context, gpxFileName(route.name), "application/gpx+xml", it, chooser, byteOrderMark = false) } } }, icon = AppIcons3.Download)
+                    SecondaryButton(stringResource(R.string.pillola_zaino), { nav.navigate("uscita/${trip.id}/zaino") }, icon = AppIcons.Backpack)
+                    PrimaryButton(stringResource(R.string.apri_uscita), { nav.navigate("uscita/${trip.id}") })
+                }
             }
             composable("uscita/nuova") {
-                TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, null)), onClose = { nav.popBackStack() }, onSaved = { id -> nav.navigate("uscita/$id") { popUpTo("uscita/nuova") { inclusive = true } } })
+                TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, null)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack(Tab.Home.route, inclusive = false) })
             }
             composable("uscita/{id}") { e ->
                 val id = e.arguments?.getString("id").orEmpty()
                 TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onPack = { nav.navigate("uscita/$id/zaino") }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") }) { trip ->
-                    TripRouteCard(trip, app.routes, onOpenRoute = { nav.navigate("percorso/$it") }, onChoose = { nav.navigate("uscita/$id/percorso") }, onRemove = { scope.launch { app.routes.setTripRoute(id, null) } })
-                    TripWeatherCard(viewModel(factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, id)), onOpen = { nav.navigate("uscita/$id/meteo") })
+                    tripDetails(trip, true)
                 }
             }
             composable("uscita/{id}/meteo") { e ->
@@ -138,9 +171,14 @@ fun BetterOutApp() {
                 TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, id)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Tab.Attrezzatura.route) {
-                InventoryScreen(viewModel(factory = InventoryViewModel.factory(app.gear)), onNew = { nav.navigate("oggetto/nuovo") }, onOpen = { nav.navigate("oggetto/$it") })
+                InventoryScreen(viewModel(factory = InventoryViewModel.factory(app.gear)), onNew = { nav.navigate("oggetto/nuovo") }, onOpen = { nav.navigate("oggetto/$it") }, onPreset = { nav.navigate("oggetto/nuovo?modello=$it") }) { TabHeader(stringResource(R.string.nav_attrezzatura), settings) }
             }
-            composable("oggetto/nuovo") { GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, null)), onClose = { nav.popBackStack() }) }
+            composable("oggetto/nuovo?modello={modello}", arguments = listOf(optional("modello"))) { e ->
+                // Un oggetto scelto dall'elenco proposto parte con nome, uso e tipo già impostati.
+                val preset = e.arguments?.getString("modello")?.toIntOrNull()?.let(GearPresets::getOrNull)
+                val template = preset?.let { GearItem(id = "", name = stringResource(it.nameRes), categoryId = "", kind = it.kind, function = it.function, createdAt = 0, updatedAt = 0) }
+                GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, null, template)), onClose = { nav.popBackStack() })
+            }
             composable("oggetto/{id}") { e -> GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, e.arguments?.getString("id"))), onClose = { nav.popBackStack() }) }
             composable("uscita/{id}/zaino") { e ->
                 val id = e.arguments?.getString("id").orEmpty()
@@ -150,7 +188,7 @@ fun BetterOutApp() {
                 val id = e.arguments?.getString("id").orEmpty()
                 AddToChecklistScreen(viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onClose = { nav.popBackStack() })
             }
-            composable(Tab.Mappa.route) {
+            composable(MAPPA) {
                 MapScreen(viewModel(factory = RoutesViewModel.factory(app.routes)), onOpenRoute = { nav.navigate("percorso/$it") }, onDraw = { nav.navigate("editor") }, onImport = { nav.navigate("gpx?uri=${Uri.encode(it.toString())}") })
             }
             composable("percorso/{id}") { e ->
@@ -163,9 +201,9 @@ fun BetterOutApp() {
                 val tripId = e.arguments?.getString("uscita")
                 RouteEditorScreen(viewModel(factory = RouteEditorViewModel.factory(app.routes, app.routing, id, tripId)), onClose = { nav.popBackStack() }, onSaved = { saved ->
                     when {
-                        tripId != null -> nav.popBackStack("uscita/{id}", inclusive = false)
+                        tripId != null -> backToTrip()
                         id != null -> nav.popBackStack()
-                        else -> nav.navigate("percorso/$saved") { popUpTo(Tab.Mappa.route) }
+                        else -> nav.navigate("percorso/$saved") { popUpTo(MAPPA) }
                     }
                 })
             }
@@ -177,25 +215,18 @@ fun BetterOutApp() {
                     onAnotherFile = { nav.popBackStack(); nav.navigate("gpx?uri=${Uri.encode(it.toString())}" + if (tripId != null) "&uscita=$tripId" else "") },
                     onDone = { ids, linked ->
                         when {
-                            linked -> nav.popBackStack("uscita/{id}", inclusive = false)
-                            tripId == null && ids.size == 1 -> nav.navigate("percorso/${ids.single()}") { popUpTo(Tab.Mappa.route) }
+                            linked -> backToTrip()
+                            tripId == null && ids.size == 1 -> nav.navigate("percorso/${ids.single()}") { popUpTo(MAPPA) }
                             else -> nav.popBackStack()
                         }
                     },
                 )
             }
-            composable(Tab.Impostazioni.route) { Segnaposto(stringResource(Tab.Impostazioni.label), stringResource(R.string.in_costruzione)) }
+            composable("impostazioni") {
+                SettingsScreen(app.settings, onBack = { nav.popBackStack() }, onImportGpx = { nav.navigate("gpx?uri=${Uri.encode(it.toString())}") }, onRoutes = { nav.navigate(MAPPA) })
+            }
         }
     }
 }
 
 private fun optional(name: String) = navArgument(name) { type = NavType.StringType; nullable = true }
-
-/** Schermata provvisoria: verrà sostituita dalle schermate vere nelle fasi successive. */
-@Composable
-private fun Segnaposto(titolo: String, testo: String) {
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(titolo, style = MaterialTheme.typography.displayLarge)
-        Text(testo, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
-}

@@ -33,7 +33,7 @@ class InventoryViewModel(private val repo: GearRepository) : ViewModel() {
     companion object { fun factory(repo: GearRepository): ViewModelProvider.Factory = viewModelFactory { initializer { InventoryViewModel(repo) } } }
 }
 
-class GearEditViewModel(private val repo: GearRepository, private val id: String?) : ViewModel() {
+class GearEditViewModel(private val repo: GearRepository, private val id: String?, private val template: GearItem? = null) : ViewModel() {
     /** I numeri sono tenuti come testo finché non si salva, così un valore non valido resta visibile e segnalato. */
     data class State(
         val loading: Boolean = true, val item: GearItem? = null, val original: State.Snapshot? = null, val categories: List<GearCategory> = emptyList(),
@@ -56,7 +56,7 @@ class GearEditViewModel(private val repo: GearRepository, private val id: String
             repo.ensureDefaultCategories()
             val categories = repo.categories()
             val now = System.currentTimeMillis()
-            val item = id?.let { repo.item(it) } ?: GearItem(id = UUID.randomUUID().toString(), name = "", categoryId = categories.first().id, createdAt = now, updatedAt = now)
+            val item = id?.let { repo.item(it) } ?: (template ?: GearItem(id = "", name = "", categoryId = "", createdAt = now, updatedAt = now)).copy(id = UUID.randomUUID().toString(), categoryId = categories.first().id, createdAt = now, updatedAt = now)
             val s = State(false, item, null, categories, item.weightGrams?.toString().orEmpty(), item.volumeLiters?.let(::plain).orEmpty(), item.capacityLiters?.let(::plain).orEmpty(), tripsUsing = id?.let { repo.tripsUsing(it) } ?: 0)
             _state.value = s.copy(original = s.snapshot)
         }
@@ -91,7 +91,8 @@ class GearEditViewModel(private val repo: GearRepository, private val id: String
     companion object {
         fun parseDecimal(text: String): Double? = text.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it >= 0 && it.isFinite() }
         private fun plain(v: Double): String = if (v % 1.0 == 0.0) v.toInt().toString() else v.toString().replace('.', ',')
-        fun factory(repo: GearRepository, id: String?): ViewModelProvider.Factory = viewModelFactory { initializer { GearEditViewModel(repo, id) } }
+        /** [template] dà nome, uso e tipo di partenza a un oggetto nuovo scelto dall'elenco proposto. */
+        fun factory(repo: GearRepository, id: String?, template: GearItem? = null): ViewModelProvider.Factory = viewModelFactory { initializer { GearEditViewModel(repo, id, template) } }
     }
 }
 

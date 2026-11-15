@@ -202,12 +202,26 @@ fun TripWeatherCard(vm: WeatherViewModel, onOpen: () -> Unit) {
                     if (plan is Plan.Ask) stringResource(R.string.meteo_del, formatDate(plan.firstDay, locale)) else stringResource(R.string.meteo),
                     style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() },
                 )
-                s.report?.let { Text(stringResource(R.string.meteo_fonte_breve, ageText(it.fetchedAt)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                if (plan is Plan.Ask) s.report?.let { Text(stringResource(R.string.meteo_fonte_breve, ageText(it.fetchedAt)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
             when (plan) {
                 Plan.NoDate -> Muted(stringResource(R.string.meteo_senza_data))
                 Plan.NoPlace -> Muted(stringResource(R.string.meteo_senza_luogo))
-                Plan.Past -> Muted(stringResource(R.string.meteo_uscita_passata))
+                Plan.Past -> {
+                    // Di un'uscita passata resta l'ultima previsione salvata: è ciò che era previsto, non ciò che è stato misurato.
+                    val report = s.report
+                    val start = s.trip?.startDate
+                    val end = s.trip?.endDate ?: start
+                    val day = if (report != null && start != null) generateSequence(start) { it.plusDays(1) }.takeWhile { !it.isAfter(end) }.firstOrNull { d -> report.points.any { it.day(d) != null } } else null
+                    if (report == null || day == null) Muted(stringResource(R.string.meteo_uscita_passata))
+                    else {
+                        report.points.forEachIndexed { i, forecast ->
+                            if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                            DaySummaryRow(pointLabel(forecast) + " · " + formatDate(day, locale), forecast.day(day))
+                        }
+                        Text(stringResource(R.string.meteo_salvata_il, formatDate(Instant.ofEpochMilli(report.fetchedAt).atZone(ZoneId.systemDefault()).toLocalDate(), locale)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
                 is Plan.TooEarly -> {
                     Muted(stringResource(R.string.meteo_non_ancora_titolo) + ". " + stringResource(R.string.meteo_non_ancora_breve, dayMonth(plan.availableFrom, locale)))
                     SecondaryButton(stringResource(R.string.meteo_apri), onOpen, icon = AppIcons4.Cloud)

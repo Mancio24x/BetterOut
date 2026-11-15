@@ -29,6 +29,13 @@ val LightColors = lightColorScheme(
     onErrorContainer = Color(0xFF5E130B),
 )
 
+/** Nero pieno per schermi AMOLED: i pixel dello sfondo restano spenti. */
+val AmoledColors by lazy {
+    DarkColors.copy(
+        background = Color(0xFF000000), surface = Color(0xFF111110), surfaceContainer = Color(0xFF111110), surfaceVariant = Color(0xFF1E1D1A),
+    )
+}
+
 val DarkColors = darkColorScheme(
     primary = Color(0xFFA9CB98),
     onPrimary = Color(0xFF172413),

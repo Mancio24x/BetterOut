@@ -137,7 +137,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
             when (val s = state) {
                 TripDetailViewModel.State.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 TripDetailViewModel.State.Missing -> Text(stringResource(R.string.uscita_non_trovata), Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
-                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack, routeCard)
+                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack, Modifier.fillMaxSize(), routeCard = routeCard)
             }
         }
     }
@@ -159,9 +159,9 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
 }
 
 @Composable
-private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit, routeCard: @Composable (Trip) -> Unit) {
+fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit, modifier: Modifier = Modifier, bottomSpace: androidx.compose.ui.unit.Dp = 24.dp, routeCard: @Composable (Trip) -> Unit) {
     val today = LocalDate.now()
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = bottomSpace), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusChip(trip.status)
             tripCountdown(trip, today)?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }

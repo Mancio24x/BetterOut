@@ -93,3 +93,33 @@ object AppIcons4 {
     val Wind by lazy { stroke("M4 9h10a2.500 2.500 0 1 0-2.500-2.500", "M4 13h14a2.500 2.500 0 1 1-2.500 2.500", "M4 17h6") }
     val Refresh by lazy { stroke("M19.500 12a7.500 7.500 0 1 1-2.200-5.300", "M18 3v4h-4") }
 }
+
+/** Icone della barra, delle impostazioni e dell'attrezzatura. */
+object AppIcons5 {
+    private fun stroke(vararg paths: String): ImageVector =
+        ImageVector.Builder(defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
+            paths.forEach {
+                addPath(pathData = addPathNodes(it), stroke = SolidColor(Color.Black), strokeLineWidth = 2f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
+            }
+        }.build()
+
+    val Compass by lazy { stroke("M20.500 12a8.500 8.500 0 1 1-17 0a8.500 8.500 0 1 1 17 0", "m15.500 8.500-2 5-5 2 2-5z") }
+    val Cog by lazy { stroke("M15 12a3 3 0 1 1-6 0a3 3 0 1 1 6 0", "M18.500 12a6.500 6.500 0 1 1-13 0a6.500 6.500 0 1 1 13 0", "M12 2.500v3M12 18.500v3M2.500 12h3M18.500 12h3M5.300 5.300l2.100 2.100M16.600 16.600l2.100 2.100M5.300 18.700l2.100-2.100M16.600 7.400l2.100-2.100") }
+    val Box by lazy { stroke("M4 8l8-4 8 4v8l-8 4-8-4z", "M4 8l8 4 8-4M12 12v8") }
+    val Boot by lazy { stroke("M6 4h5v7l7 3a3 3 0 0 1 2 2.800V19H4V6a2 2 0 0 1 2-2z", "M4 16h16") }
+    val Bottle by lazy { stroke("M9.500 3h5v3h-5z", "M8.500 6h7l1.500 3v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9z", "M7 13h10") }
+    val Shirt by lazy { stroke("M8 4 3 7l2 4 2.500-1V20h9V10L19 11l2-4-5-3a4 4 0 0 1-8 0z") }
+    val Layers by lazy { stroke("M12 4 3 8.500l9 4.500 9-4.500z", "m3 12.500 9 4.500 9-4.500", "m3 16.500 9 4.500 9-4.500") }
+    val Sock by lazy { stroke("M9 3h7v11.500a4 4 0 0 1-1.500 3.100l-3 2.400a3.300 3.300 0 0 1-4.300-5L9 13z", "M9 7h7") }
+    val Torch by lazy { stroke("M7 3h10v3l-2 3v11a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V9L7 6z", "M12 12v3") }
+    val Food by lazy { stroke("M7 3v18M4.500 3v5a2.500 2.500 0 0 0 5 0V3", "M17 3c-2 2-3 5-3 9h3v9M17 3v9") }
+    val Flame by lazy { stroke("M12 3c1 4 5 5.500 5 10.500a5 5 0 0 1-10 0c0-2 1-3.500 2-4.500 0 2 1 3 2 3 0-3-1-5 1-9z") }
+    val Hat by lazy { stroke("M3 16.500h18", "M6.500 16.500V13a5.500 5.500 0 0 1 11 0v3.500") }
+    val Glasses by lazy { stroke("M10 14.500a3.500 3.500 0 1 1-7 0a3.500 3.500 0 1 1 7 0", "M21 14.500a3.500 3.500 0 1 1-7 0a3.500 3.500 0 1 1 7 0", "M10 14.500c.600-1 3.400-1 4 0", "M3 14 5 7M21 14l-2-7") }
+    val Knife by lazy { stroke("m4 20 10.500-10.500", "M14.500 9.500 19 5c1.500 3 .500 7-3 9.500z") }
+    val Jacket by lazy { stroke("M9 3 4 6v14h5V9M15 3l5 3v14h-5V9M9 3a3 3 0 0 0 6 0M12 6v14") }
+    val FirstAid by lazy { stroke("M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z", "M9 7V4h6v3", "M12 11v5M9.500 13.500h5") }
+    val SleepingBag by lazy { stroke("M8 3h8a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z", "M5 9h14M12 9v12") }
+    val Tent by lazy { stroke("M12 4 3 20h18z", "m12 12-3 8M12 12l3 8") }
+    val Battery by lazy { stroke("M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z", "m13 8-3 4.500h4L11 17") }
+}

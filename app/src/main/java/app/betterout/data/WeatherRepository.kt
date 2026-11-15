@@ -24,6 +24,9 @@ class WeatherRepository(private val dir: File, private val now: () -> Long = Sys
     suspend fun cached(tripId: String, ask: WeatherRules.Plan.Ask): WeatherReport? =
         read<WeatherReport>(forecastFile(tripId))?.takeIf { it.key == ask.key }
 
+    /** L'ultima previsione salvata per l'uscita, qualunque sia: serve a ricordare che tempo era previsto per un'uscita passata. */
+    suspend fun lastSaved(tripId: String): WeatherReport? = read<WeatherReport>(forecastFile(tripId))
+
     /**
      * Restituisce la previsione, chiedendola al servizio se manca, se ha più di tre ore o se [force].
      * Lancia [java.io.IOException] se la richiesta non riesce: il dato salvato resta dov'è.

@@ -96,7 +96,16 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Meteo: probabilità di precipitazione oltre i primi giorni | Osservato | Per i giorni lontani il servizio non la dà: la cella mostra "—", non zero |
 | APK release firmato, per architettura | Riuscito | Compilato in locale con la chiave, firma controllata con `apksigner`, installato e avviato sull'emulatore: versione 0.2.0 (200), Home, mappa, nuova uscita. 24,6 MB per arm64 (prima 66 MB per tutte) |
 | Aggiornamento sopra una versione precedente | **Non eseguito** | Esiste un solo rilascio |
-| Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
+| Build release ottimizzata (R8) | Riuscita | Provata sull'emulatore: ricerca località, importazione GPX, mappa, meteo, salvataggi: nessun errore. 16,4 MB per arm64 |
+| Home vuota e pulsante "+" | Riuscita | Dopo il salvataggio l'itinerario compare in Home con mappa, percorso e meteo (`docs/verifiche/home-itinerario.png`) |
+| Percorso aggiunto dalla Home | Riuscito dopo una correzione | Dopo "Associa all'uscita" non si tornava indietro: ora si torna alla Home |
+| Le tue uscite a pillole | Riuscite | Quota massima, temperatura e distanza; la pillola aperta mostra mappa, meteo ed esportazione GPX |
+| Meteo salvato di un'uscita passata | Riuscito | Orologio dell'emulatore spostato avanti di tre giorni: la previsione salvata resta, dichiarata come non misurata; la Home torna vuota |
+| Tema nero AMOLED | Riuscito | Scelta salvata e applicata subito (`docs/verifiche/uscite-pillola-aperta-nero.png`) |
+| Attrezzatura con simboli e oggetti proposti | Riuscita | "Zaino" aggiunto dal modello con il peso; sparisce dai proposti (`docs/verifiche/attrezzatura-simboli.png`) |
+| Fluidità sul telefono | **Non misurata** | L'emulatore non è indicativo: va giudicata sul telefono |
+| Tema chiaro forzato, esportazione GPX dalla pillola, importazione GPX dalle impostazioni | **Non eseguiti** | Usano codice già provato altrove, ma questi punti di accesso non sono stati toccati |
+| Testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 
 ## Emulatore

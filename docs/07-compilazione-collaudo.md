@@ -35,4 +35,14 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 |---|---|---|
 | Compilazione debug | Riuscita il 15 nov 2026 | `./gradlew assembleDebug` in locale |
 | Test delle formule (durata, dislivello, pesi) | 15 su 15 | `./gradlew testDebugUnitTest` |
-| Avvio su dispositivo o emulatore | **Non eseguito** | Nessun emulatore né dispositivo disponibile |
+| Installazione e avvio su emulatore | Riusciti il 15 nov 2026, nessun crash | Emulatore Pixel 7, Android 16 (API 36), `adb install` e avvio; immagine in `docs/verifiche/scheletro-home.png` |
+| Cambio di scheda | Riuscito | Tocco sulla barra inferiore nell'emulatore |
+| Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
+
+## Emulatore
+
+```bash
+$ANDROID_HOME/emulator/emulator -avd betterout -no-window -no-audio
+```
+
+Il dispositivo virtuale `betterout` (Pixel 7, API 36) esiste solo sulla macchina di sviluppo. L'emulatore parte in inglese: l'italiano predefinito arriva con la fase delle impostazioni.

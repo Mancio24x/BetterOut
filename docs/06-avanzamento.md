@@ -22,7 +22,7 @@ L'APK attuale è solo uno scheletro: si apre sulle quattro schede, che mostrano 
 
 ## Problemi aperti
 
-1. **Nessun emulatore né dispositivo collegato** sulla macchina di sviluppo: mancano l'emulatore Android e le immagini di sistema. Finché non ci sono, l'avvio dell'app non può essere verificato qui; restano possibili compilazione, test sulla JVM e immagini delle schermate generate dai test.
+1. **Lingua**: l'app segue ancora la lingua del telefono (in inglese sull'emulatore); l'italiano predefinito non è ancora imposto.
 2. **BRouter non pubblica condizioni d'uso**: il routing predefinito dipende da un servizio di volontari senza limiti dichiarati.
 3. **Condizioni di Mapterhorn e quote di openrouteservice non lette**: da verificare prima di abilitarli nell'APK.
 4. **Curve di livello**: disponibili solo nello strato OpenTopoMap, online. Lo strato escursionistico vettoriale non le ha.

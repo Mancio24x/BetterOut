@@ -24,7 +24,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import app.betterout.BetterOutApplication
 import app.betterout.R
+import app.betterout.ui.trips.HomeScreen
+import app.betterout.ui.trips.TripDetailScreen
+import app.betterout.ui.trips.TripDetailViewModel
+import app.betterout.ui.trips.TripEditScreen
+import app.betterout.ui.trips.TripEditViewModel
+import app.betterout.ui.trips.TripListScreen
+import app.betterout.ui.trips.TripsViewModel
 import app.betterout.ui.theme.AppIcons
 
 enum class Tab(val route: String, @param:StringRes val label: Int, val icon: ImageVector) {
@@ -38,10 +48,13 @@ enum class Tab(val route: String, @param:StringRes val label: Int, val icon: Ima
 fun BetterOutApp() {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
+    val app = LocalContext.current.applicationContext as BetterOutApplication
+    val route = entry?.destination?.route
+    val showTabs = Tab.entries.any { it.route == route }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            if (showTabs) NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 Tab.entries.forEach { tab ->
                     NavigationBarItem(
                         selected = entry?.destination?.hierarchy?.any { it.route == tab.route } == true,
@@ -66,8 +79,25 @@ fun BetterOutApp() {
             }
         },
     ) { padding ->
-        NavHost(nav, startDestination = Tab.Uscite.route, modifier = Modifier.padding(padding)) {
-            composable(Tab.Uscite.route) { Segnaposto(stringResource(R.string.home_titolo), stringResource(R.string.home_vuota_titolo)) }
+        // Le schermate di secondo livello gestiscono da sole barre e margini di sistema.
+        NavHost(nav, startDestination = Tab.Uscite.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
+            composable(Tab.Uscite.route) {
+                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onSeeAll = { nav.navigate("uscite/elenco") })
+            }
+            composable("uscite/elenco") {
+                TripListScreen(viewModel(factory = TripsViewModel.factory(app.trips)), onBack = { nav.popBackStack() }, onOpen = { nav.navigate("uscita/$it") })
+            }
+            composable("uscita/nuova") {
+                TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, null)), onClose = { nav.popBackStack() }, onSaved = { id -> nav.navigate("uscita/$id") { popUpTo("uscita/nuova") { inclusive = true } } })
+            }
+            composable("uscita/{id}") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") })
+            }
+            composable("uscita/{id}/modifica") { e ->
+                val id = e.arguments?.getString("id")
+                TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, id)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
+            }
             Tab.entries.drop(1).forEach { tab ->
                 composable(tab.route) { Segnaposto(stringResource(tab.label), stringResource(R.string.in_costruzione)) }
             }

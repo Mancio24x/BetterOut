@@ -33,10 +33,16 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 
 | Verifica | Esito | Come |
 |---|---|---|
-| Compilazione debug | Riuscita il 15 nov 2026 | `./gradlew assembleDebug` in locale |
-| Test delle formule (durata, dislivello, pesi) | 15 su 15 | `./gradlew testDebugUnitTest` |
-| Installazione e avvio su emulatore | Riusciti il 15 nov 2026, nessun crash | Emulatore Pixel 7, Android 16 (API 36), `adb install` e avvio; immagine in `docs/verifiche/scheletro-home.png` |
-| Cambio di scheda | Riuscito | Tocco sulla barra inferiore nell'emulatore |
+| Compilazione debug e release, lint | Riuscite il 15 nov 2026 | In locale e su GitHub Actions |
+| Test delle regole (durata, dislivello, pesi, uscite) | 23 su 23 | `./gradlew testDebugUnitTest` |
+| Installazione e avvio | Riusciti, nessun crash | Emulatore Pixel 7, Android 16 (API 36) |
+| Creazione di un'uscita con solo nome e località | Riuscita | Percorso guidato sull'emulatore con `adb` |
+| Persistenza dopo chiusura forzata e riavvio | Riuscita | `am force-stop`, riavvio, l'uscita è ancora in Home |
+| Duplicazione indipendente | Riuscita | Copia rinominata e con data: l'originale resta invariato |
+| Data aggiunta a una bozza → proposta "Programmata" | Riuscita dopo una correzione | Difetto trovato in questa prova e corretto |
+| Avviso di modifiche non salvate | Riuscito | Tasto indietro con modifiche: tre scelte |
+| Conferma di eliminazione, elenco, filtri, filtro vuoto | Riusciti | Immagini in `docs/verifiche/` |
+| Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 
 ## Emulatore
@@ -45,4 +51,4 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 $ANDROID_HOME/emulator/emulator -avd betterout -no-window -no-audio
 ```
 
-Il dispositivo virtuale `betterout` (Pixel 7, API 36) esiste solo sulla macchina di sviluppo. L'emulatore parte in inglese: l'italiano predefinito arriva con la fase delle impostazioni.
+Il dispositivo virtuale `betterout` (Pixel 7, API 36) esiste solo sulla macchina di sviluppo. Per le prove la lingua dell'emulatore è stata impostata sull'italiano.

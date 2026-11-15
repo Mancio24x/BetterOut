@@ -5,7 +5,126 @@
     <string name="nav_mappa">Mappa</string>
     <string name="nav_attrezzatura">Attrezzatura</string>
     <string name="nav_impostazioni">Impostazioni</string>
+    <string name="in_costruzione">Questa sezione non è ancora disponibile in questa versione.</string>
+
+    <string name="indietro">Indietro</string>
+    <string name="chiudi">Chiudi</string>
+    <string name="annulla">Annulla</string>
+    <string name="conferma">Conferma</string>
+    <string name="salva">Salva</string>
+    <string name="altre_azioni">Altre azioni</string>
+    <string name="modifica">Modifica</string>
+
     <string name="home_titolo">Le tue\nuscite</string>
     <string name="home_vuota_titolo">Nessuna uscita, per ora</string>
-    <string name="in_costruzione">Questa sezione non è ancora disponibile in questa versione.</string>
+    <string name="home_vuota_testo">Scegli dove andare: il resto lo aggiungi quando vuoi.</string>
+    <string name="nuova_uscita">Nuova uscita</string>
+    <string name="prossima_uscita">Prossima uscita</string>
+    <string name="ultima_bozza">Bozza più recente</string>
+    <string name="altre_uscite">Altre uscite</string>
+    <string name="vedi_tutte">Vedi tutte · %1$d</string>
+    <string name="tutte_le_uscite">Tutte le uscite</string>
+    <string name="senza_data">Senza data</string>
+    <string name="senza_localita">Località non indicata</string>
+    <string name="partenza_alle">partenza %1$s</string>
+    <string name="oggi">oggi</string>
+    <string name="domani">domani</string>
+    <plurals name="tra_giorni">
+        <item quantity="one">tra %1$d giorno</item>
+        <item quantity="other">tra %1$d giorni</item>
+    </plurals>
+    <plurals name="giorni_fa">
+        <item quantity="one">%1$d giorno fa</item>
+        <item quantity="other">%1$d giorni fa</item>
+    </plurals>
+    <plurals name="durata_giorni">
+        <item quantity="one">%1$d giorno</item>
+        <item quantity="other">%1$d giorni</item>
+    </plurals>
+    <string name="data_passata">Data passata: è ancora programmata</string>
+
+    <string name="stato_bozza">Bozza</string>
+    <string name="stato_programmata">Programmata</string>
+    <string name="stato_completata">Completata</string>
+    <string name="stato_annullata">Annullata</string>
+    <string name="filtro_tutte">Tutte</string>
+    <string name="filtro_conteggio">%1$s · %2$d</string>
+    <string name="filtro_vuoto_titolo">Nessuna uscita con questo stato</string>
+    <string name="filtro_vuoto_testo">Cambia filtro per vedere le altre.</string>
+    <string name="mostra_tutte">Mostra tutte</string>
+
+    <string name="attivita_escursione">Escursione</string>
+    <string name="attivita_trekking">Trekking di più giorni</string>
+    <string name="attivita_ferrata">Via ferrata</string>
+    <string name="attivita_invernale">Invernale</string>
+    <string name="attivita_corsa">Corsa</string>
+    <string name="attivita_altro">Altro</string>
+    <string name="notte_nessuno">Nessuno</string>
+    <string name="notte_tenda">Tenda</string>
+    <string name="notte_rifugio">Rifugio</string>
+    <string name="notte_bivacco">Bivacco</string>
+    <string name="acqua_non_indicata">Non indicata</string>
+    <string name="acqua_frequente">Frequente</string>
+    <string name="acqua_scarsa">Scarsa</string>
+    <string name="acqua_assente">Assente</string>
+    <string name="ritmo_lento">Lento</string>
+    <string name="ritmo_medio">Medio</string>
+    <string name="ritmo_veloce">Veloce</string>
+    <string name="difficolta_non_indicata">Non indicata</string>
+
+    <string name="modifica_uscita">Modifica uscita</string>
+    <string name="campo_nome">Nome dell’uscita</string>
+    <string name="errore_nome">Scrivi un nome per salvare</string>
+    <string name="campo_localita">Località</string>
+    <string name="aiuto_localita">Per ora è solo un nome: ricerca e coordinate arrivano con la mappa.</string>
+    <string name="campo_descrizione">Descrizione</string>
+    <string name="campo_note">Note</string>
+    <string name="campo_stato">Stato</string>
+    <string name="campo_attivita">Tipo di attività</string>
+    <string name="campo_date">Date</string>
+    <string name="nessuna_data">Non ho ancora una data</string>
+    <string name="nessuna_data_aiuto">L’uscita resta utilizzabile, senza previsioni</string>
+    <string name="data_inizio">Inizio</string>
+    <string name="data_fine">Fine</string>
+    <string name="ora_partenza">Ora di partenza</string>
+    <string name="scegli">Scegli</string>
+    <string name="togli">Togli</string>
+    <string name="errore_date">La fine non può venire prima dell’inizio</string>
+    <string name="fuso_orario">Fuso orario della destinazione: %1$s</string>
+    <string name="campo_pernottamento">Pernottamento</string>
+    <string name="campo_acqua">Acqua lungo il percorso</string>
+    <string name="campo_ritmo">Ritmo</string>
+    <string name="campo_ore">Ore di cammino al giorno</string>
+    <string name="campo_difficolta">Difficoltà dichiarata</string>
+    <string name="meno">Meno</string>
+    <string name="piu">Più</string>
+    <string name="salva_uscita">Salva uscita</string>
+    <string name="salva_modifiche">Salva modifiche</string>
+    <string name="suggerisci_programmata">Ha una data: è proposta come programmata. Puoi scegliere un altro stato.</string>
+
+    <string name="non_salvate_titolo">Hai modifiche non salvate</string>
+    <string name="non_salvate_testo">Le modifiche a questa uscita non sono ancora salvate.</string>
+    <string name="salva_bozza">Salva come bozza</string>
+    <string name="esci_senza_salvare">Esci senza salvare</string>
+    <string name="continua_a_modificare">Continua a modificare</string>
+
+    <string name="uscita">Uscita</string>
+    <string name="uscita_non_trovata">Questa uscita non esiste più.</string>
+    <string name="dettagli">Dettagli</string>
+    <string name="non_ancora_percorso">Percorso, meteo e zaino si aggiungeranno qui nelle prossime versioni.</string>
+    <string name="duplica">Duplica</string>
+    <string name="segna_completata">Segna come completata</string>
+    <string name="segna_programmata">Segna come programmata</string>
+    <string name="riporta_in_bozza">Riporta in bozza</string>
+    <string name="annulla_uscita">Annulla uscita</string>
+    <string name="elimina">Elimina</string>
+    <string name="elimina_titolo">Eliminare “%1$s”?</string>
+    <string name="elimina_testo">L’uscita viene eliminata dal telefono. Non si può annullare.</string>
+    <string name="elimina_uscita">Elimina uscita</string>
+    <string name="duplica_titolo">Duplica uscita</string>
+    <string name="duplica_testo">Crea una nuova bozza con gli stessi dati. L’originale non cambia.</string>
+    <string name="duplica_nome">Nome della copia</string>
+    <string name="duplica_suffisso">%1$s (copia)</string>
+    <string name="duplica_data">Data della copia</string>
+    <string name="scegli_data">Scegli data</string>
 </resources>

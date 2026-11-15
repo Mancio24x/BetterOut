@@ -50,3 +50,18 @@ object AppIcons2 {
     val Warn by lazy { stroke("M12 4 21.5 20h-19z", "M12 10v4.5M12 17.2v.01") }
     val Filter by lazy { stroke("M4 6h16M7 12h10M10 18h4") }
 }
+
+object AppIcons3 {
+    private fun stroke(vararg paths: String): ImageVector =
+        ImageVector.Builder(defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
+            paths.forEach {
+                addPath(pathData = addPathNodes(it), stroke = SolidColor(Color.Black), strokeLineWidth = 2f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
+            }
+        }.build()
+
+    val Search by lazy { stroke("M17.5 11a6.5 6.5 0 1 1-13 0a6.5 6.5 0 1 1 13 0", "m20 20-4.2-4.2") }
+    val Undo by lazy { stroke("M8 5 4 9l4 4", "M4 9h10a5 5 0 0 1 0 10h-3") }
+    val Download by lazy { stroke("M12 4v11M7 10.5l5 5 5-5M5 20h14") }
+    val Drop by lazy { stroke("M12 3s6.5 7 6.5 11.5a6.5 6.5 0 0 1-13 0C5.500 10 12 3 12 3z") }
+    val Info by lazy { stroke("M20.5 12a8.5 8.5 0 1 1-17 0a8.5 8.5 0 1 1 17 0", "M12 11v5.5M12 7.6v.01") }
+}

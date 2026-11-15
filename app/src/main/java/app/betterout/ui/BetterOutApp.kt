@@ -28,6 +28,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.betterout.BetterOutApplication
 import app.betterout.R
+import app.betterout.ui.gear.AddToChecklistScreen
+import app.betterout.ui.gear.ChecklistScreen
+import app.betterout.ui.gear.ChecklistViewModel
+import app.betterout.ui.gear.GearEditScreen
+import app.betterout.ui.gear.GearEditViewModel
+import app.betterout.ui.gear.InventoryScreen
+import app.betterout.ui.gear.InventoryViewModel
 import app.betterout.ui.trips.HomeScreen
 import app.betterout.ui.trips.TripDetailScreen
 import app.betterout.ui.trips.TripDetailViewModel
@@ -82,23 +89,36 @@ fun BetterOutApp() {
         // Le schermate di secondo livello gestiscono da sole barre e margini di sistema.
         NavHost(nav, startDestination = Tab.Uscite.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
             composable(Tab.Uscite.route) {
-                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onSeeAll = { nav.navigate("uscite/elenco") })
+                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onSeeAll = { nav.navigate("uscite/elenco") })
             }
             composable("uscite/elenco") {
-                TripListScreen(viewModel(factory = TripsViewModel.factory(app.trips)), onBack = { nav.popBackStack() }, onOpen = { nav.navigate("uscita/$it") })
+                TripListScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onBack = { nav.popBackStack() }, onOpen = { nav.navigate("uscita/$it") })
             }
             composable("uscita/nuova") {
                 TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, null)), onClose = { nav.popBackStack() }, onSaved = { id -> nav.navigate("uscita/$id") { popUpTo("uscita/nuova") { inclusive = true } } })
             }
             composable("uscita/{id}") { e ->
                 val id = e.arguments?.getString("id").orEmpty()
-                TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") })
+                TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onPack = { nav.navigate("uscita/$id/zaino") }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") })
             }
             composable("uscita/{id}/modifica") { e ->
                 val id = e.arguments?.getString("id")
                 TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, id)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
-            Tab.entries.drop(1).forEach { tab ->
+            composable(Tab.Attrezzatura.route) {
+                InventoryScreen(viewModel(factory = InventoryViewModel.factory(app.gear)), onNew = { nav.navigate("oggetto/nuovo") }, onOpen = { nav.navigate("oggetto/$it") })
+            }
+            composable("oggetto/nuovo") { GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, null)), onClose = { nav.popBackStack() }) }
+            composable("oggetto/{id}") { e -> GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, e.arguments?.getString("id"))), onClose = { nav.popBackStack() }) }
+            composable("uscita/{id}/zaino") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                ChecklistScreen(viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onBack = { nav.popBackStack() }, onAdd = { nav.navigate("uscita/$id/zaino/aggiungi") })
+            }
+            composable("uscita/{id}/zaino/aggiungi") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                AddToChecklistScreen(viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onClose = { nav.popBackStack() })
+            }
+            listOf(Tab.Mappa, Tab.Impostazioni).forEach { tab ->
                 composable(tab.route) { Segnaposto(stringResource(tab.label), stringResource(R.string.in_costruzione)) }
             }
         }

@@ -11,14 +11,14 @@ Aggiornato il 15 novembre 2026.
 | Bozze di tutte le schermate | Fatte: 58 immagini (`design/INDICE.md`) |
 | Struttura Android e CI | Fatta: progetto compilabile, tema, navigazione a quattro schede, flusso GitHub Actions |
 | Uscite e dati locali | Fatta in parte: database, Home, elenco con filtri, creazione, modifica, stati, duplicazione, eliminazione. Mancano tappe, ricerca della località e i passi percorso, meteo e zaino del flusso "+" |
-| Attrezzatura e checklist | Da fare |
+| Attrezzatura e checklist | Fatta: inventario con ricerca, filtri e categorie proprie, scheda oggetto, checklist per uscita con quantità, tipo, note, spunte, pesi, acqua, azzeramento ed esportazione CSV. Manca il catalogo iniziale facoltativo |
 | Mappe e GPX | Da fare |
 | Meteo | Da fare |
 | Suggerimenti | Da fare |
 | Backup ed esportazioni | Da fare |
 | Verifiche e APK | Da fare |
 
-L'APK attuale gestisce le uscite (creare, modificare, duplicare, cambiare stato, eliminare) e le conserva sul telefono. Mappa, attrezzatura e impostazioni mostrano ancora un testo provvisorio. Creazione e modifica usano per ora un'unica pagina, non i sei passi delle bozze: i passi arrivano insieme a percorso, meteo e zaino. La località è un nome libero, senza coordinate. L'interfaccia è solo in italiano: l'inglese torna con le impostazioni.
+L'APK attuale gestisce uscite, inventario e checklist dello zaino, tutto salvato sul telefono. Mappa e impostazioni mostrano ancora un testo provvisorio. Creazione e modifica dell'uscita usano un'unica pagina, non i sei passi delle bozze. La località è un nome libero, senza coordinate. L'interfaccia è solo in italiano e i pesi sono mostrati in chilogrammi (grammi sotto il chilo): la scelta dell'unità arriva con le impostazioni.
 
 ## Problemi aperti
 

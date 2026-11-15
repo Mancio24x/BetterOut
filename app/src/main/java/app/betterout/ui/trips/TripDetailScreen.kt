@@ -46,7 +46,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterout.R
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Switch
+import androidx.compose.ui.semantics.Role
 import app.betterout.data.Activity
+import app.betterout.data.ChecklistEntry
+import app.betterout.domain.ChecklistRules
+import app.betterout.ui.gear.ChecklistViewModel
+import app.betterout.ui.gear.PackSummary
+import app.betterout.ui.theme.AppIcons
 import app.betterout.data.Difficulty
 import app.betterout.data.Overnight
 import app.betterout.data.Trip
@@ -87,8 +95,9 @@ fun PickDateDialog(initial: LocalDate?, onDismiss: () -> Unit, onPick: (LocalDat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripDetailScreen(vm: TripDetailViewModel, onBack: () -> Unit, onEdit: () -> Unit, onOpenCopy: (String) -> Unit) {
+fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack: () -> Unit, onBack: () -> Unit, onEdit: () -> Unit, onOpenCopy: (String) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val pack by packVm.state.collectAsStateWithLifecycle()
     var menu by remember { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var duplicating by rememberSaveable { mutableStateOf(false) }
@@ -128,7 +137,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, onBack: () -> Unit, onEdit: () -> 
             when (val s = state) {
                 TripDetailViewModel.State.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 TripDetailViewModel.State.Missing -> Text(stringResource(R.string.uscita_non_trovata), Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
-                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip)
+                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack)
             }
         }
     }
@@ -137,7 +146,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, onBack: () -> Unit, onEdit: () -> 
             onDismissRequest = { confirmDelete = false },
             icon = { Icon(AppIcons2.Trash, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
             title = { Text(stringResource(R.string.elimina_titolo, trip.title), style = MaterialTheme.typography.headlineSmall) },
-            text = { Text(stringResource(R.string.elimina_testo), style = MaterialTheme.typography.bodyMedium) },
+            text = { Text(stringResource(R.string.elimina_testo_zaino), style = MaterialTheme.typography.bodyMedium) },
             confirmButton = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     PrimaryButton(stringResource(R.string.elimina_uscita), { confirmDelete = false; vm.delete(onBack) }, icon = AppIcons2.Trash, danger = true)
@@ -146,11 +155,11 @@ fun TripDetailScreen(vm: TripDetailViewModel, onBack: () -> Unit, onEdit: () -> 
             },
         )
     }
-    if (duplicating && trip != null) DuplicateSheet(trip, onDismiss = { duplicating = false }) { title, date -> duplicating = false; vm.duplicate(title, date, onOpenCopy) }
+    if (duplicating && trip != null) DuplicateSheet(trip, onDismiss = { duplicating = false }) { title, date, reset -> duplicating = false; vm.duplicate(title, date, reset, onOpenCopy) }
 }
 
 @Composable
-private fun TripDetailContent(trip: Trip) {
+private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit) {
     val today = LocalDate.now()
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -162,6 +171,14 @@ private fun TripDetailContent(trip: Trip) {
         IconLine(AppIcons2.Pin, trip.placeName.ifBlank { stringResource(R.string.senza_localita) })
         if (TripRules.isOverdue(trip, today)) IconLine(AppIcons2.Warn, stringResource(R.string.data_passata))
         if (trip.description.isNotBlank()) Text(trip.description, style = MaterialTheme.typography.bodyLarge)
+        AppCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.zaino), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+                if (entries.isEmpty()) Text(stringResource(R.string.zaino_vuoto_testo), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                else PackSummary(entries, ChecklistRules.totals(entries, trip.waterLiters))
+                PrimaryButton(stringResource(if (entries.isEmpty()) R.string.prepara_zaino else R.string.apri_zaino), onPack, icon = AppIcons.Backpack)
+            }
+        }
         AppCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                 Text(stringResource(R.string.dettagli), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 8.dp).semantics { heading() })
@@ -204,11 +221,12 @@ private fun IconLine(icon: ImageVector, text: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DuplicateSheet(trip: Trip, onDismiss: () -> Unit, onConfirm: (String, LocalDate?) -> Unit) {
+private fun DuplicateSheet(trip: Trip, onDismiss: () -> Unit, onConfirm: (String, LocalDate?, Boolean) -> Unit) {
     val suffix = stringResource(R.string.duplica_suffisso, trip.title)
     var title by rememberSaveable { mutableStateOf(suffix) }
     var dateText by rememberSaveable { mutableStateOf<String?>(null) }
     var picking by remember { mutableStateOf(false) }
+    var reset by rememberSaveable { mutableStateOf(true) }
     val date = dateText?.let(LocalDate::parse)
     val locale = currentLocale()
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.background) {
@@ -222,9 +240,16 @@ private fun DuplicateSheet(trip: Trip, onDismiss: () -> Unit, onConfirm: (String
                 listOf(false to stringResource(R.string.senza_data), true to (date?.let { formatDate(it, locale, true) } ?: stringResource(R.string.scegli_data))),
                 selected = date != null, onSelect = { if (it) picking = true else dateText = null },
             )
-            Row(Modifier.padding(top = 20.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(top = 12.dp).toggleable(value = reset, role = Role.Switch) { reset = it }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.duplica_azzera), style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.duplica_azzera_aiuto), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = reset, onCheckedChange = null)
+            }
+            Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 SecondaryButton(stringResource(R.string.annulla), onDismiss, Modifier.weight(1f))
-                PrimaryButton(stringResource(R.string.duplica), { onConfirm(title.trim(), date) }, Modifier.weight(1f), icon = AppIcons2.Copy, enabled = title.isNotBlank())
+                PrimaryButton(stringResource(R.string.duplica), { onConfirm(title.trim(), date, reset) }, Modifier.weight(1f), icon = AppIcons2.Copy, enabled = title.isNotBlank())
             }
         }
     }

@@ -40,3 +40,17 @@ object PackWeights {
         )
     }
 }
+
+enum class WeightUnit { G, HG, KG }
+
+object WeightFormat {
+    /**
+     * Sotto l'unità scelta si mostrano sempre i grammi (sotto un chilo con kg, sotto un etto con hg).
+     * La virgola decimale segue la lingua indicata.
+     */
+    fun format(grams: Long, unit: WeightUnit = WeightUnit.KG, locale: java.util.Locale = java.util.Locale.ITALIAN): String = when {
+        unit == WeightUnit.KG && grams >= 1000 -> String.format(locale, "%.2f kg", grams / 1000.0)
+        unit == WeightUnit.HG && grams >= 100 -> String.format(locale, "%.1f hg", grams / 100.0)
+        else -> String.format(locale, "%d g", grams)
+    }
+}

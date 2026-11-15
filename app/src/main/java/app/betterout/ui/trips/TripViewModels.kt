@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import app.betterout.data.ChecklistEntry
+import app.betterout.data.GearRepository
 import app.betterout.data.Trip
 import app.betterout.data.TripRepository
 import app.betterout.data.TripStatus
@@ -21,12 +23,15 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 
-class TripsViewModel(repo: TripRepository) : ViewModel() {
+class TripsViewModel(repo: TripRepository, gear: GearRepository) : ViewModel() {
+    /** Tutte le righe di checklist, per mostrare avanzamento e peso dello zaino in Home. */
+    val entries: StateFlow<List<ChecklistEntry>> = gear.observeAllEntries().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** null finché il database non ha risposto: distingue il caricamento dall'elenco vuoto. */
     val trips: StateFlow<List<Trip>?> = repo.observeAll().map<List<Trip>, List<Trip>?> { it }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     companion object {
-        fun factory(repo: TripRepository): ViewModelProvider.Factory = viewModelFactory { initializer { TripsViewModel(repo) } }
+        fun factory(repo: TripRepository, gear: GearRepository): ViewModelProvider.Factory = viewModelFactory { initializer { TripsViewModel(repo, gear) } }
     }
 }
 
@@ -38,7 +43,7 @@ class TripDetailViewModel(private val repo: TripRepository, private val id: Stri
 
     fun setStatus(status: TripStatus) = viewModelScope.launch { repo.setStatus(id, status) }
     fun delete(onDone: () -> Unit) = viewModelScope.launch { repo.delete(id); onDone() }
-    fun duplicate(title: String, date: LocalDate?, onDone: (String) -> Unit) = viewModelScope.launch { repo.duplicate(id, title, date)?.let(onDone) }
+    fun duplicate(title: String, date: LocalDate?, resetPacked: Boolean, onDone: (String) -> Unit) = viewModelScope.launch { repo.duplicate(id, title, date, resetPacked)?.let(onDone) }
 
     companion object {
         fun factory(repo: TripRepository, id: String): ViewModelProvider.Factory = viewModelFactory { initializer { TripDetailViewModel(repo, id) } }

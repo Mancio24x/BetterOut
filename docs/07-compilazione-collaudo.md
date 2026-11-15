@@ -34,7 +34,7 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Verifica | Esito | Come |
 |---|---|---|
 | Compilazione debug e release, lint | Riuscite il 15 nov 2026 | In locale e su GitHub Actions |
-| Test delle regole (durata, dislivello, pesi, uscite) | 23 su 23 | `./gradlew testDebugUnitTest` |
+| Test delle regole (durata, dislivello, pesi, uscite, checklist, CSV) | 30 su 30 | `./gradlew testDebugUnitTest` |
 | Installazione e avvio | Riusciti, nessun crash | Emulatore Pixel 7, Android 16 (API 36) |
 | Creazione di un'uscita con solo nome e località | Riuscita | Percorso guidato sull'emulatore con `adb` |
 | Persistenza dopo chiusura forzata e riavvio | Riuscita | `am force-stop`, riavvio, l'uscita è ancora in Home |
@@ -42,6 +42,13 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Data aggiunta a una bozza → proposta "Programmata" | Riuscita dopo una correzione | Difetto trovato in questa prova e corretto |
 | Avviso di modifiche non salvate | Riuscito | Tasto indietro con modifiche: tre scelte |
 | Conferma di eliminazione, elenco, filtri, filtro vuoto | Riusciti | Immagini in `docs/verifiche/` |
+| Inventario: creazione, modifica, eliminazione | Riuscite | Percorso guidato sull'emulatore |
+| Checklist: aggiunta dall'inventario senza doppioni, spunte, quantità, tipo per uscita | Riuscite | Pesi controllati: 626 g base + 1 L d'acqua = 1,63 kg nello zaino |
+| Spunte indipendenti fra uscita e copia | Riuscite | Copia con spunte azzerate; spuntare la copia non cambia l'originale |
+| Modifica di un oggetto → checklist delle uscite aperte aggiornata | Riuscita | Peso da 86 a 95 g, riga da 2 pezzi a 190 g |
+| Eliminazione di un oggetto → riga conservata "non più in inventario" | Riuscita | Dialogo con il numero di uscite coinvolte |
+| Azzeramento delle spunte, esportazione CSV e foglio di condivisione | Riusciti | Contenuto del CSV letto dal dispositivo |
+| Pulsante "+" letto dai servizi di accessibilità | Riuscito dopo una correzione | Il pulsante flottante standard non compariva nell'albero di accessibilità: sostituito |
 | Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 

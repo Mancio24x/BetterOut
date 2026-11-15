@@ -145,3 +145,17 @@ fun EmptyState(icon: ImageVector, title: String, text: String, modifier: Modifie
         action()
     }
 }
+
+/** Pulsante "+" in primo piano: un normale pulsante con testo, così è sempre letto dai lettori di schermo. */
+@Composable
+fun AddFab(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick, modifier = modifier.heightIn(min = 60.dp), shape = RoundedCornerShape(22.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
+    ) {
+        Icon(AppIcons2.Plus, contentDescription = null, modifier = Modifier.size(28.dp))
+        Box(Modifier.size(8.dp))
+        Text(text, style = MaterialTheme.typography.titleMedium)
+    }
+}

@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExtendedFloatingActionButton
+import app.betterout.ui.components.AddFab
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,7 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterout.R
+import app.betterout.data.ChecklistEntry
 import app.betterout.data.Trip
+import app.betterout.domain.ChecklistRules
+import app.betterout.ui.gear.weight
+import androidx.compose.material3.LinearProgressIndicator
 import app.betterout.data.TripStatus
 import app.betterout.domain.TripRules
 import app.betterout.ui.components.AppCard
@@ -53,6 +57,7 @@ import java.time.LocalDate
 @Composable
 fun HomeScreen(vm: TripsViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, onSeeAll: () -> Unit) {
     val trips by vm.trips.collectAsStateWithLifecycle()
+    val allEntries by vm.entries.collectAsStateWithLifecycle()
     val today = LocalDate.now()
     Box(Modifier.fillMaxSize()) {
         val list = trips
@@ -71,7 +76,7 @@ fun HomeScreen(vm: TripsViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, 
                 val others = TripRules.sorted(list.filter { it.id != next?.id }, today)
                 LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 96.dp)) {
                     item { HomeTitle() }
-                    if (next != null) item { NextTripCard(next, today) { onOpen(next.id) } }
+                    if (next != null) item { NextTripCard(next, today, allEntries.filter { it.tripId == next.id }) { onOpen(next.id) } }
                     if (others.isNotEmpty()) {
                         item {
                             Row(Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -82,12 +87,7 @@ fun HomeScreen(vm: TripsViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, 
                         items(others.take(4), key = { it.id }) { TripRow(it, today) { onOpen(it.id) } }
                     }
                 }
-                ExtendedFloatingActionButton(
-                    onClick = onNew, modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                    containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary, shape = RoundedCornerShape(22.dp),
-                    icon = { Icon(AppIcons2.Plus, contentDescription = null, modifier = Modifier.size(28.dp)) },
-                    text = { Text(stringResource(R.string.nuova_uscita), style = MaterialTheme.typography.titleMedium) },
-                )
+                AddFab(stringResource(R.string.nuova_uscita), onNew, Modifier.align(Alignment.BottomEnd).padding(16.dp))
             }
         }
     }
@@ -99,7 +99,7 @@ private fun HomeTitle() {
 }
 
 @Composable
-private fun NextTripCard(trip: Trip, today: LocalDate, onClick: () -> Unit) {
+private fun NextTripCard(trip: Trip, today: LocalDate, entries: List<ChecklistEntry>, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
     AppCard(Modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)).clickable(role = Role.Button, onClick = onClick), color = scheme.primary, contentColor = scheme.onPrimary) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -115,6 +115,11 @@ private fun NextTripCard(trip: Trip, today: LocalDate, onClick: () -> Unit) {
             Text(trip.title, style = MaterialTheme.typography.headlineMedium)
             Text(tripWhen(trip), style = MaterialTheme.typography.bodyMedium)
             Text(trip.placeName.ifBlank { stringResource(R.string.senza_localita) }, style = MaterialTheme.typography.bodyMedium)
+            if (entries.isNotEmpty()) {
+                val packed = ChecklistRules.packedCount(entries)
+                Text(stringResource(R.string.zaino_riga_home, packed, entries.size, weight(ChecklistRules.totals(entries, trip.waterLiters).packGrams)), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 6.dp))
+                LinearProgressIndicator(progress = { packed.toFloat() / entries.size }, modifier = Modifier.fillMaxWidth().heightIn(min = 10.dp).clip(CircleShape), color = scheme.secondaryContainer, trackColor = scheme.onPrimary.copy(alpha = 0.25f), drawStopIndicator = {})
+            }
         }
     }
 }

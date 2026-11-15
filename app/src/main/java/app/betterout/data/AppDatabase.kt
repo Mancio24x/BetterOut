@@ -29,10 +29,39 @@ interface TripDao {
     @Query("DELETE FROM trips WHERE id = :id") suspend fun delete(id: String)
 }
 
-@Database(entities = [Trip::class], version = 1, exportSchema = false)
+@Dao
+interface GearDao {
+    @Query("SELECT * FROM gear_items") fun observeItems(): Flow<List<GearItem>>
+    @Query("SELECT * FROM gear_items") suspend fun items(): List<GearItem>
+    @Query("SELECT * FROM gear_items WHERE id = :id") suspend fun item(id: String): GearItem?
+    @Upsert suspend fun upsertItem(item: GearItem)
+    @Query("DELETE FROM gear_items WHERE id = :id") suspend fun deleteItem(id: String)
+    @Query("SELECT * FROM gear_categories ORDER BY sortOrder") fun observeCategories(): Flow<List<GearCategory>>
+    @Query("SELECT * FROM gear_categories ORDER BY sortOrder") suspend fun categories(): List<GearCategory>
+    @Upsert suspend fun upsertCategories(categories: List<GearCategory>)
+}
+
+@Dao
+interface ChecklistDao {
+    @Query("SELECT * FROM checklist_entries") fun observeAll(): Flow<List<ChecklistEntry>>
+    @Query("SELECT * FROM checklist_entries WHERE tripId = :tripId") fun observeForTrip(tripId: String): Flow<List<ChecklistEntry>>
+    @Query("SELECT * FROM checklist_entries WHERE tripId = :tripId") suspend fun forTrip(tripId: String): List<ChecklistEntry>
+    @Query("SELECT * FROM checklist_entries WHERE gearItemId = :itemId") suspend fun forItem(itemId: String): List<ChecklistEntry>
+    @Query("SELECT COUNT(DISTINCT tripId) FROM checklist_entries WHERE gearItemId = :itemId") suspend fun tripsUsing(itemId: String): Int
+    @Upsert suspend fun upsert(entries: List<ChecklistEntry>)
+    @Query("DELETE FROM checklist_entries WHERE id = :id") suspend fun delete(id: String)
+    @Query("DELETE FROM checklist_entries WHERE tripId = :tripId") suspend fun deleteForTrip(tripId: String)
+    @Query("UPDATE checklist_entries SET packed = 0 WHERE tripId = :tripId") suspend fun clearPacked(tripId: String)
+    @Query("UPDATE checklist_entries SET packed = :packed WHERE id = :id") suspend fun setPacked(id: String, packed: Boolean)
+    @Query("UPDATE checklist_entries SET gearItemId = NULL WHERE gearItemId = :itemId") suspend fun detachItem(itemId: String)
+}
+
+@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
+    abstract fun gearDao(): GearDao
+    abstract fun checklistDao(): ChecklistDao
 
     companion object {
         // Finché non esiste una versione pubblicata lo schema può cambiare senza migrazioni.

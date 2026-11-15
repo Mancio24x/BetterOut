@@ -34,7 +34,7 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Verifica | Esito | Come |
 |---|---|---|
 | Compilazione debug e release, lint | Riuscite il 15 nov 2026 | In locale e su GitHub Actions |
-| Test delle regole (durata, dislivello, pesi, uscite, checklist, CSV) | 30 su 30 | `./gradlew testDebugUnitTest` |
+| Test delle regole (durata, dislivello, pesi, uscite, checklist, CSV, GPX, statistiche dei percorsi, operazioni dell'editor, risposte dei servizi) | 74 su 74 | `./gradlew testDebugUnitTest` |
 | Installazione e avvio | Riusciti, nessun crash | Emulatore Pixel 7, Android 16 (API 36) |
 | Creazione di un'uscita con solo nome e località | Riuscita | Percorso guidato sull'emulatore con `adb` |
 | Persistenza dopo chiusura forzata e riavvio | Riuscita | `am force-stop`, riavvio, l'uscita è ancora in Home |
@@ -49,6 +49,25 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Eliminazione di un oggetto → riga conservata "non più in inventario" | Riuscita | Dialogo con il numero di uscite coinvolte |
 | Azzeramento delle spunte, esportazione CSV e foglio di condivisione | Riusciti | Contenuto del CSV letto dal dispositivo |
 | Pulsante "+" letto dai servizi di accessibilità | Riuscito dopo una correzione | Il pulsante flottante standard non compariva nell'albero di accessibilità: sostituito |
+| Mappa nella scheda Mappa | Riuscita | MapLibre 13.7.1 disegna anche con la grafica software dell'emulatore; attribuzione visibile |
+| Mappa senza rete | Riuscita dopo una correzione | Senza rete e senza copia: avviso e percorsi comunque disegnati; "tocca per riprovare" con la rete tornata; senza rete ma con copia locale: sfondo presente. La libreria da sola non segnalava l'errore |
+| Ricerca di una zona | Riuscita | "Misurina" trovata; "Falzarego" senza risultati: stato dichiarato |
+| Importazione GPX con quote | Riuscita | 200 punti: 1,9 km, 648 m di salita, profilo |
+| GPX con 2 tracciati, 3 segmenti, punti non validi, quote assenti in un tracciato | Riuscita | Avvisi mostrati, 2 punti scartati contati, scelta dei tracciati, durata non stimata con quote parziali |
+| GPX troncato, file non GPX, traccia vuota | Riusciti | Messaggio specifico e "Non è stato salvato nulla" |
+| GPX da 7,6 MB e 120 000 punti | Riuscita | Letto in pochi secondi, salvato e aperto; la schermata di avanzamento è durata troppo poco per essere osservata |
+| File originale conservato | Riuscito | Stessa dimensione del file scelto, nello spazio privato dell'app |
+| Editor: tratto su sentiero | Riuscito | Richiesta vera a BRouter: 923 m, 82 m di salita |
+| Editor: tratto manuale, inserisci, elimina, annulla, ripristina, inverti, anello | Riusciti | Tratto manuale tratteggiato e segnalato |
+| Editor: trascinamento e "Sposta" con tocco | Riusciti | Trascinamento simulato con `adb`; i tratti vicini vengono ricalcolati |
+| Editor: routing senza rete | Riuscito | Errore con tre scelte; nessuna linea tracciata; "Traccia a mano" e "Annulla" provati |
+| Salvataggio, riapertura in modifica, uscita senza salvare | Riusciti | Conferma se ci sono modifiche |
+| "Chiedi le quote" | Riuscito | Richiesta vera: quote completate, dichiarate come stime, durata disponibile |
+| Esportazione GPX | Riuscita | File letto dal dispositivo: XML valido, 267 punti, nota sui tratti manuali |
+| Rinomina ed eliminazione di un percorso | Riuscite | File rimossi; l'uscita che lo usava resta senza percorso |
+| Percorso associato all'uscita da archivio, da GPX e dal disegno; "Togli" | Riusciti | Statistiche e durata nel dettaglio uscita |
+| Località dell'uscita: ricerca e punto sulla mappa | Riuscite dopo una correzione | Il foglio di ricerca non compariva con la tastiera aperta |
+| Persistenza dei percorsi dopo chiusura forzata | Riuscita | `am force-stop`, riavvio |
 | Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 

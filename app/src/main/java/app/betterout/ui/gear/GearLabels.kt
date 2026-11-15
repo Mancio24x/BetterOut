@@ -28,9 +28,9 @@ fun functionLabel(function: GearFunction): String {
 fun formatLiters(liters: Double, locale: java.util.Locale): String = if (liters % 1.0 == 0.0) String.format(locale, "%.0f", liters) else String.format(locale, "%.1f", liters)
 
 /** Scrive il testo in un file temporaneo dell'app e apre il foglio di condivisione di Android. */
-fun shareTextFile(context: Context, fileName: String, mime: String, content: String, chooserTitle: String) {
+fun shareTextFile(context: Context, fileName: String, mime: String, content: String, chooserTitle: String, byteOrderMark: Boolean = true) {
     val dir = File(context.cacheDir, "esportazioni").apply { mkdirs() }
-    val file = File(dir, fileName).apply { writeText(Char(0xFEFF) + content, Charsets.UTF_8) }
+    val file = File(dir, fileName).apply { writeText(if (byteOrderMark) Char(0xFEFF) + content else content, Charsets.UTF_8) }
     val uri = FileProvider.getUriForFile(context, context.packageName + ".files", file)
     val send = Intent(Intent.ACTION_SEND).setType(mime).putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     context.startActivity(Intent.createChooser(send, chooserTitle))

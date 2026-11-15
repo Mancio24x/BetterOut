@@ -76,7 +76,7 @@
     <string name="campo_nome">Nome dell’uscita</string>
     <string name="errore_nome">Scrivi un nome per salvare</string>
     <string name="campo_localita">Località</string>
-    <string name="aiuto_localita">Per ora è solo un nome: ricerca e coordinate arrivano con la mappa.</string>
+    <string name="aiuto_localita">Il nome è libero. Le coordinate serviranno per il meteo.</string>
     <string name="campo_descrizione">Descrizione</string>
     <string name="campo_note">Note</string>
     <string name="campo_stato">Stato</string>
@@ -111,7 +111,7 @@
     <string name="uscita">Uscita</string>
     <string name="uscita_non_trovata">Questa uscita non esiste più.</string>
     <string name="dettagli">Dettagli</string>
-    <string name="non_ancora_percorso">Percorso e meteo si aggiungeranno qui nelle prossime versioni.</string>
+    <string name="non_ancora_percorso">Il meteo si aggiungerà qui nelle prossime versioni.</string>
     <string name="duplica">Duplica</string>
     <string name="segna_completata">Segna come completata</string>
     <string name="segna_programmata">Segna come programmata</string>
@@ -258,4 +258,169 @@
     <string name="duplica_azzera_aiuto">Mantiene oggetti e quantità</string>
     <string name="elimina_testo_zaino">Elimino l’uscita e la sua checklist. Gli oggetti restano nell’inventario. Non si può annullare.</string>
     <string name="zaino_riga_home">Zaino: %1$d di %2$d pronti · %3$s</string>
+
+    <string name="mappa_attribuzione">OpenFreeMap © OpenMapTiles · dati © OpenStreetMap</string>
+    <string name="mappa_sfondo_assente">Sfondo della mappa non disponibile: controlla la connessione e tocca qui per riprovare.</string>
+    <string name="mappa_descrizione">Mappa. Si sposta trascinando e si ingrandisce con due dita.</string>
+    <string name="cerca_zona">Cerca una zona</string>
+    <string name="cerca_localita">Paese, cima, valle…</string>
+    <string name="cerca">Cerca</string>
+    <string name="cerca_aiuto">Scrivi un nome e premi Cerca.</string>
+    <string name="cerca_errore">Ricerca non riuscita: controlla la connessione.</string>
+    <string name="cerca_nessun_risultato">Nessun risultato. Prova un altro nome, oppure trova il punto muovendo la mappa.</string>
+    <string name="cerca_fonte">Ricerca: Open-Meteo, dati GeoNames.</string>
+    <string name="riprova">Riprova</string>
+    <string name="non_disponibile">non disponibile</string>
+
+    <string name="percorso">Percorso</string>
+    <string name="percorsi">Percorsi</string>
+    <string name="percorsi_conteggio">Percorsi · %1$d</string>
+    <string name="percorsi_vuoto_titolo">Nessun percorso salvato</string>
+    <string name="percorsi_vuoto_testo">Disegna un percorso sulla mappa o importa un file GPX.</string>
+    <string name="nuovo_percorso">Nuovo percorso</string>
+    <string name="disegna_titolo">Disegna sulla mappa</string>
+    <string name="disegna_testo">Tocca i punti: l’app segue i sentieri o li unisce a mano</string>
+    <string name="importa_titolo">Importa un file GPX</string>
+    <string name="importa_testo">Da Komoot, Outdooractive, Garmin e altri</string>
+    <string name="percorso_disegnato">Disegnato</string>
+    <string name="percorso_importato">Importato</string>
+    <string name="su_sentiero">Su sentiero</string>
+    <string name="con_tratti_manuali">Con tratti manuali</string>
+    <string name="non_usato">Non usato in nessuna uscita</string>
+    <plurals name="usato_in_uscite">
+        <item quantity="one">Usato in %1$d uscita</item>
+        <item quantity="other">Usato in %1$d uscite</item>
+    </plurals>
+    <string name="salita_di">salita %1$s</string>
+    <string name="quote_assenti">quote assenti</string>
+    <string name="stat_distanza">distanza</string>
+    <string name="stat_salita">salita</string>
+    <string name="stat_discesa">discesa</string>
+    <string name="stat_stimata">stimata</string>
+    <string name="percorso_non_trovato">Questo percorso non esiste più.</string>
+    <string name="rinomina">Rinomina</string>
+    <string name="nome_percorso">Nome del percorso</string>
+    <string name="esporta_gpx">Esporta GPX</string>
+    <string name="gpx_nota_manuale">Contiene tratti manuali, tracciati in linea retta e non verificati su sentiero.</string>
+    <string name="avviso_tratti_manuali">I tratti tratteggiati sono manuali: linee rette non verificate su sentiero. Distanza e dislivello lì sono indicativi.</string>
+    <plurals name="avviso_segmenti">
+        <item quantity="one">%1$d segmento.</item>
+        <item quantity="other">%1$d segmenti separati: il vuoto fra loro non entra in distanza e dislivello.</item>
+    </plurals>
+    <string name="senza_quote_titolo">Quote non disponibili</string>
+    <string name="senza_quote_testo">Senza quote mancano dislivello, durata stimata e profilo. Puoi chiederle a un modello del terreno: saranno indicate come stime.</string>
+    <string name="quote_parziali_titolo">Quote solo su una parte dei punti</string>
+    <string name="quote_parziali">Solo una parte dei punti ha la quota: dislivello e profilo sono incompleti, e la durata non viene stimata.</string>
+    <string name="chiedi_quote">Chiedi le quote</string>
+    <string name="quote_in_corso">Richiesta delle quote in corso…</string>
+    <string name="quote_errore">Quote non ricevute: controlla la connessione.</string>
+    <string name="quote_da_gpx">Quote dal file GPX.</string>
+    <string name="quote_da_routing">Quote dal servizio di routing (BRouter).</string>
+    <string name="quote_da_modello">Quote da modello del terreno (Copernicus GLO-90 tramite Open-Meteo, risoluzione 90 m): sono stime.</string>
+    <string name="quote_completate_modello">Quelle mancanti vengono da un modello del terreno (Copernicus GLO-90 tramite Open-Meteo, risoluzione 90 m) e sono stime.</string>
+    <string name="nota_durata">Durata: stima con il metodo escursionistico (DIN 33466), ritmo medio, senza soste.</string>
+    <string name="profilo_altimetrico">Profilo altimetrico</string>
+    <string name="profilo_descrizione">Profilo altimetrico: da %1$s a %2$s di quota, su %3$s.</string>
+    <string name="soglia_metri">soglia %1$d m</string>
+    <string name="quota_min_max">Quota minima · massima</string>
+    <string name="elimina_percorso">Elimina percorso</string>
+    <string name="elimina_percorso_libero">Sparisce dall’archivio. Non è usato in nessuna uscita. Non si può annullare.</string>
+    <plurals name="elimina_percorso_in_uso">
+        <item quantity="one">È usato in %1$d uscita, che resterà senza percorso. Non si può annullare.</item>
+        <item quantity="other">È usato in %1$d uscite, che resteranno senza percorso. Non si può annullare.</item>
+    </plurals>
+
+    <string name="importa_gpx">Importa GPX</string>
+    <string name="file_scelto">File scelto</string>
+    <string name="lettura_in_corso">Lettura del file… %1$d %%</string>
+    <string name="scegli_altro_file">Scegli un altro file</string>
+    <string name="gpx_errore_non_gpx_titolo">Questo file non è un GPX</string>
+    <string name="gpx_errore_non_gpx_testo">Serve un file .gpx esportato da un’app o da un GPS.</string>
+    <string name="gpx_errore_xml_titolo">Il file è danneggiato</string>
+    <string name="gpx_errore_xml_testo">Il GPX si interrompe o contiene errori e non si può leggere per intero.</string>
+    <string name="gpx_errore_vuoto_titolo">Traccia vuota</string>
+    <string name="gpx_errore_vuoto_testo">Il file non contiene nessun punto valido.</string>
+    <string name="gpx_errore_apertura_titolo">File non leggibile</string>
+    <string name="gpx_errore_apertura_testo">Il file scelto non si riesce ad aprire.</string>
+    <string name="gpx_nulla_salvato">Non è stato salvato nulla.</string>
+    <string name="gpx_segmenti_separati">I segmenti restano separati: il vuoto fra loro non entra in distanza e dislivello.</string>
+    <string name="gpx_senza_quote_testo">Dislivello, durata e profilo non sono disponibili o sono incompleti. Dopo il salvataggio puoi chiedere le quote a un modello del terreno dal dettaglio del percorso: saranno indicate come stime.</string>
+    <string name="gpx_nessuno_scelto">Scegli almeno un tracciato da importare.</string>
+    <string name="cosa_importare">Cosa importare</string>
+    <string name="scelti_di">%1$d di %2$d</string>
+    <string name="solo_archivio">Solo archivio</string>
+    <string name="associa_uscita">Associa all’uscita</string>
+    <string name="salva_in_archivio">Salva nell’archivio</string>
+    <string name="stima_nota_breve">durata stimata, ritmo medio</string>
+    <plurals name="importa_percorsi">
+        <item quantity="one">Importa %1$d percorso</item>
+        <item quantity="other">Importa %1$d percorsi</item>
+    </plurals>
+    <plurals name="conteggio_tracciati">
+        <item quantity="one">%1$d tracciato</item>
+        <item quantity="other">%1$d tracciati</item>
+    </plurals>
+    <plurals name="conteggio_segmenti">
+        <item quantity="one">%1$d segmento</item>
+        <item quantity="other">%1$d segmenti</item>
+    </plurals>
+    <plurals name="conteggio_punti">
+        <item quantity="one">%1$d punto</item>
+        <item quantity="other">%1$d punti</item>
+    </plurals>
+    <plurals name="conteggio_punti_interesse">
+        <item quantity="one">%1$d punto di interesse</item>
+        <item quantity="other">%1$d punti di interesse</item>
+    </plurals>
+    <plurals name="gpx_punti_scartati">
+        <item quantity="one">%1$d punto scartato: senza coordinate o con coordinate fuori intervallo.</item>
+        <item quantity="other">%1$d punti scartati: senza coordinate o con coordinate fuori intervallo.</item>
+    </plurals>
+
+    <string name="editor_inizio">Tocca la mappa per mettere la partenza</string>
+    <string name="editor_secondo_punto">Tocca la mappa per il punto successivo</string>
+    <string name="editor_calcolo">Calcolo del tratto lungo i sentieri…</string>
+    <string name="editor_punto_selezionato">Punto %1$d di %2$d · trascinalo o usa i pulsanti</string>
+    <string name="editor_sposta_tocca">Tocca la mappa dove spostare il punto %1$d di %2$d</string>
+    <string name="editor_sposta">Sposta</string>
+    <string name="editor_inserisci">Inserisci</string>
+    <string name="editor_fine_qui">Fine qui</string>
+    <string name="editor_punti">Punti</string>
+    <string name="editor_punto_n">Punto %1$d di %2$d</string>
+    <string name="editor_inverti">Inverti</string>
+    <string name="editor_anello">Anello</string>
+    <string name="editor_legenda_manuale">Tratteggio: tratto manuale, non verificato su sentiero</string>
+    <string name="editor_non_salvato">Il percorso che stai disegnando non è ancora salvato.</string>
+    <string name="modo_sentieri">Segui sentieri</string>
+    <string name="modo_manuale">Manuale</string>
+    <string name="annulla_azione">Annulla l’ultima modifica</string>
+    <string name="ripristina_azione">Ripristina la modifica annullata</string>
+    <string name="salva_percorso">Salva percorso</string>
+    <string name="percorso_senza_nome">Nuovo percorso</string>
+    <plurals name="percorso_condiviso">
+        <item quantity="one">Questo percorso è usato in %1$d uscita: la modifica vale anche lì.</item>
+        <item quantity="other">Questo percorso è usato in %1$d uscite: la modifica vale per tutte.</item>
+    </plurals>
+    <string name="routing_errore_titolo">Tratto non calcolato</string>
+    <string name="routing_errore_testo">Non si riesce a seguire i sentieri fra il punto %1$d e il punto %2$d: manca la rete, il servizio non risponde o lì non c’è un sentiero noto. Non è stata tracciata nessuna linea.</string>
+    <string name="routing_a_mano">Traccia a mano questo tratto</string>
+    <string name="routing_annulla_modifica">Annulla l’ultima modifica</string>
+
+    <string name="uscita_senza_percorso">Nessun percorso. Aggiungilo per avere distanza, dislivello e durata stimata.</string>
+    <string name="aggiungi_percorso">Aggiungi percorso</string>
+    <string name="apri_percorso">Apri percorso</string>
+    <string name="cambia_percorso">Cambia</string>
+    <string name="togli_percorso">Togli dall’uscita</string>
+    <string name="uscita_durata_nota">Durata stimata con ritmo %1$s, senza soste.</string>
+    <string name="uscita_percorso_senza_quote">Al percorso mancano quote: dislivello e durata non sono disponibili o sono incompleti.</string>
+    <string name="percorso_uscita">Percorso dell’uscita</string>
+    <string name="scelta_percorso_titolo">Che percorso fai?</string>
+    <string name="scelta_percorso_testo">Dal percorso arrivano distanza, dislivello e durata stimata.</string>
+    <string name="scegli_archivio">Scegli dall’archivio</string>
+    <string name="coordinate">Coordinate: %1$s</string>
+    <string name="senza_coordinate">Senza coordinate: cerca la località o scegli il punto sulla mappa.</string>
+    <string name="togli_coordinate">Togli</string>
+    <string name="cerca_localita_azione">Cerca località</string>
+    <string name="scegli_sulla_mappa">Scegli sulla mappa</string>
+    <string name="usa_questo_punto">Usa questo punto</string>
 </resources>

@@ -2,7 +2,7 @@
 
 App Android nativa per pianificare escursioni: uscite, percorsi su mappa e da GPX, meteo, attrezzatura e zaino. Funziona senza account e tiene i dati sul dispositivo. Il nome è provvisorio.
 
-**Stato: in sviluppo.** Funziona la gestione delle uscite; mappa, GPX, meteo, attrezzatura, suggerimenti e backup non sono ancora implementati. Dettagli in [`docs/06-avanzamento.md`](docs/06-avanzamento.md).
+**Stato: in sviluppo.** Funzionano uscite, attrezzatura e checklist, mappa, editor del percorso e GPX; meteo, suggerimenti, impostazioni e backup non sono ancora implementati. Dettagli in [`docs/06-avanzamento.md`](docs/06-avanzamento.md).
 
 ## Documenti
 

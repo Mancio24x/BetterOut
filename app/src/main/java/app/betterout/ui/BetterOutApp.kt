@@ -1,6 +1,8 @@
 package app.betterout.ui
 
+import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -24,6 +27,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.betterout.BetterOutApplication
@@ -35,6 +41,16 @@ import app.betterout.ui.gear.GearEditScreen
 import app.betterout.ui.gear.GearEditViewModel
 import app.betterout.ui.gear.InventoryScreen
 import app.betterout.ui.gear.InventoryViewModel
+import app.betterout.ui.map.GpxImportScreen
+import app.betterout.ui.map.GpxImportViewModel
+import app.betterout.ui.map.MapScreen
+import app.betterout.ui.map.RouteDetailScreen
+import app.betterout.ui.map.RouteDetailViewModel
+import app.betterout.ui.map.RouteEditorScreen
+import app.betterout.ui.map.RouteEditorViewModel
+import app.betterout.ui.map.RoutesViewModel
+import app.betterout.ui.map.TripRouteCard
+import app.betterout.ui.map.TripRouteScreen
 import app.betterout.ui.trips.HomeScreen
 import app.betterout.ui.trips.TripDetailScreen
 import app.betterout.ui.trips.TripDetailViewModel
@@ -58,6 +74,7 @@ fun BetterOutApp() {
     val app = LocalContext.current.applicationContext as BetterOutApplication
     val route = entry?.destination?.route
     val showTabs = Tab.entries.any { it.route == route }
+    val scope = rememberCoroutineScope()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -99,7 +116,14 @@ fun BetterOutApp() {
             }
             composable("uscita/{id}") { e ->
                 val id = e.arguments?.getString("id").orEmpty()
-                TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onPack = { nav.navigate("uscita/$id/zaino") }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") })
+                TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onPack = { nav.navigate("uscita/$id/zaino") }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") }) { trip ->
+                    TripRouteCard(trip, app.routes, onOpenRoute = { nav.navigate("percorso/$it") }, onChoose = { nav.navigate("uscita/$id/percorso") }, onRemove = { scope.launch { app.routes.setTripRoute(id, null) } })
+                }
+            }
+            composable("uscita/{id}/percorso") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                val vm: RoutesViewModel = viewModel(factory = RoutesViewModel.factory(app.routes))
+                TripRouteScreen(vm, onBack = { nav.popBackStack() }, onDraw = { nav.navigate("editor?uscita=$id") }, onImport = { nav.navigate("gpx?uri=${Uri.encode(it.toString())}&uscita=$id") }, onPick = { vm.assignToTrip(id, it) { nav.popBackStack() } })
             }
             composable("uscita/{id}/modifica") { e ->
                 val id = e.arguments?.getString("id")
@@ -118,12 +142,46 @@ fun BetterOutApp() {
                 val id = e.arguments?.getString("id").orEmpty()
                 AddToChecklistScreen(viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onClose = { nav.popBackStack() })
             }
-            listOf(Tab.Mappa, Tab.Impostazioni).forEach { tab ->
-                composable(tab.route) { Segnaposto(stringResource(tab.label), stringResource(R.string.in_costruzione)) }
+            composable(Tab.Mappa.route) {
+                MapScreen(viewModel(factory = RoutesViewModel.factory(app.routes)), onOpenRoute = { nav.navigate("percorso/$it") }, onDraw = { nav.navigate("editor") }, onImport = { nav.navigate("gpx?uri=${Uri.encode(it.toString())}") })
             }
+            composable("percorso/{id}") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                RouteDetailScreen(viewModel(factory = RouteDetailViewModel.factory(app.routes, id)), onBack = { nav.popBackStack() }, onEdit = { nav.navigate("editor?id=$id") })
+            }
+            // L'editor e l'importazione possono partire da un'uscita ("uscita"): in quel caso il percorso le viene associato.
+            composable("editor?id={id}&uscita={uscita}", arguments = listOf(optional("id"), optional("uscita"))) { e ->
+                val id = e.arguments?.getString("id")
+                val tripId = e.arguments?.getString("uscita")
+                RouteEditorScreen(viewModel(factory = RouteEditorViewModel.factory(app.routes, app.routing, id, tripId)), onClose = { nav.popBackStack() }, onSaved = { saved ->
+                    when {
+                        tripId != null -> nav.popBackStack("uscita/{id}", inclusive = false)
+                        id != null -> nav.popBackStack()
+                        else -> nav.navigate("percorso/$saved") { popUpTo(Tab.Mappa.route) }
+                    }
+                })
+            }
+            composable("gpx?uri={uri}&uscita={uscita}", arguments = listOf(optional("uri"), optional("uscita"))) { e ->
+                val uri = e.arguments?.getString("uri").orEmpty().toUri()
+                val tripId = e.arguments?.getString("uscita")
+                GpxImportScreen(
+                    viewModel(factory = GpxImportViewModel.factory(app, app.routes, uri, tripId)), onBack = { nav.popBackStack() },
+                    onAnotherFile = { nav.popBackStack(); nav.navigate("gpx?uri=${Uri.encode(it.toString())}" + if (tripId != null) "&uscita=$tripId" else "") },
+                    onDone = { ids, linked ->
+                        when {
+                            linked -> nav.popBackStack("uscita/{id}", inclusive = false)
+                            tripId == null && ids.size == 1 -> nav.navigate("percorso/${ids.single()}") { popUpTo(Tab.Mappa.route) }
+                            else -> nav.popBackStack()
+                        }
+                    },
+                )
+            }
+            composable(Tab.Impostazioni.route) { Segnaposto(stringResource(Tab.Impostazioni.label), stringResource(R.string.in_costruzione)) }
         }
     }
 }
+
+private fun optional(name: String) = navArgument(name) { type = NavType.StringType; nullable = true }
 
 /** Schermata provvisoria: verrà sostituita dalle schermate vere nelle fasi successive. */
 @Composable

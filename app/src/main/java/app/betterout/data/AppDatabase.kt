@@ -27,6 +27,18 @@ interface TripDao {
     @Query("SELECT * FROM trips WHERE id = :id") suspend fun get(id: String): Trip?
     @Upsert suspend fun upsert(trip: Trip)
     @Query("DELETE FROM trips WHERE id = :id") suspend fun delete(id: String)
+    @Query("SELECT COUNT(*) FROM trips WHERE routeId = :routeId") fun observeRouteUsage(routeId: String): Flow<Int>
+    @Query("UPDATE trips SET routeId = NULL WHERE routeId = :routeId") suspend fun detachRoute(routeId: String)
+    @Query("UPDATE trips SET routeId = :routeId, updatedAt = :now WHERE id = :id") suspend fun setRoute(id: String, routeId: String?, now: Long)
+}
+
+@Dao
+interface RouteDao {
+    @Query("SELECT * FROM routes ORDER BY updatedAt DESC") fun observeAll(): Flow<List<Route>>
+    @Query("SELECT * FROM routes WHERE id = :id") fun observe(id: String): Flow<Route?>
+    @Query("SELECT * FROM routes WHERE id = :id") suspend fun get(id: String): Route?
+    @Upsert suspend fun upsert(route: Route)
+    @Query("DELETE FROM routes WHERE id = :id") suspend fun delete(id: String)
 }
 
 @Dao
@@ -56,12 +68,13 @@ interface ChecklistDao {
     @Query("UPDATE checklist_entries SET gearItemId = NULL WHERE gearItemId = :itemId") suspend fun detachItem(itemId: String)
 }
 
-@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class], version = 2, exportSchema = false)
+@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class, Route::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
     abstract fun gearDao(): GearDao
     abstract fun checklistDao(): ChecklistDao
+    abstract fun routeDao(): RouteDao
 
     companion object {
         // Finché non esiste una versione pubblicata lo schema può cambiare senza migrazioni.

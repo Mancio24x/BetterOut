@@ -95,7 +95,7 @@ fun PickDateDialog(initial: LocalDate?, onDismiss: () -> Unit, onPick: (LocalDat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack: () -> Unit, onBack: () -> Unit, onEdit: () -> Unit, onOpenCopy: (String) -> Unit) {
+fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack: () -> Unit, onBack: () -> Unit, onEdit: () -> Unit, onOpenCopy: (String) -> Unit, routeCard: @Composable (Trip) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     val pack by packVm.state.collectAsStateWithLifecycle()
     var menu by remember { mutableStateOf(false) }
@@ -137,7 +137,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
             when (val s = state) {
                 TripDetailViewModel.State.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 TripDetailViewModel.State.Missing -> Text(stringResource(R.string.uscita_non_trovata), Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
-                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack)
+                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack, routeCard)
             }
         }
     }
@@ -159,7 +159,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
 }
 
 @Composable
-private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit) {
+private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit, routeCard: @Composable (Trip) -> Unit) {
     val today = LocalDate.now()
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -171,6 +171,7 @@ private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack:
         IconLine(AppIcons2.Pin, trip.placeName.ifBlank { stringResource(R.string.senza_localita) })
         if (TripRules.isOverdue(trip, today)) IconLine(AppIcons2.Warn, stringResource(R.string.data_passata))
         if (trip.description.isNotBlank()) Text(trip.description, style = MaterialTheme.typography.bodyLarge)
+        routeCard(trip)
         AppCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.zaino), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })

@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.datastore.preferences)
+    implementation(libs.maplibre)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

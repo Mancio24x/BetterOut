@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -64,6 +65,9 @@ import app.betterout.ui.components.FieldLabel
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.components.statusLabel
+import app.betterout.domain.GeoPoint
+import app.betterout.ui.map.PlacePickerDialog
+import app.betterout.ui.map.PlaceSearchSheet
 import app.betterout.ui.theme.AppIcons2
 import java.time.LocalDate
 import java.time.LocalTime
@@ -123,6 +127,7 @@ private fun TripForm(draft: Trip, nameError: Boolean, datesValid: Boolean, isNew
         FieldLabel(stringResource(R.string.campo_localita))
         OutlinedTextField(draft.placeName, { v -> edit { it.copy(placeName = v) } }, Modifier.fillMaxWidth(), singleLine = true, shape = shape, keyboardOptions = caps,
             leadingIcon = { Icon(AppIcons2.Pin, contentDescription = null) }, supportingText = { Text(stringResource(R.string.aiuto_localita)) })
+        PlaceCoordinates(draft, edit)
 
         FieldLabel(stringResource(R.string.campo_attivita))
         ChoiceChips(Activity.entries.map { it to activityLabel(it) }, draft.activity, { v -> edit { it.copy(activity = v) } })
@@ -206,5 +211,36 @@ private fun PickerField(label: String, value: String, modifier: Modifier = Modif
     Column(modifier) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 4.dp))
         SecondaryButton(value, onClick, Modifier.semantics { contentDescription = description })
+    }
+}
+
+/** Coordinate della località: servono al meteo. Si ottengono cercando un nome o scegliendo il punto sulla mappa. */
+@Composable
+private fun PlaceCoordinates(draft: Trip, edit: ((Trip) -> Trip) -> Unit) {
+    var searching by remember { mutableStateOf(false) }
+    var picking by remember { mutableStateOf(false) }
+    val focus = LocalFocusManager.current
+    val lat = draft.latitude
+    val lon = draft.longitude
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            if (lat != null && lon != null) stringResource(R.string.coordinate, String.format(currentLocale(), "%.4f, %.4f", lat, lon)) else stringResource(R.string.senza_coordinate),
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f),
+        )
+        if (lat != null) TextButton(onClick = { edit { it.copy(latitude = null, longitude = null) } }) { Text(stringResource(R.string.togli_coordinate)) }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Con la tastiera aperta il foglio di ricerca non compare: prima si lascia il campo di testo.
+        SecondaryButton(stringResource(R.string.cerca_localita_azione), { focus.clearFocus(); searching = true }, Modifier.weight(1f))
+        SecondaryButton(stringResource(R.string.scegli_sulla_mappa), { focus.clearFocus(); picking = true }, Modifier.weight(1f))
+    }
+    // Dalla ricerca arrivano anche nome e fuso orario della località; dalla mappa solo il punto.
+    if (searching) PlaceSearchSheet({ searching = false }) { place ->
+        searching = false
+        edit { it.copy(placeName = place.name, latitude = place.latitude, longitude = place.longitude, timeZoneId = place.timezone ?: it.timeZoneId) }
+    }
+    if (picking) PlacePickerDialog(if (lat != null && lon != null) GeoPoint(lat, lon) else null, { picking = false }) { point ->
+        picking = false
+        edit { it.copy(latitude = point.lat, longitude = point.lon) }
     }
 }

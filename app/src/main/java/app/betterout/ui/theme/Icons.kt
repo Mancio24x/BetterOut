@@ -64,4 +64,8 @@ object AppIcons3 {
     val Download by lazy { stroke("M12 4v11M7 10.5l5 5 5-5M5 20h14") }
     val Drop by lazy { stroke("M12 3s6.5 7 6.5 11.5a6.5 6.5 0 0 1-13 0C5.500 10 12 3 12 3z") }
     val Info by lazy { stroke("M20.5 12a8.5 8.5 0 1 1-17 0a8.5 8.5 0 1 1 17 0", "M12 11v5.5M12 7.6v.01") }
+    val Redo by lazy { stroke("m16 5 4 4-4 4", "M20 9H10a5 5 0 0 0 0 10h3") }
+    val Flag by lazy { stroke("M6 21V4h11l-2.5 4 2.5 4H6") }
+    val Move by lazy { stroke("M12 3v18M3 12h18", "m9 6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3") }
+    val File by lazy { stroke("M7 3h7l4 4v14H7z", "M14 3v4h4") }
 }

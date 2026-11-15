@@ -8,7 +8,7 @@ L'app non ha un proprio server: ogni richiesta parte dal telefono verso il servi
 
 | Ruolo | Scelta | Chiave | Stato della verifica |
 |---|---|---|---|
-| Libreria che disegna la mappa | MapLibre Native per Android | no | Pubblicata su Maven Central; versione da fissare alla creazione del progetto |
+| Libreria che disegna la mappa | MapLibre Native per Android 13.7.1 | no | Provata: disegna sull'emulatore. Scelta l'ultima versione stabile; le versioni "globe" e "pre" sono state scartate |
 | Fornitore delle mappe (sfondo) | OpenFreeMap, stile vettoriale su dati OpenStreetMap | no | Provato: lo stile `liberty` risponde |
 | Rilievo ombreggiato | Mapterhorn (tessere di quota) | no | Provato: il descrittore risponde, codifica "terrarium" |
 | Carta topografica con curve di livello (strato facoltativo) | OpenTopoMap | no | Letto: uso in app ammesso senza carico eccessivo |
@@ -20,7 +20,7 @@ L'app non ha un proprio server: ogni richiesta parte dal telefono verso il servi
 
 ## Mappe
 
-**OpenFreeMap** fornisce tessere vettoriali nello schema OpenMapTiles, senza chiave né registrazione. Lo schema contiene sentieri, cime e rifugi, ma non le curve di livello. Lo stile di BetterOut parte da quello pubblico e mette in evidenza i sentieri.
+**OpenFreeMap** fornisce tessere vettoriali nello schema OpenMapTiles, senza chiave né registrazione. Lo schema contiene sentieri, cime e rifugi, ma non le curve di livello. Lo stile di BetterOut parte da quello pubblico (`liberty`) e mette in evidenza i sentieri: li disegna scuri e già dallo zoom 12, mentre lo stile pubblico li ha bianchi e sottili. Lo stile viene scaricato dall'app, che ne tiene una copia per quando manca la rete.
 
 - Attribuzione obbligatoria e sempre visibile: OpenFreeMap, © OpenMapTiles, dati © OpenStreetMap.
 - Scaricamento per l'uso offline: ammesso fino a 3000 tessere o 50 MB per scaricamento, con al massimo 4 richieste parallele e un identificativo dell'app riconoscibile. BetterOut applica questi tetti a ogni area e mostra dimensione stimata, avanzamento e pulsante di rimozione.

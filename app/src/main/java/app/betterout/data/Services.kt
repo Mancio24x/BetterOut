@@ -3,12 +3,16 @@ package app.betterout.data
 import app.betterout.domain.Climate
 import app.betterout.domain.ClimateDay
 import app.betterout.domain.DayWeather
+import app.betterout.domain.Geo
 import app.betterout.domain.GeoPoint
 import app.betterout.domain.HourWeather
 import app.betterout.domain.PointForecast
 import app.betterout.domain.WeatherPoint
 import app.betterout.domain.WeatherRules
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -16,6 +20,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonArray
@@ -72,19 +77,94 @@ class BRouterService(private val fetch: suspend (String) -> String = Http::get) 
     }
 }
 
-@Serializable
-data class Place(val name: String, val latitude: Double, val longitude: Double, val elevation: Double? = null, val admin1: String? = null, val country: String? = null, val timezone: String? = null)
+enum class PlaceKind { CIMA, RIFUGIO, PASSO, LAGO, LOCALITA, VALLE, GHIACCIAIO, CASCATA, BELVEDERE, PARCHEGGIO, IMPIANTO }
 
-/** Ricerca località di Open-Meteo (GeoNames). */
+/** Un luogo trovato. [kind] e [area] (il comune) ci sono quando la fonte li dà; [elevation] e [timezone] solo da Open-Meteo. */
+@Serializable
+data class Place(
+    val name: String, val latitude: Double, val longitude: Double, val elevation: Double? = null, val admin1: String? = null, val country: String? = null,
+    val timezone: String? = null, val kind: PlaceKind? = null, val area: String? = null,
+)
+
+/**
+ * Ricerca dei luoghi su tre fonti insieme: Nominatim e Photon (dati OpenStreetMap: cime, rifugi, passi, laghi)
+ * e Open-Meteo (GeoNames: paesi, con quota e fuso orario). I risultati doppi sono uniti.
+ * Una richiesta per fonte, solo quando l'utente preme "Cerca".
+ */
 object PlaceSearch {
     @Serializable private data class Response(val results: List<Place> = emptyList())
 
-    suspend fun search(query: String, language: String = "it", fetch: suspend (String) -> String = Http::get): List<Place> {
-        val body = fetch("https://geocoding-api.open-meteo.com/v1/search?name=${URLEncoder.encode(query.trim(), "UTF-8")}&count=10&language=$language&format=json")
-        return parse(body)
+    suspend fun search(query: String, language: String = "it", fetch: suspend (String) -> String = Http::get): List<Place> = coroutineScope {
+        val q = URLEncoder.encode(query.trim(), "UTF-8")
+        val sources: List<suspend () -> List<Place>> = listOf(
+            { parseNominatim(fetch("https://nominatim.openstreetmap.org/search?q=$q&format=jsonv2&limit=10&addressdetails=1&accept-language=$language")) },
+            { parsePhoton(fetch("https://photon.komoot.io/api/?q=$q&limit=10")) },
+            { parse(fetch("https://geocoding-api.open-meteo.com/v1/search?name=$q&count=10&language=$language&format=json")) },
+        )
+        // Una fonte che non risponde non ferma le altre: è un errore solo se non risponde nessuna.
+        val answers = sources.map { source -> async { try { source() } catch (e: IOException) { null } } }.awaitAll()
+        if (answers.all { it == null }) throw IOException("nessuna fonte di ricerca ha risposto")
+        merge(answers.filterNotNull().flatten())
     }
 
+    /** Open-Meteo. */
     fun parse(body: String): List<Place> = parsing { json.decodeFromString<Response>(body).results }
+
+    fun parseNominatim(body: String): List<Place> = parsing {
+        json.parseToJsonElement(body).jsonArray.mapNotNull { e ->
+            val o = e.jsonObject
+            val address = o["address"] as? JsonObject
+            fun text(from: JsonObject?, vararg keys: String) = keys.firstNotNullOfOrNull { k -> (from?.get(k) as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } }
+            val name = text(o, "name") ?: text(o, "display_name")?.substringBefore(',') ?: return@mapNotNull null
+            Place(
+                name, o.getValue("lat").jsonPrimitive.double, o.getValue("lon").jsonPrimitive.double, admin1 = text(address, "state", "region"), country = text(address, "country"),
+                kind = placeKind(text(o, "category"), text(o, "type")), area = text(address, "municipality", "city", "town", "village", "county")?.takeIf { it != name },
+            )
+        }
+    }
+
+    fun parsePhoton(body: String): List<Place> = parsing {
+        json.parseToJsonElement(body).jsonObject.getValue("features").jsonArray.mapNotNull { e ->
+            val p = e.jsonObject.getValue("properties").jsonObject
+            fun text(vararg keys: String) = keys.firstNotNullOfOrNull { k -> (p[k] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } }
+            val name = text("name") ?: return@mapNotNull null
+            val c = e.jsonObject.getValue("geometry").jsonObject.getValue("coordinates").jsonArray
+            Place(name, c[1].jsonPrimitive.double, c[0].jsonPrimitive.double, admin1 = text("state"), country = text("country"), kind = placeKind(text("osm_key"), text("osm_value")), area = text("city", "county")?.takeIf { it != name })
+        }
+    }
+
+    /** Il tipo di luogo dalle etichette OpenStreetMap; null per quelli che a chi cammina non dicono niente. */
+    fun placeKind(key: String?, value: String?): PlaceKind? = when {
+        value == "peak" || value == "volcano" -> PlaceKind.CIMA
+        value == "alpine_hut" || value == "wilderness_hut" -> PlaceKind.RIFUGIO
+        key == "mountain_pass" || value == "saddle" || value == "mountain_pass" -> PlaceKind.PASSO
+        key == "water" || value == "water" || value == "lake" || value == "reservoir" -> PlaceKind.LAGO
+        value == "valley" -> PlaceKind.VALLE
+        value == "glacier" -> PlaceKind.GHIACCIAIO
+        value == "waterfall" -> PlaceKind.CASCATA
+        value == "viewpoint" -> PlaceKind.BELVEDERE
+        value == "parking" -> PlaceKind.PARCHEGGIO
+        key == "aerialway" -> PlaceKind.IMPIANTO
+        key == "place" || key == "boundary" -> PlaceKind.LOCALITA
+        else -> null
+    }
+
+    /**
+     * Unisce i risultati delle fonti: lo stesso luogo (stesso nome entro 500 m, o a meno di 50 m) compare una volta,
+     * con i dati di tutte. Prima i luoghi di cui si conosce il tipo, nell'ordine dato dalle fonti.
+     */
+    fun merge(places: List<Place>, limit: Int = 20): List<Place> {
+        val merged = ArrayList<Place>()
+        for (p in places) {
+            val i = merged.indexOfFirst { m ->
+                val d = Geo.distance(GeoPoint(m.latitude, m.longitude), GeoPoint(p.latitude, p.longitude))
+                d < 50 || d < 500 && m.name.trim().equals(p.name.trim(), ignoreCase = true)
+            }
+            if (i < 0) merged += p
+            else merged[i] = merged[i].let { m -> m.copy(elevation = m.elevation ?: p.elevation, admin1 = m.admin1 ?: p.admin1, country = m.country ?: p.country, timezone = m.timezone ?: p.timezone, kind = m.kind ?: p.kind, area = m.area ?: p.area) }
+        }
+        return merged.sortedBy { it.kind == null }.take(limit)
+    }
 }
 
 /** Quote dal modello del terreno Copernicus GLO-90 tramite Open-Meteo: al più 100 punti per richiesta. */

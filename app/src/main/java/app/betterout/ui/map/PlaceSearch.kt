@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import app.betterout.R
 import app.betterout.data.Place
+import app.betterout.data.PlaceKind
 import app.betterout.data.PlaceSearch
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.theme.AppIcons3
@@ -52,7 +53,16 @@ private sealed interface SearchState {
 @Composable
 fun placeSubtitle(place: Place): String {
     val locale = currentLocale()
-    return listOfNotNull(place.elevation?.let { formatMeters(it, locale) }, place.admin1, place.country).joinToString(" · ")
+    val kind = place.kind?.let {
+        stringResource(
+            when (it) {
+                PlaceKind.CIMA -> R.string.luogo_cima; PlaceKind.RIFUGIO -> R.string.luogo_rifugio; PlaceKind.PASSO -> R.string.luogo_passo; PlaceKind.LAGO -> R.string.luogo_lago
+                PlaceKind.LOCALITA -> R.string.luogo_localita; PlaceKind.VALLE -> R.string.luogo_valle; PlaceKind.GHIACCIAIO -> R.string.luogo_ghiacciaio; PlaceKind.CASCATA -> R.string.luogo_cascata
+                PlaceKind.BELVEDERE -> R.string.luogo_belvedere; PlaceKind.PARCHEGGIO -> R.string.luogo_parcheggio; PlaceKind.IMPIANTO -> R.string.luogo_impianto
+            },
+        )
+    }
+    return listOfNotNull(kind, place.elevation?.let { formatMeters(it, locale) }, place.area, place.admin1, place.country).distinct().joinToString(" · ")
 }
 
 /** Ricerca di una località. La richiesta parte solo quando l'utente la chiede, non a ogni lettera. */

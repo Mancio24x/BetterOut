@@ -9,6 +9,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.room.Upsert
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.LocalTime
@@ -68,7 +70,7 @@ interface ChecklistDao {
     @Query("UPDATE checklist_entries SET gearItemId = NULL WHERE gearItemId = :itemId") suspend fun detachItem(itemId: String)
 }
 
-@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class, Route::class], version = 3, exportSchema = false)
+@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class, Route::class], version = 4, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
@@ -77,9 +79,15 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun routeDao(): RouteDao
 
     companion object {
+        /** Dalla versione 0.3.0 pubblicata i dati non si cancellano più: ogni cambio di schema ha la sua migrazione. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) = db.execSQL("ALTER TABLE gear_items ADD COLUMN preset TEXT")
+        }
+
         // Finché non esiste una versione pubblicata lo schema può cambiare senza migrazioni.
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "betterout.db")
+                .addMigrations(MIGRATION_3_4)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

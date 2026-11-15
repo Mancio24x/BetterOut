@@ -33,16 +33,18 @@ class InventoryViewModel(private val repo: GearRepository) : ViewModel() {
     companion object { fun factory(repo: GearRepository): ViewModelProvider.Factory = viewModelFactory { initializer { InventoryViewModel(repo) } } }
 }
 
-class GearEditViewModel(private val repo: GearRepository, private val id: String?, private val template: GearItem? = null) : ViewModel() {
+class GearEditViewModel(private val repo: GearRepository, private val id: String?, private val template: GearItem? = null, private val startInKg: Boolean = false) : ViewModel() {
     /** I numeri sono tenuti come testo finché non si salva, così un valore non valido resta visibile e segnalato. */
     data class State(
         val loading: Boolean = true, val item: GearItem? = null, val original: State.Snapshot? = null, val categories: List<GearCategory> = emptyList(),
         val weight: String = "", val volume: String = "", val capacity: String = "", val nameError: Boolean = false, val tripsUsing: Int = 0,
+        /** Il peso scritto nel campo è in chilogrammi (con decimali) invece che in grammi. */
+        val kg: Boolean = false,
     ) {
         data class Snapshot(val item: GearItem, val weight: String, val volume: String, val capacity: String)
         val snapshot: Snapshot? get() = item?.let { Snapshot(it, weight, volume, capacity) }
         val isDirty: Boolean get() = snapshot != original
-        val weightError: Boolean get() = weight.isNotBlank() && weight.trim().toIntOrNull()?.takeIf { it >= 0 } == null
+        val weightError: Boolean get() = weight.isNotBlank() && grams(weight, kg) == null
         val volumeError: Boolean get() = volume.isNotBlank() && parseDecimal(volume) == null
         val capacityError: Boolean get() = capacity.isNotBlank() && parseDecimal(capacity) == null
     }
@@ -57,13 +59,21 @@ class GearEditViewModel(private val repo: GearRepository, private val id: String
             val categories = repo.categories()
             val now = System.currentTimeMillis()
             val item = id?.let { repo.item(it) } ?: (template ?: GearItem(id = "", name = "", categoryId = "", createdAt = now, updatedAt = now)).copy(id = UUID.randomUUID().toString(), categoryId = categories.first().id, createdAt = now, updatedAt = now)
-            val s = State(false, item, null, categories, item.weightGrams?.toString().orEmpty(), item.volumeLiters?.let(::plain).orEmpty(), item.capacityLiters?.let(::plain).orEmpty(), tripsUsing = id?.let { repo.tripsUsing(it) } ?: 0)
+            val s = State(false, item, null, categories, weightText(item.weightGrams, startInKg), item.volumeLiters?.let(::plain).orEmpty(), item.capacityLiters?.let(::plain).orEmpty(), tripsUsing = id?.let { repo.tripsUsing(it) } ?: 0, kg = startInKg)
             _state.value = s.copy(original = s.snapshot)
         }
     }
 
     fun edit(change: (GearItem) -> GearItem) = _state.update { s -> s.item?.let { s.copy(item = change(it), nameError = false) } ?: s }
     fun setWeight(v: String) = _state.update { it.copy(weight = v) }
+    /** Cambia l'unità del campo del peso, convertendo quello che c'è scritto. */
+    fun setUnit(kg: Boolean) = _state.update { s ->
+        if (s.kg == kg) s else s.copy(
+            kg = kg, weight = grams(s.weight, s.kg)?.let { weightText(it, kg) } ?: s.weight,
+            original = s.original?.let { o -> o.copy(weight = grams(o.weight, s.kg)?.let { weightText(it, kg) } ?: o.weight) },
+        )
+    }
+
     fun setVolume(v: String) = _state.update { it.copy(volume = v) }
     fun setCapacity(v: String) = _state.update { it.copy(capacity = v) }
 
@@ -79,7 +89,7 @@ class GearEditViewModel(private val repo: GearRepository, private val id: String
         if (item.name.isBlank()) { _state.update { it.copy(nameError = true) }; return }
         if (s.weightError || s.volumeError || s.capacityError) return
         val cleaned = item.copy(
-            name = item.name.trim(), weightGrams = s.weight.trim().toIntOrNull(), volumeLiters = parseDecimal(s.volume),
+            name = item.name.trim(), weightGrams = grams(s.weight, s.kg), volumeLiters = parseDecimal(s.volume),
             capacityLiters = if (item.function == GearFunction.ZAINO) parseDecimal(s.capacity) else null,
             weightIsEstimate = item.weightIsEstimate && s.weight.isNotBlank(),
         )
@@ -90,9 +100,17 @@ class GearEditViewModel(private val repo: GearRepository, private val id: String
 
     companion object {
         fun parseDecimal(text: String): Double? = text.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it >= 0 && it.isFinite() }
+        /** Grammi dal testo del campo: interi se in grammi, con decimali se in chilogrammi. Null se vuoto o non valido. */
+        fun grams(text: String, kg: Boolean): Int? =
+            if (kg) parseDecimal(text)?.let { Math.round(it * 1000).toInt() } else text.trim().toIntOrNull()?.takeIf { it >= 0 }
+        fun weightText(grams: Int?, kg: Boolean): String = when {
+            grams == null -> ""
+            kg -> java.math.BigDecimal(grams).movePointLeft(3).stripTrailingZeros().toPlainString().replace('.', ',')
+            else -> grams.toString()
+        }
         private fun plain(v: Double): String = if (v % 1.0 == 0.0) v.toInt().toString() else v.toString().replace('.', ',')
         /** [template] dà nome, uso e tipo di partenza a un oggetto nuovo scelto dall'elenco proposto. */
-        fun factory(repo: GearRepository, id: String?, template: GearItem? = null): ViewModelProvider.Factory = viewModelFactory { initializer { GearEditViewModel(repo, id, template) } }
+        fun factory(repo: GearRepository, id: String?, template: GearItem? = null, kg: Boolean = false): ViewModelProvider.Factory = viewModelFactory { initializer { GearEditViewModel(repo, id, template, kg) } }
     }
 }
 

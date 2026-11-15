@@ -55,4 +55,54 @@ class ServicesTest {
         try { TerrainElevation.elevations(listOf(GeoPoint(46.0, 12.0), GeoPoint(46.1, 12.0))) { """{"elevation":[1000.0]}""" } } catch (e: IOException) { failed = true }
         assertTrue(failed)
     }
+
+    @Test fun `Nominatim - nome, tipo, comune e regione`() {
+        val body = """[{"name":"Passo di Falzarego","category":"mountain_pass","type":"yes","lat":"46.5187504","lon":"12.0084323","display_name":"Passo di Falzarego, Cortina d'Ampezzo, Belluno, Veneto, Italia","address":{"town":"Cortina d'Ampezzo","state":"Veneto","country":"Italia"}},{"name":"","display_name":"Falzarego, SR48","category":"historic","type":"memorial","lat":"46.519","lon":"12.009"}]"""
+        val places = PlaceSearch.parseNominatim(body)
+        assertEquals(Place("Passo di Falzarego", 46.5187504, 12.0084323, admin1 = "Veneto", country = "Italia", kind = PlaceKind.PASSO, area = "Cortina d'Ampezzo"), places[0])
+        assertEquals("Falzarego", places[1].name)
+        assertEquals(null, places[1].kind)
+    }
+
+    @Test fun `Photon - longitudine prima di latitudine, luoghi senza nome scartati`() {
+        val body = """{"features":[{"geometry":{"coordinates":[12.008133,46.527754],"type":"Point"},"properties":{"name":"Rifugio Lagazuoi","osm_key":"tourism","osm_value":"alpine_hut","state":"Veneto","country":"Italia"}},{"geometry":{"coordinates":[12.0,46.0]},"properties":{"osm_key":"highway","osm_value":"path"}}]}"""
+        assertEquals(listOf(Place("Rifugio Lagazuoi", 46.527754, 12.008133, admin1 = "Veneto", country = "Italia", kind = PlaceKind.RIFUGIO)), PlaceSearch.parsePhoton(body))
+    }
+
+    @Test fun `lo stesso luogo trovato da più fonti compare una volta, con i dati di tutte`() {
+        val merged = PlaceSearch.merge(listOf(
+            Place("Falzarego", 46.5190, 12.0090),
+            Place("Rifugio Lagazuoi", 46.527754, 12.008133, kind = PlaceKind.RIFUGIO),
+            Place("rifugio lagazuoi", 46.5278, 12.0082, elevation = 2752.0, timezone = "Europe/Rome"),
+            Place("Misurina", 46.5811, 12.2528, 1752.0),
+        ))
+        assertEquals(listOf("Rifugio Lagazuoi", "Falzarego", "Misurina"), merged.map { it.name })
+        assertEquals(2752.0, merged[0].elevation!!, 0.0)
+        assertEquals("Europe/Rome", merged[0].timezone)
+    }
+
+    @Test fun `la ricerca usa tre fonti e ne sopporta la mancanza, ma non di tutte`() = runTest {
+        val asked = mutableListOf<String>()
+        val places = PlaceSearch.search("Rifugio Lagazuoi") { url ->
+            asked += url.substringAfter("://").substringBefore("/")
+            when {
+                "nominatim" in url -> throw IOException("non risponde")
+                "photon" in url -> """{"features":[{"geometry":{"coordinates":[12.008133,46.527754]},"properties":{"name":"Rifugio Lagazuoi","osm_key":"tourism","osm_value":"alpine_hut"}}]}"""
+                else -> """{"generationtime_ms":0.1}"""
+            }
+        }
+        assertEquals(setOf("nominatim.openstreetmap.org", "photon.komoot.io", "geocoding-api.open-meteo.com"), asked.toSet())
+        assertEquals(listOf("Rifugio Lagazuoi"), places.map { it.name })
+        var failed = false
+        try { PlaceSearch.search("x") { throw IOException("senza rete") } } catch (e: IOException) { failed = true }
+        assertTrue(failed)
+    }
+
+    @Test fun `i tipi di luogo utili a chi cammina sono riconosciuti`() {
+        assertEquals(PlaceKind.CIMA, PlaceSearch.placeKind("natural", "peak"))
+        assertEquals(PlaceKind.LAGO, PlaceSearch.placeKind("water", "lake"))
+        assertEquals(PlaceKind.LOCALITA, PlaceSearch.placeKind("place", "village"))
+        assertEquals(PlaceKind.IMPIANTO, PlaceSearch.placeKind("aerialway", "chair_lift"))
+        assertEquals(null, PlaceSearch.placeKind("historic", "memorial"))
+    }
 }

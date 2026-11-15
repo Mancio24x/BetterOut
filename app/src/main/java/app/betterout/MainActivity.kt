@@ -7,7 +7,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import app.betterout.ui.gear.LocalWeightUnit
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterout.data.ThemeMode
@@ -27,8 +29,9 @@ class MainActivity : ComponentActivity() {
                 val style = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark }
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
+            val unit by settings.weightUnit.collectAsStateWithLifecycle()
             BetterOutTheme(mode) {
-                BetterOutApp()
+                CompositionLocalProvider(LocalWeightUnit provides unit) { BetterOutApp() }
             }
         }
     }

@@ -24,6 +24,8 @@ data class GearItem(
     val notes: String = "",
     val createdAt: Long,
     val updatedAt: Long,
+    /** Chiave dell'oggetto proposto da cui è nato: decide il simbolo, anche se poi il nome cambia. */
+    val preset: String? = null,
 )
 
 /**

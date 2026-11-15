@@ -63,6 +63,7 @@ import app.betterout.ui.theme.AppIcons
 import app.betterout.ui.theme.AppIcons3
 import app.betterout.ui.theme.AppIcons5
 import app.betterout.data.GearItem
+import app.betterout.domain.WeightUnit
 import app.betterout.data.Trip
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
@@ -124,6 +125,8 @@ fun BetterOutApp() {
         // Le schermate di secondo livello gestiscono da sole barre e margini di sistema.
         NavHost(nav, startDestination = Tab.Home.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
             val settings = { nav.navigate("impostazioni") }
+            val inKg = { app.settings.weightUnit.value == WeightUnit.KG }
+            val setUnit = { kg: Boolean -> app.settings.setWeightUnit(if (kg) WeightUnit.KG else WeightUnit.G) }
             // Il percorso di un'uscita si può aggiungere dal suo dettaglio o dalla Home: si torna da dove si era partiti.
             val backToTrip = { if (!nav.popBackStack("uscita/{id}", inclusive = false)) nav.popBackStack(Tab.Home.route, inclusive = false) }
             // Mappa, percorso e meteo di un'uscita: gli stessi pezzi in Home, nel dettaglio e nelle pillole aperte.
@@ -176,10 +179,10 @@ fun BetterOutApp() {
             composable("oggetto/nuovo?modello={modello}", arguments = listOf(optional("modello"))) { e ->
                 // Un oggetto scelto dall'elenco proposto parte con nome, uso e tipo già impostati.
                 val preset = e.arguments?.getString("modello")?.toIntOrNull()?.let(GearPresets::getOrNull)
-                val template = preset?.let { GearItem(id = "", name = stringResource(it.nameRes), categoryId = "", kind = it.kind, function = it.function, createdAt = 0, updatedAt = 0) }
-                GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, null, template)), onClose = { nav.popBackStack() })
+                val template = preset?.let { GearItem(id = "", name = stringResource(it.nameRes), categoryId = "", kind = it.kind, function = it.function, preset = it.key, createdAt = 0, updatedAt = 0) }
+                GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, null, template, inKg())), onClose = { nav.popBackStack() }, onUnit = setUnit)
             }
-            composable("oggetto/{id}") { e -> GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, e.arguments?.getString("id"))), onClose = { nav.popBackStack() }) }
+            composable("oggetto/{id}") { e -> GearEditScreen(viewModel(factory = GearEditViewModel.factory(app.gear, e.arguments?.getString("id"), kg = inKg())), onClose = { nav.popBackStack() }, onUnit = setUnit) }
             composable("uscita/{id}/zaino") { e ->
                 val id = e.arguments?.getString("id").orEmpty()
                 ChecklistScreen(viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onBack = { nav.popBackStack() }, onAdd = { nav.navigate("uscita/$id/zaino/aggiungi") })

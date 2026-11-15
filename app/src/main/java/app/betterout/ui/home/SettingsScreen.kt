@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterout.R
 import app.betterout.data.AppSettings
 import app.betterout.data.ThemeMode
+import app.betterout.domain.WeightUnit
 import app.betterout.ui.components.AppCard
 import app.betterout.ui.components.ChoiceChips
 import app.betterout.ui.map.GPX_MIME_TYPES
@@ -43,6 +44,7 @@ import app.betterout.ui.theme.AppIcons3
 @Composable
 fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: (Uri) -> Unit, onRoutes: () -> Unit) {
     val theme by settings.theme.collectAsStateWithLifecycle()
+    val unit by settings.weightUnit.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onImportGpx(uri) }
@@ -65,6 +67,12 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: (Uri)
                         theme, settings::setTheme,
                     )
                     Text(stringResource(R.string.tema_nota), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            AppCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.unita_peso), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+                    ChoiceChips(listOf(WeightUnit.G to stringResource(R.string.unita_grammi), WeightUnit.KG to stringResource(R.string.unita_chilogrammi)), unit, settings::setWeightUnit)
                 }
             }
             Text(stringResource(R.string.impostazioni_dati), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp).semantics { heading() })

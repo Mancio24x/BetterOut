@@ -23,7 +23,10 @@ fun functionLabel(function: GearFunction): String {
     return if (id != 0) stringResource(id) else function.name
 }
 
-@Composable fun weight(grams: Long): String = WeightFormat.format(grams, locale = currentLocale())
+/** Unità scelta nelle impostazioni o nella scheda di un oggetto. */
+val LocalWeightUnit = androidx.compose.runtime.staticCompositionLocalOf { app.betterout.domain.WeightUnit.KG }
+
+@Composable fun weight(grams: Long): String = WeightFormat.format(grams, LocalWeightUnit.current, currentLocale())
 
 fun formatLiters(liters: Double, locale: java.util.Locale): String = if (liters % 1.0 == 0.0) String.format(locale, "%.0f", liters) else String.format(locale, "%.1f", liters)
 

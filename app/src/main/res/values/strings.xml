@@ -267,7 +267,7 @@
     <string name="cerca_aiuto">Scrivi un nome e premi Cerca.</string>
     <string name="cerca_errore">Ricerca non riuscita: controlla la connessione.</string>
     <string name="cerca_nessun_risultato">Nessun risultato. Prova un altro nome, oppure trova il punto muovendo la mappa.</string>
-    <string name="cerca_fonte">Ricerca: Open-Meteo, dati GeoNames.</string>
+    <string name="cerca_fonte">Ricerca: Nominatim e Photon (dati © OpenStreetMap), Open-Meteo (GeoNames).</string>
     <string name="riprova">Riprova</string>
     <string name="non_disponibile">non disponibile</string>
 
@@ -569,4 +569,20 @@
     <string name="modello_sacco_a_pelo">Sacco a pelo</string>
     <string name="modello_tenda">Tenda</string>
     <string name="modello_powerbank">Powerbank</string>
+
+    <string name="unita_peso">Unità di peso</string>
+    <string name="unita_grammi">Grammi (g)</string>
+    <string name="unita_chilogrammi">Chilogrammi (kg)</string>
+    <string name="campo_peso_kg">Peso (kg)</string>
+    <string name="luogo_cima">Cima</string>
+    <string name="luogo_rifugio">Rifugio</string>
+    <string name="luogo_passo">Passo</string>
+    <string name="luogo_lago">Lago</string>
+    <string name="luogo_localita">Località</string>
+    <string name="luogo_valle">Valle</string>
+    <string name="luogo_ghiacciaio">Ghiacciaio</string>
+    <string name="luogo_cascata">Cascata</string>
+    <string name="luogo_belvedere">Belvedere</string>
+    <string name="luogo_parcheggio">Parcheggio</string>
+    <string name="luogo_impianto">Impianto di risalita</string>
 </resources>

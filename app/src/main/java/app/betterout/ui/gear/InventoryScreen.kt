@@ -67,31 +67,36 @@ fun filterItems(items: List<GearItem>, categories: List<GearCategory>, query: St
 }
 
 /** Un oggetto proposto: simbolo, nome e uso già impostati; peso e volume li mette l'utente. */
-class GearPreset(val nameRes: Int, val icon: ImageVector, val function: GearFunction = GearFunction.ALTRO, val kind: GearKind = GearKind.BASE)
+class GearPreset(val key: String, val nameRes: Int, val icon: ImageVector, val function: GearFunction = GearFunction.ALTRO, val kind: GearKind = GearKind.BASE)
 
 val GearPresets = listOf(
-    GearPreset(R.string.modello_zaino, AppIcons.Backpack, GearFunction.ZAINO),
-    GearPreset(R.string.modello_scarpe, AppIcons5.Boot, kind = GearKind.INDOSSATO),
-    GearPreset(R.string.modello_borraccia, AppIcons5.Bottle, GearFunction.CONTENITORE_ACQUA),
-    GearPreset(R.string.modello_maglietta, AppIcons5.Shirt, GearFunction.MAGLIETTA, GearKind.INDOSSATO),
-    GearPreset(R.string.modello_cambi, AppIcons5.Layers),
-    GearPreset(R.string.modello_calze, AppIcons5.Sock, GearFunction.CALZE),
-    GearPreset(R.string.modello_torcia, AppIcons5.Torch, GearFunction.FRONTALE),
-    GearPreset(R.string.modello_cibo, AppIcons5.Food, kind = GearKind.CONSUMABILE),
-    GearPreset(R.string.modello_fornello, AppIcons5.Flame, GearFunction.FORNELLO),
-    GearPreset(R.string.modello_cappello, AppIcons5.Hat, GearFunction.BERRETTO),
-    GearPreset(R.string.modello_occhiali, AppIcons5.Glasses, GearFunction.OCCHIALI_SOLE),
-    GearPreset(R.string.modello_coltello, AppIcons5.Knife),
-    GearPreset(R.string.modello_giacca, AppIcons5.Jacket, GearFunction.GUSCIO_PIOGGIA),
-    GearPreset(R.string.modello_primo_soccorso, AppIcons5.FirstAid, GearFunction.PRIMO_SOCCORSO),
-    GearPreset(R.string.modello_sacco_a_pelo, AppIcons5.SleepingBag, GearFunction.SACCO_LETTO),
-    GearPreset(R.string.modello_tenda, AppIcons5.Tent, GearFunction.RIPARO),
-    GearPreset(R.string.modello_powerbank, AppIcons5.Battery, GearFunction.POWERBANK),
+    GearPreset("ZAINO", R.string.modello_zaino, AppIcons.Backpack, GearFunction.ZAINO),
+    GearPreset("SCARPE", R.string.modello_scarpe, AppIcons5.Boot, kind = GearKind.INDOSSATO),
+    GearPreset("BORRACCIA", R.string.modello_borraccia, AppIcons5.Bottle, GearFunction.CONTENITORE_ACQUA),
+    GearPreset("MAGLIETTA", R.string.modello_maglietta, AppIcons5.Shirt, GearFunction.MAGLIETTA, GearKind.INDOSSATO),
+    GearPreset("CAMBI", R.string.modello_cambi, AppIcons5.Layers),
+    GearPreset("CALZE", R.string.modello_calze, AppIcons5.Sock, GearFunction.CALZE),
+    GearPreset("TORCIA", R.string.modello_torcia, AppIcons5.Torch, GearFunction.FRONTALE),
+    GearPreset("CIBO", R.string.modello_cibo, AppIcons5.Food, kind = GearKind.CONSUMABILE),
+    GearPreset("FORNELLO", R.string.modello_fornello, AppIcons5.Flame, GearFunction.FORNELLO),
+    GearPreset("CAPPELLO", R.string.modello_cappello, AppIcons5.Hat, GearFunction.BERRETTO),
+    GearPreset("OCCHIALI", R.string.modello_occhiali, AppIcons5.Glasses, GearFunction.OCCHIALI_SOLE),
+    GearPreset("COLTELLO", R.string.modello_coltello, AppIcons5.Knife),
+    GearPreset("GIACCA", R.string.modello_giacca, AppIcons5.Jacket, GearFunction.GUSCIO_PIOGGIA),
+    GearPreset("PRIMO_SOCCORSO", R.string.modello_primo_soccorso, AppIcons5.FirstAid, GearFunction.PRIMO_SOCCORSO),
+    GearPreset("SACCO_A_PELO", R.string.modello_sacco_a_pelo, AppIcons5.SleepingBag, GearFunction.SACCO_LETTO),
+    GearPreset("TENDA", R.string.modello_tenda, AppIcons5.Tent, GearFunction.RIPARO),
+    GearPreset("POWERBANK", R.string.modello_powerbank, AppIcons5.Battery, GearFunction.POWERBANK),
 )
 
-/** L'oggetto proposto a cui corrisponde un oggetto dell'inventario: stesso nome, oppure stesso uso. */
+/**
+ * L'oggetto proposto a cui corrisponde un oggetto dell'inventario: quello da cui è nato; per gli oggetti creati prima
+ * che il collegamento fosse salvato, quello il cui nome compare nel nome dell'oggetto, o con lo stesso uso.
+ */
 fun presetIndexFor(item: GearItem, presetNames: List<String>): Int? =
-    presetNames.indexOfFirst { it.equals(item.name.trim(), ignoreCase = true) }.takeIf { it >= 0 }
+    GearPresets.indexOfFirst { it.key == item.preset }.takeIf { it >= 0 }
+        ?: presetNames.indexOfFirst { it.equals(item.name.trim(), ignoreCase = true) }.takeIf { it >= 0 }
+        ?: presetNames.indexOfFirst { item.name.contains(it, ignoreCase = true) }.takeIf { it >= 0 }
         ?: GearPresets.indexOfFirst { it.function != GearFunction.ALTRO && it.function == item.function }.takeIf { it >= 0 }
 
 /** Attrezzatura: prima gli oggetti già compilati, poi quelli proposti ancora da aggiungere. Ogni riga ha simbolo e nome. */

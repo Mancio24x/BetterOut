@@ -64,7 +64,7 @@ private fun ErrorText(text: String) = Row(verticalAlignment = Alignment.CenterVe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GearEditScreen(vm: GearEditViewModel, onClose: () -> Unit) {
+fun GearEditScreen(vm: GearEditViewModel, onClose: () -> Unit, onUnit: (Boolean) -> Unit = {}) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var askLeave by remember { mutableStateOf(false) }
@@ -92,10 +92,12 @@ fun GearEditScreen(vm: GearEditViewModel, onClose: () -> Unit) {
             FieldLabel(stringResource(R.string.campo_nome_oggetto), Modifier.padding(top = 0.dp))
             OutlinedTextField(item.name, { v -> vm.edit { it.copy(name = v) } }, Modifier.fillMaxWidth(), singleLine = true, shape = shape, isError = state.nameError,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences), supportingText = if (state.nameError) ({ ErrorText(stringResource(R.string.errore_nome_oggetto)) }) else null)
+            FieldLabel(stringResource(R.string.unita_peso))
+            ChoiceChips(listOf(false to stringResource(R.string.unita_grammi), true to stringResource(R.string.unita_chilogrammi)), state.kg, { vm.setUnit(it); onUnit(it) })
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(Modifier.weight(1f)) {
-                    FieldLabel(stringResource(R.string.campo_peso))
-                    OutlinedTextField(state.weight, vm::setWeight, Modifier.fillMaxWidth(), singleLine = true, shape = shape, isError = state.weightError, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    FieldLabel(stringResource(if (state.kg) R.string.campo_peso_kg else R.string.campo_peso))
+                    OutlinedTextField(state.weight, vm::setWeight, Modifier.fillMaxWidth(), singleLine = true, shape = shape, isError = state.weightError, keyboardOptions = KeyboardOptions(keyboardType = if (state.kg) KeyboardType.Decimal else KeyboardType.Number),
                         supportingText = if (state.weightError) ({ ErrorText(stringResource(R.string.errore_numero)) }) else null)
                 }
                 Column(Modifier.weight(1f)) {

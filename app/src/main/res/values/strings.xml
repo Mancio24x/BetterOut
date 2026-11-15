@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BetterOut</string>
+    <string name="app_name" translatable="false">BetterOut</string>
     <string name="nav_uscite">Uscite</string>
     <string name="nav_mappa">Mappa</string>
     <string name="nav_attrezzatura">Attrezzatura</string>

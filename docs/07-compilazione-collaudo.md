@@ -12,18 +12,32 @@ JDK 17 o successivo e Android SDK con piattaforma 37 e build-tools 36. Il percor
 ./gradlew assembleRelease
 ```
 
-- `app/build/outputs/apk/debug/app-debug.apk` — **debug**: firmato con la chiave di debug, installabile, identificativo `app.betterout.debug`.
-- `app/build/outputs/apk/release/app-release-unsigned.apk` — **release non firmato**: non installabile finché non viene firmato con una chiave propria, che non sta nel repository.
+Ogni compilazione produce un APK per architettura (`arm64-v8a`, `armeabi-v7a`, `x86_64`): le librerie della mappa pesano, e ogni telefono ne usa una sola. Quasi tutti i telefoni usano `arm64-v8a`.
+
+- `app/build/outputs/apk/debug/app-arm64-v8a-debug.apk` — **debug**: firmato con la chiave di debug della macchina, installabile, identificativo `app.betterout.debug`.
+- `app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk` — **release non firmato**: è quello che esce senza la chiave di firma, che non sta nel repository.
 
 ## Installare l'APK debug
 
 Con il telefono collegato e il debug USB attivo:
 
 ```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
 ```
 
-Oppure si copia il file sul telefono e lo si apre, autorizzando l'installazione da quella sorgente.
+## Rilasci firmati
+
+Un tag `vX.Y.Z` su `main` avvia il flusso `Rilascio` (`.github/workflows/release.yml`): test, lint, APK release firmati e una Release su GitHub con i file `BetterOut-X.Y.Z-<architettura>.apk`.
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+- La versione dell'app viene dal tag: `0.2.0` diventa `versionName` 0.2.0 e `versionCode` 200 (maggiore × 10 000 + minore × 100 + correzione). Ogni rilascio deve avere un numero più alto del precedente, altrimenti il telefono non lo vede come aggiornamento.
+- La chiave di firma sta nei secrets del repository (`BETTEROUT_KEYSTORE_BASE64`, `BETTEROUT_KEYSTORE_PASSWORD`) e in copia fuori dal repository, sulla macchina di sviluppo. Va conservata: senza quella chiave un aggiornamento non si installa sopra le versioni già distribuite. Impronta SHA-256 del certificato: `5B:DA:8F:77:AA:E7:89:18:E1:CB:E2:20:B1:2C:E5:62:E2:DF:54:41:A5:AA:6A:47:FC:24:1C:C3:1F:87:E7:6B`.
+- In Obtainium: aggiungere `https://github.com/Mancio24x/BetterOut`; se chiede quale file, scegliere `arm64-v8a`.
+- L'APK dei rilasci ha identificativo `app.betterout` e convive con quello di debug (`app.betterout.debug`).
+- Finché lo schema del database è provvisorio, un aggiornamento che lo cambia cancella i dati locali (vedi `06-avanzamento.md`).
 
 ## GitHub Actions
 
@@ -80,6 +94,8 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Eliminazione dell'uscita → dati meteo rimossi | Riuscita | File della cache controllati sul dispositivo |
 | Aggiornamento automatico dopo tre ore | **Non osservato sul dispositivo** | Coperto solo dai test (orologio simulato) |
 | Meteo: probabilità di precipitazione oltre i primi giorni | Osservato | Per i giorni lontani il servizio non la dà: la cella mostra "—", non zero |
+| APK release firmato, per architettura | Riuscito | Compilato in locale con la chiave, firma controllata con `apksigner`, installato e avviato sull'emulatore: versione 0.2.0 (200), Home, mappa, nuova uscita. 24,6 MB per arm64 (prima 66 MB per tutte) |
+| Aggiornamento sopra una versione precedente | **Non eseguito** | Esiste un solo rilascio |
 | Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 

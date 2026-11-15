@@ -5,6 +5,14 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+// La versione arriva dal tag del rilascio (-Pbetterout.version=0.2.0); il codice numerico ne deriva: 0.2.0 → 200.
+val appVersion = providers.gradleProperty("betterout.version").getOrElse("0.2.0")
+val appVersionCode = appVersion.split(".").map(String::toInt).let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+
+// La chiave di firma non sta nel repository: il flusso di rilascio la passa con queste variabili.
+val keystoreFile = System.getenv("BETTEROUT_KEYSTORE_FILE")
+val keystorePassword = System.getenv("BETTEROUT_KEYSTORE_PASSWORD")
+
 android {
     namespace = "app.betterout"
     compileSdk {
@@ -15,8 +23,27 @@ android {
         applicationId = "app.betterout"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersion
+    }
+
+    signingConfigs {
+        if (keystoreFile != null && keystorePassword != null) create("release") {
+            storeFile = file(keystoreFile)
+            storePassword = keystorePassword
+            keyAlias = "betterout"
+            keyPassword = keystorePassword
+        }
+    }
+
+    // Un APK per architettura: le librerie native della mappa pesano, e ogni telefono ne usa una sola.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
+        }
     }
 
     buildTypes {
@@ -25,8 +52,9 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            // Nessuna chiave di firma nel repository: l'APK release esce non firmato.
+            // Senza le variabili della chiave (cioè fuori dal flusso di rilascio) l'APK release esce non firmato.
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
     compileOptions {

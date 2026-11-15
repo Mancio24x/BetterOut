@@ -16,7 +16,7 @@ Aggiornato il 15 novembre 2026.
 | Meteo | Fatta in parte: previsioni per partenza e punto più alto, vista giornaliera e oraria, cache con età del dato, clima del periodo. Mancano il punto del pernottamento e l'aggiornamento in background (vedi sotto) |
 | Suggerimenti | Da fare |
 | Backup ed esportazioni | Da fare |
-| Verifiche e APK | Da fare |
+| Verifiche e APK | Fatta in parte: rilasci firmati su GitHub a ogni tag, un APK per architettura. Mancano le prove su telefono reale |
 
 L'APK attuale gestisce uscite, inventario, checklist dello zaino, percorsi e meteo, tutto salvato sul telefono. Le impostazioni mostrano ancora un testo provvisorio. Creazione e modifica dell'uscita usano un'unica pagina, non i sei passi delle bozze. L'interfaccia è solo in italiano e i pesi sono mostrati in chilogrammi (grammi sotto il chilo): la scelta dell'unità arriva con le impostazioni.
 
@@ -76,7 +76,7 @@ Non ancora fatto:
 
 ## Problemi aperti
 
-8. **Peso dell'APK**: con le librerie native della mappa per quattro architetture l'APK debug è passato da 14 a 67 MB. Si può ridurre con un APK per architettura.
+8. **Peso dell'APK**: risolto con un APK per architettura (24,6 MB per arm64 invece di 66 MB).
 9. **Lista dei punti nell'editor**: selezione e azioni hanno i pulsanti, ma aggiungere o spostare un punto richiede comunque un tocco sulla mappa; con TalkBack non è stato provato.
 10. **Il file GPX originale** è conservato ma non ancora usato: servirà al backup.
 

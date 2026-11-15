@@ -9,7 +9,7 @@ Aggiornato il 15 novembre 2026.
 | Specifica funzionale | Fatta (`01-specifica-funzionale.md`) |
 | Tre direzioni visive | Fatte; scelta B · Rifugio |
 | Bozze di tutte le schermate | Fatte: 58 immagini (`design/INDICE.md`) |
-| Struttura Android e CI | Da fare |
+| Struttura Android e CI | Fatta: progetto compilabile, tema, navigazione a quattro schede, flusso GitHub Actions |
 | Uscite e dati locali | Da fare |
 | Attrezzatura e checklist | Da fare |
 | Mappe e GPX | Da fare |
@@ -18,7 +18,7 @@ Aggiornato il 15 novembre 2026.
 | Backup ed esportazioni | Da fare |
 | Verifiche e APK | Da fare |
 
-Non esiste ancora codice Android né un APK: finora ci sono documenti e bozze.
+L'APK attuale è solo uno scheletro: si apre sulle quattro schede, che mostrano un testo provvisorio. Nessuna funzione dell'app è ancora utilizzabile. Sono già scritte e testate (15 test) le formule di durata, dislivello con soglia e pesi dello zaino.
 
 ## Problemi aperti
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BetterOut</string>
+    <string name="nav_uscite">Uscite</string>
+    <string name="nav_mappa">Mappa</string>
+    <string name="nav_attrezzatura">Attrezzatura</string>
+    <string name="nav_impostazioni">Impostazioni</string>
+    <string name="home_titolo">Le tue\nuscite</string>
+    <string name="home_vuota_titolo">Nessuna uscita, per ora</string>
+    <string name="in_costruzione">Questa sezione non è ancora disponibile in questa versione.</string>
+</resources>

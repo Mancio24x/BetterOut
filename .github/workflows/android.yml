@@ -1,0 +1,49 @@
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["design/**", "docs/**", "**.md"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v5
+      - name: Test e verifiche
+        run: ./gradlew testDebugUnitTest lintDebug
+      - name: APK debug
+        run: ./gradlew assembleDebug
+      - name: APK release non firmato
+        run: ./gradlew assembleRelease
+      - name: Carica APK debug (installabile)
+        uses: actions/upload-artifact@v5
+        with:
+          name: BetterOut-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+      - name: Carica APK release (non firmato, non installabile così com'è)
+        uses: actions/upload-artifact@v5
+        with:
+          name: BetterOut-release-NON-FIRMATO
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+      - name: Carica i rapporti
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: rapporti
+          path: |
+            app/build/reports/**
+            app/build/test-results/**

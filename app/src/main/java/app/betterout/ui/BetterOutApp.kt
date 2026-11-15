@@ -52,6 +52,9 @@ import app.betterout.ui.map.RoutesViewModel
 import app.betterout.ui.map.TripRouteCard
 import app.betterout.ui.map.TripRouteScreen
 import app.betterout.ui.trips.HomeScreen
+import app.betterout.ui.weather.TripWeatherCard
+import app.betterout.ui.weather.WeatherScreen
+import app.betterout.ui.weather.WeatherViewModel
 import app.betterout.ui.trips.TripDetailScreen
 import app.betterout.ui.trips.TripDetailViewModel
 import app.betterout.ui.trips.TripEditScreen
@@ -118,7 +121,12 @@ fun BetterOutApp() {
                 val id = e.arguments?.getString("id").orEmpty()
                 TripDetailScreen(viewModel(factory = TripDetailViewModel.factory(app.trips, id)), viewModel(factory = ChecklistViewModel.factory(app.gear, app.trips, id)), onPack = { nav.navigate("uscita/$id/zaino") }, onBack = { nav.popBackStack() }, onEdit = { nav.navigate("uscita/$id/modifica") }, onOpenCopy = { nav.navigate("uscita/$it") }) { trip ->
                     TripRouteCard(trip, app.routes, onOpenRoute = { nav.navigate("percorso/$it") }, onChoose = { nav.navigate("uscita/$id/percorso") }, onRemove = { scope.launch { app.routes.setTripRoute(id, null) } })
+                    TripWeatherCard(viewModel(factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, id)), onOpen = { nav.navigate("uscita/$id/meteo") })
                 }
+            }
+            composable("uscita/{id}/meteo") { e ->
+                val id = e.arguments?.getString("id").orEmpty()
+                WeatherScreen(viewModel(factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, id)), onBack = { nav.popBackStack() })
             }
             composable("uscita/{id}/percorso") { e ->
                 val id = e.arguments?.getString("id").orEmpty()

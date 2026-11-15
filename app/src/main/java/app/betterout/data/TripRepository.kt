@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.util.UUID
 
-class TripRepository(private val db: AppDatabase, private val dao: TripDao = db.tripDao(), private val checklist: ChecklistDao = db.checklistDao(), private val now: () -> Long = System::currentTimeMillis) {
+class TripRepository(private val db: AppDatabase, private val dao: TripDao = db.tripDao(), private val checklist: ChecklistDao = db.checklistDao(), private val now: () -> Long = System::currentTimeMillis, private val onDeleted: suspend (String) -> Unit = {}) {
     fun observeAll(): Flow<List<Trip>> = dao.observeAll()
     fun observe(id: String): Flow<Trip?> = dao.observe(id)
     suspend fun get(id: String): Trip? = dao.get(id)
@@ -30,6 +30,9 @@ class TripRepository(private val db: AppDatabase, private val dao: TripDao = db.
         copy.id
     }
 
-    /** Elimina l'uscita e la sua checklist. Percorsi e inventario restano. */
-    suspend fun delete(id: String) = db.withTransaction { checklist.deleteForTrip(id); dao.delete(id) }
+    /** Elimina l'uscita e la sua checklist; [onDeleted] toglie ciò che sta fuori dal database. Percorsi e inventario restano. */
+    suspend fun delete(id: String) {
+        db.withTransaction { checklist.deleteForTrip(id); dao.delete(id) }
+        onDeleted(id)
+    }
 }

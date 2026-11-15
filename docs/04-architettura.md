@@ -21,7 +21,7 @@ Le richieste di rete usano `HttpURLConnection`, senza librerie aggiuntive. La ma
 1. **Identificativi UUID** per tutte le entità: rendono possibile l'unione dei backup senza conflitti.
 2. **La checklist copia i dati dell'oggetto** (nome, peso, tipo, volume) e ne conserva il collegamento: lo storico non cambia quando cambia l'inventario.
 3. **Il GPX originale è conservato come file** nello spazio privato dell'app; la geometria per calcoli e disegno è salvata a parte, anch'essa in un file (JSON) e non nel database: una riga di database non regge un tracciato lungo. Nel database stanno nome, origine e statistiche già calcolate.
-4. **Servizi esterni sostituibili.** Il routing sta dietro l'interfaccia `RoutingService`; ricerca delle località e quote ricevono come parametro la funzione che fa la richiesta. In entrambi i casi nei test la rete è simulata. Il meteo seguirà lo stesso schema.
+4. **Servizi esterni sostituibili.** Il routing sta dietro l'interfaccia `RoutingService`; ricerca delle località e quote ricevono come parametro la funzione che fa la richiesta. In entrambi i casi nei test la rete è simulata. Il meteo segue lo stesso schema: `WeatherRepository` riceve la funzione di rete e l'orologio, e tiene la cache in file.
 5. **Nessuna chiave nel repository.** Le chiavi facoltative le inserisce l'utente e restano in DataStore, fuori dai backup.
 6. **Icone proprie** disegnate come vettori (le stesse delle bozze), per non dipendere da librerie di icone.
 7. **Caratteri inclusi nell'app** (Fraunces e Archivo, licenza OFL): l'aspetto non dipende dalla rete.

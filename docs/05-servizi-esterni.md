@@ -17,6 +17,7 @@ L'app non ha un proprio server: ogni richiesta parte dal telefono verso il servi
 | Routing alternativo | openrouteservice, profilo `foot-hiking` | sì, dell'utente | Limiti letti in parte; quote giornaliere non verificate |
 | Quote altimetriche | Open-Meteo Elevation (Copernicus GLO-90) | no | Provato |
 | Meteo | Open-Meteo Forecast | no | Provato, anche con più punti e con data fuori orizzonte |
+| Clima del periodo | Open-Meteo Historical Weather (archivio) | no | Provato: medie di cinque anni alla quota del punto |
 
 ## Mappe
 
@@ -59,7 +60,9 @@ In entrambi i casi il risultato dipende dai dati OpenStreetMap: un sentiero manc
 - `timezone=auto` restituisce il fuso della località, usato come fuso della destinazione.
 - I limiti valgono per indirizzo IP: su reti condivise si possono incontrare prima. L'app tiene la cache e non interroga più di una volta ogni tre ore per uscita, salvo richiesta esplicita.
 
-I dati climatici del periodo verrebbero dall'archivio storico di Open-Meteo: da provare nella fase meteo, prima di mostrarli.
+**Open-Meteo Historical Weather** (`archive-api.open-meteo.com/v1/archive`), per il "Clima del periodo". Provato: accetta `elevation` e `timezone=auto` e restituisce massime, minime e precipitazioni giornaliere di più anni in una richiesta. È una rianalisi, non una serie di misure sul posto: per questo i valori sono presentati come medie tipiche e mai come previsione. Stessa licenza CC-BY 4.0 e stessa citazione della fonte. Una richiesta per uscita, salvata e non ripetuta.
+
+Provato in questa fase anche: l'ultimo giorno ammesso dal servizio di previsione è oggi + 15; la risposta con un solo punto è un oggetto, con più punti un elenco nello stesso ordine; per i giorni più lontani la probabilità di precipitazione oraria manca (valore nullo).
 
 ## Riservatezza
 

@@ -34,7 +34,7 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Verifica | Esito | Come |
 |---|---|---|
 | Compilazione debug e release, lint | Riuscite il 15 nov 2026 | In locale e su GitHub Actions |
-| Test delle regole (durata, dislivello, pesi, uscite, checklist, CSV, GPX, statistiche dei percorsi, operazioni dell'editor, risposte dei servizi) | 74 su 74 | `./gradlew testDebugUnitTest` |
+| Test delle regole (durata, dislivello, pesi, uscite, checklist, CSV, GPX, statistiche dei percorsi, operazioni dell'editor, risposte dei servizi, regole e cache del meteo) | 105 su 105 | `./gradlew testDebugUnitTest` |
 | Installazione e avvio | Riusciti, nessun crash | Emulatore Pixel 7, Android 16 (API 36) |
 | Creazione di un'uscita con solo nome e località | Riuscita | Percorso guidato sull'emulatore con `adb` |
 | Persistenza dopo chiusura forzata e riavvio | Riuscita | `am force-stop`, riavvio, l'uscita è ancora in Home |
@@ -68,6 +68,18 @@ Il flusso `Android` (`.github/workflows/android.yml`) esegue test, lint e compil
 | Percorso associato all'uscita da archivio, da GPX e dal disegno; "Togli" | Riusciti | Statistiche e durata nel dettaglio uscita |
 | Località dell'uscita: ricerca e punto sulla mappa | Riuscite dopo una correzione | Il foglio di ricerca non compariva con la tastiera aperta |
 | Persistenza dei percorsi dopo chiusura forzata | Riuscita | `am force-stop`, riavvio |
+| Meteo nel dettaglio dell'uscita | Riuscito | Richiesta vera a Open-Meteo: previsione del primo giorno per punto, con quota, fonte ed età del dato (`docs/verifiche/meteo-uscita.png`) |
+| Schermata Meteo: Giorni e Ore | Riuscite | Condizioni, temperature, percepita, precipitazioni, neve, vento e raffiche, zero termico, alba e tramonto; 24 ore; vento per fascia; rientro stimato e margine di luce |
+| Due punti in una sola richiesta | Riuscito | Percorso Lagazuoi: partenza 2105 m e quota massima 2755 m, temperature diverse; un percorso con 82 m di salita chiede solo la partenza |
+| Meteo senza rete con dato salvato | Riuscito | Avviso con l'età del dato e "Riprova"; il dato resta in vista |
+| Meteo senza rete e senza dato | Riuscito | Messaggio e "Riprova"; con la rete tornata "Riprova" carica le previsioni; l'uscita si apre e si modifica comunque |
+| Data oltre l'orizzonte | Riuscita | "Previsioni non ancora disponibili" con il primo giorno utile; nessuna richiesta di previsione |
+| Clima del periodo | Riuscito | Richiesta vera all'archivio storico: medie di 5 anni alla quota del punto (1763 m e 2755 m), sezione dichiarata "non è una previsione" |
+| Uscita di più giorni a cavallo dell'orizzonte | Riuscita | 29 nov – 2 dic: previsti 29 e 30, avviso per i giorni successivi; scelta del giorno nella vista oraria |
+| Uscita senza data, senza località, già passata | Riuscite | Ogni caso dice che cosa manca; nessuna richiesta parte |
+| Eliminazione dell'uscita → dati meteo rimossi | Riuscita | File della cache controllati sul dispositivo |
+| Aggiornamento automatico dopo tre ore | **Non osservato sul dispositivo** | Coperto solo dai test (orologio simulato) |
+| Meteo: probabilità di precipitazione oltre i primi giorni | Osservato | Per i giorni lontani il servizio non la dà: la cella mostra "—", non zero |
 | Tema scuro, testo ingrandito, TalkBack | **Non eseguiti** | — |
 | Avvio su telefono reale | **Non eseguito** | Nessun dispositivo collegato |
 

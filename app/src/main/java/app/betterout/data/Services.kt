@@ -1,13 +1,23 @@
 package app.betterout.data
 
+import app.betterout.domain.Climate
+import app.betterout.domain.ClimateDay
+import app.betterout.domain.DayWeather
 import app.betterout.domain.GeoPoint
+import app.betterout.domain.HourWeather
+import app.betterout.domain.PointForecast
+import app.betterout.domain.WeatherPoint
+import app.betterout.domain.WeatherRules
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -15,6 +25,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.time.LocalDate
 import java.util.Locale
 
 /** Richieste ai servizi esterni: partono solo su azione dell'utente e portano solo coordinate o il testo cercato. */
@@ -89,4 +100,83 @@ object TerrainElevation {
         val array: JsonArray = (json.parseToJsonElement(body) as JsonObject).getValue("elevation").jsonArray
         array.map { it.jsonPrimitive.double }
     }
+}
+
+/**
+ * Previsioni di Open-Meteo: una sola richiesta per tutti i punti, nel fuso della destinazione.
+ * I dati hanno licenza CC BY 4.0: chi li mostra cita la fonte.
+ */
+object WeatherForecast {
+    private const val DAILY = "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_min,precipitation_sum,precipitation_probability_max,snowfall_sum,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset"
+    private const val HOURLY = "weather_code,temperature_2m,apparent_temperature,precipitation_probability,precipitation,snowfall,wind_speed_10m,wind_gusts_10m,wind_direction_10m,freezing_level_height,is_day"
+
+    suspend fun forecast(ask: WeatherRules.Plan.Ask, fetch: suspend (String) -> String = Http::get): List<PointForecast> =
+        parse(fetch(url(ask)), ask.points)
+
+    /** Le quote si mandano solo se le hanno tutti i punti; altrimenti le stima il servizio dal suo modello del terreno. */
+    fun url(ask: WeatherRules.Plan.Ask): String {
+        val elevation = if (ask.points.all { it.elevation != null }) "&elevation=" + ask.points.joinToString(",") { String.format(Locale.ROOT, "%.0f", it.elevation) } else ""
+        return "https://api.open-meteo.com/v1/forecast?latitude=${ask.points.joinToString(",") { coordinate(it.lat) }}&longitude=${ask.points.joinToString(",") { coordinate(it.lon) }}$elevation" +
+            "&timezone=auto&start_date=${ask.from}&end_date=${ask.to}&daily=$DAILY&hourly=$HOURLY"
+    }
+
+    /** Con un punto la risposta è un oggetto, con più punti un elenco nello stesso ordine della richiesta. */
+    fun parse(body: String, points: List<WeatherPoint>): List<PointForecast> = parsing {
+        val root = json.parseToJsonElement(body)
+        val answers = if (root is JsonArray) root.map { it.jsonObject } else listOf(root.jsonObject)
+        if (answers.size != points.size) throw IOException("previsioni mancanti nella risposta")
+        points.zip(answers).map { (point, o) ->
+            val daily = Columns(o.getValue("daily").jsonObject)
+            val hourly = Columns(o.getValue("hourly").jsonObject)
+            PointForecast(
+                point = point, elevation = o["elevation"]?.number(),
+                days = daily.times.indices.map { i ->
+                    DayWeather(
+                        date = daily.times[i], code = daily.int("weather_code", i), tempMax = daily.double("temperature_2m_max", i), tempMin = daily.double("temperature_2m_min", i),
+                        feelsMin = daily.double("apparent_temperature_min", i), precipitationMm = daily.double("precipitation_sum", i), precipitationProbability = daily.int("precipitation_probability_max", i),
+                        snowCm = daily.double("snowfall_sum", i), windKmh = daily.double("wind_speed_10m_max", i), gustsKmh = daily.double("wind_gusts_10m_max", i),
+                        windDirection = daily.int("wind_direction_10m_dominant", i), sunrise = daily.text("sunrise", i), sunset = daily.text("sunset", i),
+                    )
+                },
+                hours = hourly.times.indices.map { i ->
+                    HourWeather(
+                        time = hourly.times[i], code = hourly.int("weather_code", i), temp = hourly.double("temperature_2m", i), feels = hourly.double("apparent_temperature", i),
+                        precipitationProbability = hourly.int("precipitation_probability", i), precipitationMm = hourly.double("precipitation", i), snowCm = hourly.double("snowfall", i),
+                        windKmh = hourly.double("wind_speed_10m", i), gustsKmh = hourly.double("wind_gusts_10m", i), windDirection = hourly.int("wind_direction_10m", i),
+                        freezingLevel = hourly.double("freezing_level_height", i), isDay = hourly.int("is_day", i)?.let { it == 1 },
+                    )
+                },
+            )
+        }
+    }
+}
+
+/** Archivio storico di Open-Meteo (rianalisi): serve solo per le medie del periodo, che non sono una previsione. */
+object ClimateArchive {
+    suspend fun climate(key: String, point: WeatherPoint, windows: List<Pair<LocalDate, LocalDate>>, fetch: suspend (String) -> String = Http::get): Climate {
+        val elevation = point.elevation?.let { "&elevation=" + String.format(Locale.ROOT, "%.0f", it) }.orEmpty()
+        val body = fetch(
+            "https://archive-api.open-meteo.com/v1/archive?latitude=${coordinate(point.lat)}&longitude=${coordinate(point.lon)}$elevation" +
+                "&timezone=auto&start_date=${windows.minOf { it.first }}&end_date=${windows.maxOf { it.second }}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum",
+        )
+        val (usedElevation, days) = parse(body)
+        return WeatherRules.climate(key, usedElevation, days, windows)
+    }
+
+    fun parse(body: String): Pair<Double?, List<ClimateDay>> = parsing {
+        val o = json.parseToJsonElement(body).jsonObject
+        val daily = Columns(o.getValue("daily").jsonObject)
+        o["elevation"]?.number() to daily.times.indices.map { i -> ClimateDay(daily.times[i], daily.double("temperature_2m_max", i), daily.double("temperature_2m_min", i), daily.double("precipitation_sum", i)) }
+    }
+}
+
+private fun JsonElement.number(): Double? = if (this is JsonNull) null else jsonPrimitive.doubleOrNull
+
+/** Le serie di Open-Meteo: un elenco di istanti e, per ogni grandezza, un elenco parallelo dove un valore può mancare. */
+private class Columns(private val o: JsonObject) {
+    val times: List<String> = o.getValue("time").jsonArray.map { it.jsonPrimitive.content }
+    private fun cell(name: String, i: Int): JsonElement? = (o[name] as? JsonArray)?.getOrNull(i)?.takeIf { it !is JsonNull }
+    fun double(name: String, i: Int): Double? = cell(name, i)?.jsonPrimitive?.doubleOrNull
+    fun int(name: String, i: Int): Int? = double(name, i)?.let { Math.round(it).toInt() }
+    fun text(name: String, i: Int): String? = cell(name, i)?.jsonPrimitive?.content
 }

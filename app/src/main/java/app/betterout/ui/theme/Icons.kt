@@ -69,3 +69,27 @@ object AppIcons3 {
     val Move by lazy { stroke("M12 3v18M3 12h18", "m9 6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3") }
     val File by lazy { stroke("M7 3h7l4 4v14H7z", "M14 3v4h4") }
 }
+
+/** Icone del meteo. */
+object AppIcons4 {
+    private fun stroke(vararg paths: String): ImageVector =
+        ImageVector.Builder(defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
+            paths.forEach {
+                addPath(pathData = addPathNodes(it), stroke = SolidColor(Color.Black), strokeLineWidth = 2f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
+            }
+        }.build()
+
+    private const val CLOUD = "M7 18.5a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 9.6a4.5 4.5 0 0 1 .5 8.9z"
+    private const val HIGH_CLOUD = "M7 14.5a4 4 0 0 1-.6-7.95A5.5 5.5 0 0 1 17 5.6a4.5 4.5 0 0 1 .5 8.9z"
+
+    val Sun by lazy { stroke("M16 12a4 4 0 1 1-8 0a4 4 0 1 1 8 0", "M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4") }
+    val Moon by lazy { stroke("M20 14.5A8 8 0 1 1 9.500 4a6.5 6.5 0 0 0 10.5 10.5z") }
+    val Cloud by lazy { stroke(CLOUD) }
+    val CloudSun by lazy { stroke("M7 19.500a3.500 3.500 0 0 1-.5-6.960A5 5 0 0 1 16 12.300a3.600 3.600 0 0 1 .4 7.200z", "M13 7.500a3.500 3.500 0 0 1 6 3.500", "M16 2.500V4M21.500 8H20M20 4l-1 1") }
+    val Rain by lazy { stroke(HIGH_CLOUD, "M8.500 18v2.500M12 18v2.500M15.500 18v2.500") }
+    val Snow by lazy { stroke(HIGH_CLOUD, "M8.500 18.500v.01M12 21v.01M15.500 18.500v.01") }
+    val Storm by lazy { stroke(HIGH_CLOUD, "m12.500 16.500-2 3h3L12 22") }
+    val Fog by lazy { stroke("M4 9h16M4 13h16M7 17h10") }
+    val Wind by lazy { stroke("M4 9h10a2.500 2.500 0 1 0-2.500-2.500", "M4 13h14a2.500 2.500 0 1 1-2.500 2.500", "M4 17h6") }
+    val Refresh by lazy { stroke("M19.500 12a7.500 7.500 0 1 1-2.200-5.300", "M18 3v4h-4") }
+}

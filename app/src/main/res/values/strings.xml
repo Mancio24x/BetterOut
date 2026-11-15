@@ -111,7 +111,6 @@
     <string name="uscita">Uscita</string>
     <string name="uscita_non_trovata">Questa uscita non esiste più.</string>
     <string name="dettagli">Dettagli</string>
-    <string name="non_ancora_percorso">Il meteo si aggiungerà qui nelle prossime versioni.</string>
     <string name="duplica">Duplica</string>
     <string name="segna_completata">Segna come completata</string>
     <string name="segna_programmata">Segna come programmata</string>
@@ -423,4 +422,105 @@
     <string name="cerca_localita_azione">Cerca località</string>
     <string name="scegli_sulla_mappa">Scegli sulla mappa</string>
     <string name="usa_questo_punto">Usa questo punto</string>
+
+    <!-- Meteo -->
+    <string name="meteo">Meteo</string>
+    <string name="meteo_del">Meteo · %1$s</string>
+    <string name="meteo_apri">Apri il meteo</string>
+    <string name="meteo_aggiorna">Aggiorna le previsioni</string>
+    <string name="meteo_fonte_breve">Open-Meteo · %1$s</string>
+    <string name="meteo_fonte">Fonte: Open-Meteo (CC BY 4.0)</string>
+    <string name="meteo_fonte_archivio">Fonte: archivio storico Open-Meteo (CC BY 4.0)</string>
+    <string name="meteo_aggiornato_oggi">Aggiornato oggi alle %1$s</string>
+    <string name="meteo_aggiornato_il">Aggiornato %1$s alle %2$s</string>
+    <string name="meteo_eta_adesso">adesso</string>
+    <plurals name="meteo_eta_minuti">
+        <item quantity="one">%1$d minuto fa</item>
+        <item quantity="other">%1$d minuti fa</item>
+    </plurals>
+    <plurals name="meteo_eta_ore">
+        <item quantity="one">%1$d ora fa</item>
+        <item quantity="other">%1$d ore fa</item>
+    </plurals>
+    <string name="meteo_senza_data">Aggiungi una data all’uscita per vedere le previsioni.</string>
+    <string name="meteo_senza_luogo">Aggiungi una località o un percorso all’uscita per vedere le previsioni.</string>
+    <string name="meteo_uscita_passata">L’uscita è passata: non ci sono previsioni da mostrare.</string>
+    <string name="meteo_in_arrivo">Chiedo le previsioni a Open-Meteo…</string>
+    <string name="meteo_non_ancora_titolo">Previsioni non ancora disponibili</string>
+    <string name="meteo_non_ancora_breve">Primo giorno in cui saranno consultabili: %1$s.</string>
+    <string name="meteo_non_ancora_testo">Data dell’uscita: %1$s. Le previsioni arrivano fino a 16 giorni. Primo giorno in cui saranno consultabili: %2$s.</string>
+    <string name="meteo_troncato">Le previsioni arrivano fino a %1$s. I giorni successivi dell’uscita non sono ancora disponibili.</string>
+    <string name="meteo_errore_titolo">Previsioni non aggiornate</string>
+    <string name="meteo_errore_senza_dato">Non riesco a raggiungere il servizio meteo: manca la rete o il servizio non risponde. L’uscita resta salvata.</string>
+    <string name="meteo_errore_con_dato">Non riesco a raggiungere il servizio meteo. Mostro l’ultima previsione salvata, di %1$s: può non essere più valida.</string>
+    <string name="meteo_errore_breve">Aggiornamento non riuscito: previsione di %1$s.</string>
+    <string name="meteo_giorni">Giorni</string>
+    <string name="meteo_ore">Ore</string>
+    <string name="meteo_punto_localita">Località</string>
+    <string name="meteo_punto_partenza">Partenza</string>
+    <string name="meteo_punto_quota_massima">Quota massima</string>
+    <string name="meteo_punto_con_quota">%1$s · %2$s</string>
+    <string name="meteo_quota_stimata">Quota stimata dal servizio meteo con il suo modello del terreno.</string>
+    <string name="meteo_min_max">%1$s / %2$s</string>
+    <string name="meteo_min_max_letto">minima %1$s, massima %2$s</string>
+    <string name="meteo_percepita">percepita %1$s</string>
+    <string name="meteo_vento_breve">vento %1$s</string>
+    <string name="meteo_precipitazioni">Precipitazioni</string>
+    <string name="meteo_neve">Neve</string>
+    <string name="meteo_vento_raffiche">Vento · raffiche</string>
+    <string name="meteo_vento_da">%1$s da %2$s</string>
+    <string name="meteo_zero_termico">Zero termico</string>
+    <string name="meteo_alba_tramonto">Alba · tramonto</string>
+    <string name="meteo_giorni_vicini">Giorni vicini</string>
+    <string name="meteo_ora_per_ora">%1$s, ora per ora</string>
+    <string name="meteo_ora_locale">ora locale</string>
+    <string name="meteo_ora_letta">Ore %1$s: %2$s, %3$s, precipitazioni %4$s</string>
+    <string name="meteo_legenda_ore">Sotto la temperatura: probabilità di precipitazione.</string>
+    <string name="meteo_vento_titolo">Vento e luce</string>
+    <string name="meteo_mattina">Mattina (07–11)</string>
+    <string name="meteo_pomeriggio">Pomeriggio (12–16)</string>
+    <string name="meteo_vento_fascia">%1$s · raffiche %2$s</string>
+    <string name="meteo_rientro">Partenza %1$s → rientro stimato</string>
+    <string name="meteo_rientro_nota">Il rientro è stimato sul solo tempo di cammino, senza soste.</string>
+    <string name="meteo_tramonto">Tramonto</string>
+    <string name="meteo_margine">%1$s · %2$s di margine</string>
+    <string name="meteo_dopo_tramonto">%1$s · rientro stimato %2$s dopo il tramonto</string>
+    <string name="meteo_clima_titolo">Clima del periodo — non è una previsione</string>
+    <string name="meteo_clima_testo">Medie del periodo %1$s – %2$s negli ultimi %3$d anni a %4$s (%5$s). Il tempo reale può essere molto diverso.</string>
+    <string name="meteo_clima_testo_senza_quota">Medie del periodo %1$s – %2$s negli ultimi %3$d anni (%4$s). Il tempo reale può essere molto diverso.</string>
+    <string name="meteo_clima_minima">Minima tipica</string>
+    <string name="meteo_clima_massima">Massima tipica</string>
+    <string name="meteo_clima_giorni_pioggia">Giorni con almeno 1 mm di precipitazioni</string>
+    <string name="meteo_clima_su">%1$d su %2$d</string>
+    <string name="meteo_clima_in_arrivo">Chiedo le medie del periodo all’archivio storico di Open-Meteo…</string>
+    <string name="meteo_clima_errore">Non riesco a raggiungere l’archivio storico: le medie del periodo non sono disponibili.</string>
+    <string name="meteo_cielo_sereno">Sereno</string>
+    <string name="meteo_cielo_poco_nuvoloso">Poco nuvoloso</string>
+    <string name="meteo_cielo_parzialmente_nuvoloso">Parzialmente nuvoloso</string>
+    <string name="meteo_cielo_coperto">Coperto</string>
+    <string name="meteo_cielo_nebbia">Nebbia</string>
+    <string name="meteo_cielo_pioviggine">Pioviggine</string>
+    <string name="meteo_cielo_pioviggine_gelata">Pioviggine che gela</string>
+    <string name="meteo_cielo_pioggia_debole">Pioggia debole</string>
+    <string name="meteo_cielo_pioggia">Pioggia</string>
+    <string name="meteo_cielo_pioggia_forte">Pioggia forte</string>
+    <string name="meteo_cielo_pioggia_gelata">Pioggia che gela</string>
+    <string name="meteo_cielo_neve_debole">Neve debole</string>
+    <string name="meteo_cielo_neve">Neve</string>
+    <string name="meteo_cielo_neve_forte">Neve forte</string>
+    <string name="meteo_cielo_rovesci">Rovesci</string>
+    <string name="meteo_cielo_rovesci_neve">Rovesci di neve</string>
+    <string name="meteo_cielo_temporale">Temporale</string>
+    <string name="meteo_cielo_temporale_grandine">Temporale con grandine</string>
+    <string name="meteo_cielo_ignoto">Condizioni non disponibili</string>
+    <string-array name="meteo_rosa_dei_venti">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SO</item>
+        <item>O</item>
+        <item>NO</item>
+    </string-array>
 </resources>

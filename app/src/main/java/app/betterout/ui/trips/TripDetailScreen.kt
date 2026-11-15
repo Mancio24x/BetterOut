@@ -208,7 +208,6 @@ private fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack:
             }
         }
         Text(stringResource(R.string.fuso_orario, trip.timeZoneId), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(stringResource(R.string.non_ancora_percorso), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

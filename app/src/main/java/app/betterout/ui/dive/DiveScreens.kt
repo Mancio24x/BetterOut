@@ -46,6 +46,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import app.betterout.ui.home.TabTopBar
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -66,7 +71,6 @@ import app.betterout.R
 import app.betterout.data.Dive
 import app.betterout.domain.DiveRules
 import app.betterout.domain.GeoPoint
-import app.betterout.ui.components.AddFab
 import app.betterout.ui.components.AppCard
 import app.betterout.ui.components.ChoiceChips
 import app.betterout.ui.components.EmptyState
@@ -75,7 +79,6 @@ import app.betterout.ui.components.NavMotion
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.home.SettingsScreen
-import app.betterout.ui.home.TabHeader
 import app.betterout.ui.map.PlacePickerDialog
 import app.betterout.ui.map.StatTile
 import app.betterout.ui.theme.AppIcons2
@@ -144,29 +147,45 @@ internal fun gasName(oxygenPercent: Int): String = if (oxygenPercent == 21) stri
 
 // ---- Logbook ----
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiveLogScreen(vm: DiveLogViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, onImport: (Uri) -> Unit, onSettings: () -> Unit) {
     val list by vm.dives.collectAsStateWithLifecycle()
     // FIT, UDDF e XML non hanno un tipo MIME comune a tutti i telefoni: si sceglie fra tutti i file e si riconosce dal contenuto.
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onImport(uri) }
-    Box(Modifier.fillMaxSize().statusBarsPadding()) {
-        Column(Modifier.fillMaxSize()) {
-            TabHeader(stringResource(R.string.nav_immersioni), onSettings) {
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val listState = rememberLazyListState()
+    val expandedFab by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 40 } }
+    val sorted = remember(list) { list?.let(DiveRules::sorted) }
+    Scaffold(
+        modifier = Modifier.statusBarsPadding().nestedScroll(scroll.nestedScrollConnection),
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            TabTopBar(stringResource(R.string.nav_immersioni), onSettings, scroll) {
                 IconButton(onClick = { picker.launch(arrayOf("*/*")) }) { Icon(AppIcons3.Download, contentDescription = stringResource(R.string.imm_importa)) }
             }
-            val dives = list
-            when {
-                dives == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                dives.isEmpty() -> EmptyState(AppIcons5.Mask, stringResource(R.string.logbook_vuoto_titolo), stringResource(R.string.logbook_vuoto_testo), Modifier.padding(top = 48.dp)) {
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = { Text(stringResource(R.string.nuova_immersione)) }, icon = { Icon(AppIcons2.Plus, contentDescription = null) },
+                onClick = onNew, expanded = expandedFab,
+                containerColor = MaterialTheme.colorScheme.secondary, contentColor = MaterialTheme.colorScheme.onSecondary,
+            )
+        },
+    ) { padding ->
+        val dives = sorted
+        when {
+            dives == null -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            dives.isEmpty() -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                EmptyState(AppIcons5.Mask, stringResource(R.string.logbook_vuoto_titolo), stringResource(R.string.logbook_vuoto_testo)) {
                     SecondaryButton(stringResource(R.string.imm_importa), { picker.launch(arrayOf("*/*")) }, icon = AppIcons3.Download)
                 }
-                else -> LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 104.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    item { TotalsCard(dives) }
-                    items(DiveRules.sorted(dives), key = { it.id }) { Box(Modifier.animateItem()) { DiveRow(it) { onOpen(it.id) } } }
-                }
+            }
+            else -> LazyColumn(Modifier.padding(padding), state = listState, contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 104.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(key = "totali") { TotalsCard(dives) }
+                items(dives, key = { it.id }) { Box(Modifier.animateItem()) { DiveRow(it) { onOpen(it.id) } } }
             }
         }
-        AddFab(stringResource(R.string.nuova_immersione), onNew, Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(20.dp))
     }
 }
 

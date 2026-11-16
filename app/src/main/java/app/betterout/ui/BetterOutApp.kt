@@ -66,7 +66,6 @@ import app.betterout.ui.components.NavMotion
 import app.betterout.ui.gear.GearPresets
 import app.betterout.ui.home.HomeDashboard
 import app.betterout.ui.home.SettingsScreen
-import app.betterout.ui.home.TabHeader
 import app.betterout.ui.home.TripMap
 import app.betterout.ui.home.TripListScreen
 import androidx.compose.foundation.layout.height
@@ -170,7 +169,7 @@ fun BetterOutApp() {
                 TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, id)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack() })
             }
             composable(Tab.Attrezzatura.route) {
-                InventoryScreen(viewModel(factory = InventoryViewModel.factory(app.gear)), onNew = { nav.navigate("oggetto/nuovo") }, onOpen = { nav.navigate("oggetto/$it") }, onPreset = { nav.navigate("oggetto/nuovo?modello=$it") }) { TabHeader(stringResource(R.string.nav_attrezzatura), settings) }
+                InventoryScreen(viewModel(factory = InventoryViewModel.factory(app.gear)), onNew = { nav.navigate("oggetto/nuovo") }, onOpen = { nav.navigate("oggetto/$it") }, onPreset = { nav.navigate("oggetto/nuovo?modello=$it") }, onSettings = settings)
             }
             composable("oggetto/nuovo?modello={modello}", arguments = listOf(optional("modello"))) { e ->
                 // Un oggetto scelto dall'elenco proposto parte con nome, uso e tipo già impostati.

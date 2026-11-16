@@ -6,7 +6,9 @@ import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +69,9 @@ class MainActivity : ComponentActivity() {
             }
             BetterOutTheme(mode, diving) {
                 CompositionLocalProvider(LocalWeightUnit provides unit, LocalModeSwitch provides ModeSwitch(diving, toggle)) {
-                    Box(Modifier.fillMaxSize()) {
+                    // Lo sfondo del tema attivo anche sotto la barra di stato: senza, nella modalità immersioni
+                    // si vedrebbe quello della finestra, beige come le escursioni.
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                         // Ogni modalità ha la sua navigazione: passando dall'una all'altra si riparte dalla schermata principale.
                         if (diving) DiveApp(application as BetterOutApplication) else BetterOutApp()
                         if (biting) SharkBite(bite.value)

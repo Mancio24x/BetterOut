@@ -38,6 +38,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
@@ -104,13 +107,14 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
     var duplicating by rememberSaveable { mutableStateOf(false) }
     val trip = (state as? TripDetailViewModel.State.Ready)?.trip
     // Material 3: la barra resta, e cambia tono quando il contenuto le scorre sotto.
-    val scroll = TopAppBarDefaults.pinnedScrollBehavior()
+    // Barra grande con il nome dell'uscita: scorrendo si comprime e il nome resta visibile.
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.uscita), style = MaterialTheme.typography.titleLarge) },
+            LargeTopAppBar(
+                title = { Text(trip?.title.orEmpty(), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() }) },
                 scrollBehavior = scroll,
                 navigationIcon = { IconButton(onClick = onBack) { Icon(AppIcons2.Back, contentDescription = stringResource(R.string.indietro)) } },
                 actions = {
@@ -137,12 +141,18 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer),
             )
         },
+        bottomBar = {
+            // L'azione principale resta sempre a portata di pollice, come nella bozza del dettaglio.
+            if (trip != null) Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                PrimaryButton(stringResource(if (pack.entries.isEmpty()) R.string.prepara_zaino else R.string.apri_zaino), onPack, icon = AppIcons.Backpack)
+            }
+        },
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (val s = state) {
                 TripDetailViewModel.State.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 TripDetailViewModel.State.Missing -> Text(stringResource(R.string.uscita_non_trovata), Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
-                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, onPack, Modifier.fillMaxSize(), routeCard = routeCard)
+                is TripDetailViewModel.State.Ready -> TripDetailContent(s.trip, pack.entries, Modifier.fillMaxSize(), routeCard = routeCard)
             }
         }
     }
@@ -164,14 +174,13 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
 }
 
 @Composable
-fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> Unit, modifier: Modifier = Modifier, bottomSpace: androidx.compose.ui.unit.Dp = 24.dp, routeCard: @Composable (Trip) -> Unit) {
+fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, modifier: Modifier = Modifier, bottomSpace: androidx.compose.ui.unit.Dp = 24.dp, routeCard: @Composable (Trip) -> Unit) {
     val today = LocalDate.now()
     Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = bottomSpace), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusChip(trip.status)
             tripCountdown(trip, today)?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
-        Text(trip.title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
         IconLine(AppIcons2.Clock, tripWhen(trip, withYear = true))
         IconLine(AppIcons2.Pin, trip.placeName.ifBlank { stringResource(R.string.senza_localita) })
         if (TripRules.isOverdue(trip, today)) IconLine(AppIcons2.Warn, stringResource(R.string.data_passata))
@@ -182,7 +191,6 @@ fun TripDetailContent(trip: Trip, entries: List<ChecklistEntry>, onPack: () -> U
                 Text(stringResource(R.string.zaino), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                 if (entries.isEmpty()) Text(stringResource(R.string.zaino_vuoto_testo), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 else PackSummary(entries, ChecklistRules.totals(entries, trip.waterLiters))
-                PrimaryButton(stringResource(if (entries.isEmpty()) R.string.prepara_zaino else R.string.apri_zaino), onPack, icon = AppIcons.Backpack)
             }
         }
         AppCard(Modifier.fillMaxWidth()) {

@@ -635,4 +635,26 @@
     <string name="imm_stat_acqua">acqua</string>
     <string name="imm_elimina_titolo">Eliminare l’immersione n. %1$d?</string>
     <string name="imm_elimina_testo">Sparisce dal logbook. I numeri delle altre immersioni non cambiano.</string>
+    <string name="imm_importa">Importa da file</string>
+    <plurals name="imm_importa_n">
+        <item quantity="one">Importa %1$d immersione</item>
+        <item quantity="other">Importa %1$d immersioni</item>
+    </plurals>
+    <string name="imm_lettura">Lettura del file…</string>
+    <string name="imm_errore_apertura">Il file non si è potuto aprire, oppure è più grande di 64 MB.</string>
+    <string name="imm_errore_formato">Questo file non è un logbook di immersioni in un formato conosciuto.</string>
+    <string name="imm_errore_rovinato">Il file sembra rovinato o incompleto: non è stato importato nulla.</string>
+    <string name="imm_errore_vuoto">Il file si legge ma non contiene immersioni.</string>
+    <string name="imm_formati">Formati letti: FIT (Garmin, Suunto e altri computer subacquei), UDDF (Suunto DM5, Mares, divelogs.de e altri), XML di Subsurface.</string>
+    <plurals name="imm_trovate">
+        <item quantity="one">%1$d immersione trovata</item>
+        <item quantity="other">%1$d immersioni trovate</item>
+    </plurals>
+    <plurals name="imm_gia_presenti">
+        <item quantity="one">%1$d è già nel logbook (stessa data e ora) e non è selezionata.</item>
+        <item quantity="other">%1$d sono già nel logbook (stessa data e ora) e non sono selezionate.</item>
+    </plurals>
+    <string name="imm_gia_nel_logbook">già nel logbook</string>
+    <string name="imm_profilo">Profilo</string>
+    <string name="imm_profilo_letto">Profilo dell’immersione: profondità massima %1$s, durata %2$s</string>
 </resources>

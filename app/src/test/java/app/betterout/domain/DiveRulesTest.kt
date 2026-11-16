@@ -3,6 +3,7 @@ package app.betterout.domain
 import app.betterout.data.AppDatabase
 import app.betterout.data.Dive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -37,6 +38,23 @@ class DiveRulesTest {
         assertNull(DiveRules.sacLitersPerMinute(full.copy(tankLiters = null)))
         assertNull(DiveRules.sacLitersPerMinute(full.copy(averageDepthMeters = null)))
         assertNull(DiveRules.usedBar(full.copy(endBar = 210)))
+    }
+
+    private fun imported(date: String, time: String? = null, number: Int? = null, depth: Double? = null) =
+        ImportedDive(LocalDate.parse(date), time?.let(LocalTime::parse), number, maxDepthMeters = depth)
+
+    @Test fun `un'immersione già nel logbook si riconosce da data e ora, o senza ora dalla profondità`() {
+        val log = listOf(dive(1, "2026-08-01", "09:30"), dive(2, "2026-08-02", depth = 18.0))
+        assertTrue(DiveRules.isDuplicate(log, imported("2026-08-01", "09:30:40")))
+        assertFalse(DiveRules.isDuplicate(log, imported("2026-08-01", "15:00")))
+        assertTrue(DiveRules.isDuplicate(log, imported("2026-08-02", depth = 18.0)))
+        assertFalse(DiveRules.isDuplicate(log, imported("2026-08-02", depth = 22.0)))
+    }
+
+    @Test fun `i numeri del file si tengono se liberi, gli altri seguono dalla più vecchia`() {
+        val log = listOf(dive(1), dive(2), dive(5))
+        val list = listOf(imported("2026-09-03"), imported("2026-09-01", number = 2), imported("2026-09-02", number = 9))
+        assertEquals(listOf(11, 10, 9), DiveRules.importNumbers(log, list))
     }
 
     @Test fun `la migrazione crea la tabella esattamente come la genera Room`() {

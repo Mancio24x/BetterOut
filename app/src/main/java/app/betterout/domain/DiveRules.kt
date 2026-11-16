@@ -1,6 +1,7 @@
 package app.betterout.domain
 
 import app.betterout.data.Dive
+import java.time.temporal.ChronoUnit
 
 /** Totali del logbook: quante immersioni, quanto tempo sott'acqua, la profondità più grande. */
 data class DiveTotals(val count: Int, val minutes: Int, val deepestMeters: Double?)
@@ -33,5 +34,29 @@ object DiveRules {
         val minutes = dive.durationMinutes?.takeIf { it > 0 } ?: return null
         val depth = dive.averageDepthMeters?.takeIf { it >= 0 } ?: return null
         return bar * liters / minutes / (depth / 10.0 + 1.0)
+    }
+
+    /**
+     * Un'immersione letta da file è già nel logbook se ha la stessa data e la stessa ora d'ingresso (al minuto);
+     * senza ora, se ha la stessa data e la stessa profondità massima.
+     */
+    fun isDuplicate(existing: List<Dive>, imported: ImportedDive): Boolean = existing.any { d ->
+        d.date == imported.date && when {
+            d.startTime != null && imported.startTime != null -> d.startTime.truncatedTo(ChronoUnit.MINUTES) == imported.startTime.truncatedTo(ChronoUnit.MINUTES)
+            else -> d.maxDepthMeters != null && d.maxDepthMeters == imported.maxDepthMeters
+        }
+    }
+
+    /**
+     * I numeri da dare alle immersioni importate, nell'ordine dato: quello del file se c'è e non è già usato,
+     * altrimenti il successivo al più alto. Le immersioni sono numerate dalla più vecchia.
+     */
+    fun importNumbers(existing: List<Dive>, imported: List<ImportedDive>): List<Int> {
+        val used = existing.map { it.number }.toMutableSet()
+        val numbers = arrayOfNulls<Int>(imported.size)
+        val order = imported.indices.sortedWith(compareBy<Int> { imported[it].date }.thenBy { imported[it].startTime })
+        for (i in order) imported[i].number?.takeIf { it > 0 && it !in used }?.let { numbers[i] = it; used += it }
+        for (i in order) if (numbers[i] == null) ((used.maxOrNull() ?: 0) + 1).let { numbers[i] = it; used += it }
+        return numbers.map { it!! }
     }
 }

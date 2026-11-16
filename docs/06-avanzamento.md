@@ -42,7 +42,17 @@ Il tasto con l'onda, accanto alla rotellina in ogni scheda principale, porta l'a
 - Totali: numero di immersioni, tempo sott'acqua, profondità record. Nel dettaglio il consumo in superficie (SAC), solo con tutti i dati necessari.
 - Database alla versione 5: la tabella `dives` arriva con una migrazione, le uscite già salvate restano. Un test controlla che la migrazione coincida con lo schema generato da Room.
 
-Prossime tappe: siti d'immersione, attrezzatura sub con checklist, immersioni pianificate, calcolo nitrox (profondità massima operativa, miscela migliore), importazione dal computer subacqueo.
+Importazione da file (tasto in alto nel logbook, oppure dal logbook vuoto). Il formato si riconosce dal contenuto, non dal nome:
+
+- **FIT** (Garmin, Suunto e altri computer): lettore scritto dalla specifica pubblica del formato. Usa sessione, riepilogo dell'immersione, campioni di profondità e temperatura, gas, pressioni delle bombole, ora locale registrata dal computer.
+- **UDDF** (Suunto DM5, Mares, divelogs.de, esportazioni di Subsurface): unità SI convertite (kelvin, pascal, metri cubi).
+- **XML di Subsurface**, formato attuale (`<divelog>`) e vecchio (`<dives>`).
+- Provati su file reali dei dati di prova di Subsurface (due FIT Garmin Descent, un FIT Suunto Ocean, UDDF e XML della stessa immersione): valori coerenti. Quei file non sono nel repository; i test usano file costruiti apposta.
+- Anteprima con scelta delle immersioni; quelle già nel logbook (stessa data e ora) sono indicate e non selezionate. I numeri del file si tengono se liberi.
+- Il profilo (profondità nel tempo) è salvato in `filesDir/immersioni/<id>.csv` e disegnato nel dettaglio.
+- XML con DTD o entità esterne rifiutato; file oltre 64 MB rifiutato.
+
+Prossime tappe: siti d'immersione, attrezzatura sub con checklist, immersioni pianificate, calcolo nitrox (profondità massima operativa, miscela migliore).
 
 ## Mappe e GPX: cosa c'è e cosa manca
 

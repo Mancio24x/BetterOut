@@ -1,6 +1,9 @@
 package app.betterout.ui.dive
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,6 +78,7 @@ import app.betterout.ui.home.TabHeader
 import app.betterout.ui.map.PlacePickerDialog
 import app.betterout.ui.map.StatTile
 import app.betterout.ui.theme.AppIcons2
+import app.betterout.ui.theme.AppIcons3
 import app.betterout.ui.theme.AppIcons5
 import app.betterout.ui.trips.PickDateDialog
 import app.betterout.ui.trips.currentLocale
@@ -91,7 +95,14 @@ fun DiveApp(app: BetterOutApplication) {
     NavHost(nav, startDestination = "logbook") {
         val settings = { nav.navigate("impostazioni") }
         composable("logbook") {
-            DiveLogScreen(viewModel(factory = DiveLogViewModel.factory(app.dives)), onNew = { nav.navigate("immersione/nuova") }, onOpen = { nav.navigate("immersione/$it") }, onSettings = settings)
+            DiveLogScreen(
+                viewModel(factory = DiveLogViewModel.factory(app.dives)), onNew = { nav.navigate("immersione/nuova") }, onOpen = { nav.navigate("immersione/$it") },
+                onImport = { nav.navigate("importa?uri=${Uri.encode(it.toString())}") }, onSettings = settings,
+            )
+        }
+        composable("importa?uri={uri}", listOf(navArgument("uri") { type = NavType.StringType })) { e ->
+            val uri = Uri.parse(e.arguments?.getString("uri").orEmpty())
+            DiveImportScreen(viewModel(factory = DiveImportViewModel.factory(app, app.dives, uri)), onClose = { nav.popBackStack() }) { nav.popBackStack("logbook", inclusive = false) }
         }
         composable("immersione/nuova") {
             DiveEditScreen(viewModel(factory = DiveEditViewModel.factory(app.dives, null)), onClose = { nav.popBackStack() }) { id ->
@@ -112,35 +123,41 @@ fun DiveApp(app: BetterOutApplication) {
 
 // ---- Formati ----
 
-private fun decimal(value: Double, locale: Locale): String =
+internal fun decimal(value: Double, locale: Locale): String =
     if (value % 1.0 == 0.0) String.format(locale, "%.0f", value) else String.format(locale, "%.1f", value)
 
-private fun meters(value: Double, locale: Locale) = decimal(value, locale) + " m"
+internal fun meters(value: Double, locale: Locale) = decimal(value, locale) + " m"
 
 /** "−2 °C": segno meno tipografico e unità sempre scritta. */
-private fun celsius(value: Double, locale: Locale) = decimal(value, locale).replace("-", "−") + " °C"
+internal fun celsius(value: Double, locale: Locale) = decimal(value, locale).replace("-", "−") + " °C"
 
 @Composable
-private fun minutes(value: Int): String = stringResource(R.string.imm_minuti, value)
+internal fun minutes(value: Int): String = stringResource(R.string.imm_minuti, value)
 
 @Composable
 private fun hours(totalMinutes: Int): String = stringResource(R.string.imm_ore_minuti, totalMinutes / 60, totalMinutes % 60)
 
 @Composable
-private fun gasName(oxygenPercent: Int): String = if (oxygenPercent == 21) stringResource(R.string.imm_aria) else stringResource(R.string.imm_ean, oxygenPercent)
+internal fun gasName(oxygenPercent: Int): String = if (oxygenPercent == 21) stringResource(R.string.imm_aria) else stringResource(R.string.imm_ean, oxygenPercent)
 
 // ---- Logbook ----
 
 @Composable
-fun DiveLogScreen(vm: DiveLogViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, onSettings: () -> Unit) {
+fun DiveLogScreen(vm: DiveLogViewModel, onNew: () -> Unit, onOpen: (String) -> Unit, onImport: (Uri) -> Unit, onSettings: () -> Unit) {
     val list by vm.dives.collectAsStateWithLifecycle()
+    // FIT, UDDF e XML non hanno un tipo MIME comune a tutti i telefoni: si sceglie fra tutti i file e si riconosce dal contenuto.
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onImport(uri) }
     Box(Modifier.fillMaxSize().statusBarsPadding()) {
         Column(Modifier.fillMaxSize()) {
-            TabHeader(stringResource(R.string.nav_immersioni), onSettings)
+            TabHeader(stringResource(R.string.nav_immersioni), onSettings) {
+                IconButton(onClick = { picker.launch(arrayOf("*/*")) }) { Icon(AppIcons3.Download, contentDescription = stringResource(R.string.imm_importa)) }
+            }
             val dives = list
             when {
                 dives == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                dives.isEmpty() -> EmptyState(AppIcons5.Mask, stringResource(R.string.logbook_vuoto_titolo), stringResource(R.string.logbook_vuoto_testo), Modifier.padding(top = 48.dp))
+                dives.isEmpty() -> EmptyState(AppIcons5.Mask, stringResource(R.string.logbook_vuoto_titolo), stringResource(R.string.logbook_vuoto_testo), Modifier.padding(top = 48.dp)) {
+                    SecondaryButton(stringResource(R.string.imm_importa), { picker.launch(arrayOf("*/*")) }, icon = AppIcons3.Download)
+                }
                 else -> LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 104.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     item { TotalsCard(dives) }
                     items(DiveRules.sorted(dives), key = { it.id }) { DiveRow(it) { onOpen(it.id) } }
@@ -196,6 +213,7 @@ private fun DiveRow(dive: Dive, onClick: () -> Unit) {
 @Composable
 fun DiveDetailScreen(vm: DiveDetailViewModel, onBack: () -> Unit, onEdit: () -> Unit) {
     val dive by vm.dive.collectAsStateWithLifecycle()
+    val profile by vm.profile.collectAsStateWithLifecycle()
     var askDelete by remember { mutableStateOf(false) }
     val locale = currentLocale()
     Scaffold(
@@ -223,6 +241,7 @@ fun DiveDetailScreen(vm: DiveDetailViewModel, onBack: () -> Unit, onEdit: () -> 
                 StatTile(d.durationMinutes?.let { minutes(it) }, stringResource(R.string.imm_stat_durata), Modifier.weight(1f))
                 StatTile(d.waterTempC?.let { celsius(it, locale) }, stringResource(R.string.imm_stat_acqua), Modifier.weight(1f))
             }
+            if (profile.size >= 2) DiveProfileCard(profile)
             AppCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
                     Text(stringResource(R.string.dettagli), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 8.dp).semantics { heading() })

@@ -23,7 +23,7 @@ class BetterOutApplication : Application() {
     val routes: RouteRepository by lazy { RouteRepository(database, File(filesDir, "percorsi")) }
     val routing: RoutingService by lazy { BRouterService() }
     val weather: WeatherRepository by lazy { WeatherRepository(File(filesDir, "meteo")) }
-    val dives: DiveRepository by lazy { DiveRepository(database.diveDao()) }
+    val dives: DiveRepository by lazy { DiveRepository(database.diveDao(), File(filesDir, "immersioni")) }
 
     override fun onCreate() {
         super.onCreate()

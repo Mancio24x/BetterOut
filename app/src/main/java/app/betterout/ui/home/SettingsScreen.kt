@@ -60,6 +60,17 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: ((Uri
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LocalModeSwitch.current?.let { mode ->
+                AppCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.impostazioni_modalita), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+                        ChoiceChips(
+                            listOf(false to stringResource(R.string.modalita_escursioni), true to stringResource(R.string.modalita_immersioni)),
+                            mode.diving, { diving -> if (diving != mode.diving) mode.toggle() },
+                        )
+                    }
+                }
+            }
             AppCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(stringResource(R.string.impostazioni_tema), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })

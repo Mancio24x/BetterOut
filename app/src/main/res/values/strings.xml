@@ -657,4 +657,7 @@
     <string name="imm_gia_nel_logbook">già nel logbook</string>
     <string name="imm_profilo">Profilo</string>
     <string name="imm_profilo_letto">Profilo dell’immersione: profondità massima %1$s, durata %2$s</string>
+    <string name="impostazioni_modalita">Modalità</string>
+    <string name="modalita_escursioni">Escursioni</string>
+    <string name="modalita_immersioni">Immersioni</string>
 </resources>

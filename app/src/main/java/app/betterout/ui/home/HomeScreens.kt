@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -78,8 +79,9 @@ fun TabHeader(title: String, onSettings: () -> Unit, extra: @Composable () -> Un
     Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f).semantics { heading() })
         extra()
+        // Il passaggio fra le modalità ha uno sfondo pieno: deve vedersi subito, non confondersi con le altre icone.
         LocalModeSwitch.current?.let { mode ->
-            IconButton(onClick = mode.toggle) {
+            FilledTonalIconButton(onClick = mode.toggle) {
                 Icon(if (mode.diving) AppIcons.Mountain else AppIcons5.Wave, contentDescription = stringResource(if (mode.diving) R.string.passa_escursioni else R.string.passa_immersioni))
             }
         }

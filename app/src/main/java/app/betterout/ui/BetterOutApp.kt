@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,6 +66,7 @@ import app.betterout.ui.theme.AppIcons5
 import app.betterout.data.GearItem
 import app.betterout.domain.WeightUnit
 import app.betterout.data.Trip
+import app.betterout.ui.components.NavMotion
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.gear.GearPresets
@@ -123,7 +125,11 @@ fun BetterOutApp() {
         },
     ) { padding ->
         // Le schermate di secondo livello gestiscono da sole barre e margini di sistema.
-        NavHost(nav, startDestination = Tab.Home.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier) {
+        val motion = remember { NavMotion(Tab.entries.map { it.route }.toSet() + MAPPA) }
+        NavHost(
+            nav, startDestination = Tab.Home.route, modifier = if (showTabs) Modifier.padding(padding) else Modifier,
+            enterTransition = motion.enter, exitTransition = motion.exit, popEnterTransition = motion.popEnter, popExitTransition = motion.popExit,
+        ) {
             val settings = { nav.navigate("impostazioni") }
             val inKg = { app.settings.weightUnit.value == WeightUnit.KG }
             val setUnit = { kg: Boolean -> app.settings.setWeightUnit(if (kg) WeightUnit.KG else WeightUnit.G) }

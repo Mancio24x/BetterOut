@@ -4,61 +4,95 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Direzione "Rifugio": valori documentati in docs/03-design-system.md
+// Direzione "Rifugio": valori documentati in docs/03-design-system.md.
+// Tutti i ruoli di Material 3 sono definiti: un ruolo lasciato al valore predefinito porterebbe i toni viola
+// di base in dialoghi, calendario, menu e fogli dal basso.
 val LightColors = lightColorScheme(
     primary = Color(0xFF3F5F3A),
     onPrimary = Color(0xFFFFFCF5),
     primaryContainer = Color(0xFFDCE6CF),
     onPrimaryContainer = Color(0xFF22381E),
+    inversePrimary = Color(0xFFA9CB98),
     secondary = Color(0xFFB9741A),
     onSecondary = Color(0xFFFFFCF5),
     secondaryContainer = Color(0xFFF0C46B),
     onSecondaryContainer = Color(0xFF2A2620),
+    tertiary = Color(0xFF7A4A2A),
+    onTertiary = Color(0xFFFFFCF5),
+    tertiaryContainer = Color(0xFFF1DCC9),
+    onTertiaryContainer = Color(0xFF3B2312),
     background = Color(0xFFF3ECDF),
     onBackground = Color(0xFF2A2620),
     surface = Color(0xFFFFFCF5),
     onSurface = Color(0xFF2A2620),
     surfaceVariant = Color(0xFFEFE7D8),
     onSurfaceVariant = Color(0xFF6A6155),
+    surfaceTint = Color(0xFF3F5F3A),
+    inverseSurface = Color(0xFF2A2620),
+    inverseOnSurface = Color(0xFFF3ECDF),
+    surfaceBright = Color(0xFFFFFCF5),
+    surfaceDim = Color(0xFFE2D9C8),
+    surfaceContainerLowest = Color(0xFFFFFEFA),
+    surfaceContainerLow = Color(0xFFFAF4EA),
     surfaceContainer = Color(0xFFFFFCF5),
+    surfaceContainerHigh = Color(0xFFF6EFE3),
+    surfaceContainerHighest = Color(0xFFEFE7D8),
     outline = Color(0xFF6A6155),
     outlineVariant = Color(0x242A2620),
     error = Color(0xFFA3271B),
     onError = Color(0xFFFFFCF5),
     errorContainer = Color(0xFFF4D3CC),
     onErrorContainer = Color(0xFF5E130B),
+    scrim = Color(0xFF000000),
 )
-
-/** Nero pieno per schermi AMOLED: i pixel dello sfondo restano spenti. */
-val AmoledColors by lazy {
-    DarkColors.copy(
-        background = Color(0xFF000000), surface = Color(0xFF111110), surfaceContainer = Color(0xFF111110), surfaceVariant = Color(0xFF1E1D1A),
-    )
-}
 
 val DarkColors = darkColorScheme(
     primary = Color(0xFFA9CB98),
     onPrimary = Color(0xFF172413),
     primaryContainer = Color(0xFF3A4A33),
     onPrimaryContainer = Color(0xFFE3F2D9),
+    inversePrimary = Color(0xFF3F5F3A),
     secondary = Color(0xFFE3A84A),
     onSecondary = Color(0xFF191713),
     secondaryContainer = Color(0xFFF0C46B),
     onSecondaryContainer = Color(0xFF2A2620),
+    tertiary = Color(0xFFE2B48A),
+    onTertiary = Color(0xFF3B2312),
+    tertiaryContainer = Color(0xFF5A3A22),
+    onTertiaryContainer = Color(0xFFF6DCC4),
     background = Color(0xFF191713),
     onBackground = Color(0xFFF1EADC),
     surface = Color(0xFF25221C),
     onSurface = Color(0xFFF1EADC),
     surfaceVariant = Color(0xFF322E26),
     onSurfaceVariant = Color(0xFFB6AC9B),
+    surfaceTint = Color(0xFFA9CB98),
+    inverseSurface = Color(0xFFF1EADC),
+    inverseOnSurface = Color(0xFF2A2620),
+    surfaceBright = Color(0xFF3A362E),
+    surfaceDim = Color(0xFF191713),
+    surfaceContainerLowest = Color(0xFF14120F),
+    surfaceContainerLow = Color(0xFF1F1C17),
     surfaceContainer = Color(0xFF25221C),
+    surfaceContainerHigh = Color(0xFF2D2A23),
+    surfaceContainerHighest = Color(0xFF38342C),
     outline = Color(0xFFB6AC9B),
     outlineVariant = Color(0x26F1EADC),
     error = Color(0xFFFF9C8F),
     onError = Color(0xFF2B0905),
     errorContainer = Color(0xFF4F1D16),
     onErrorContainer = Color(0xFFFFD9D2),
+    scrim = Color(0xFF000000),
 )
+
+/** Nero pieno per schermi AMOLED: i pixel dello sfondo restano spenti. */
+val AmoledColors by lazy {
+    DarkColors.copy(
+        background = Color(0xFF000000), surface = Color(0xFF111110), surfaceVariant = Color(0xFF1E1D1A), surfaceDim = Color(0xFF000000), surfaceBright = Color(0xFF2A2926),
+        surfaceContainerLowest = Color(0xFF000000), surfaceContainerLow = Color(0xFF0B0B0A), surfaceContainer = Color(0xFF111110),
+        surfaceContainerHigh = Color(0xFF1A1917), surfaceContainerHighest = Color(0xFF242320),
+    )
+}
 
 // Modalità immersioni: blu del mare, stessi ruoli e contrasti dei temi delle escursioni.
 val DiveLightColors = lightColorScheme(
@@ -66,23 +100,38 @@ val DiveLightColors = lightColorScheme(
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFCFE5F3),
     onPrimaryContainer = Color(0xFF06324D),
+    inversePrimary = Color(0xFF7CC4EA),
     secondary = Color(0xFF0F7FA8),
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = Color(0xFFBFE6F5),
     onSecondaryContainer = Color(0xFF0E2230),
+    tertiary = Color(0xFF1F6E5A),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFBDEBDD),
+    onTertiaryContainer = Color(0xFF06291F),
     background = Color(0xFFE8F1F6),
     onBackground = Color(0xFF0E2230),
     surface = Color(0xFFFAFDFF),
     onSurface = Color(0xFF0E2230),
     surfaceVariant = Color(0xFFDCE9F1),
     onSurfaceVariant = Color(0xFF465D6D),
+    surfaceTint = Color(0xFF0B5A86),
+    inverseSurface = Color(0xFF0E2230),
+    inverseOnSurface = Color(0xFFE8F1F6),
+    surfaceBright = Color(0xFFFAFDFF),
+    surfaceDim = Color(0xFFD3E1EA),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF2F8FB),
     surfaceContainer = Color(0xFFFAFDFF),
+    surfaceContainerHigh = Color(0xFFEDF5F9),
+    surfaceContainerHighest = Color(0xFFDCE9F1),
     outline = Color(0xFF465D6D),
     outlineVariant = Color(0x240E2230),
     error = Color(0xFFA3271B),
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFF4D3CC),
     onErrorContainer = Color(0xFF5E130B),
+    scrim = Color(0xFF000000),
 )
 
 val DiveDarkColors = darkColorScheme(
@@ -90,25 +139,44 @@ val DiveDarkColors = darkColorScheme(
     onPrimary = Color(0xFF032538),
     primaryContainer = Color(0xFF134560),
     onPrimaryContainer = Color(0xFFD3ECFA),
+    inversePrimary = Color(0xFF0B5A86),
     secondary = Color(0xFF4FC0E8),
     onSecondary = Color(0xFF032538),
     secondaryContainer = Color(0xFF1B5A78),
     onSecondaryContainer = Color(0xFFE3F0F8),
+    tertiary = Color(0xFF8FD9C2),
+    onTertiary = Color(0xFF06291F),
+    tertiaryContainer = Color(0xFF1C5244),
+    onTertiaryContainer = Color(0xFFBDEBDD),
     background = Color(0xFF07131C),
     onBackground = Color(0xFFE3F0F8),
     surface = Color(0xFF0F212D),
     onSurface = Color(0xFFE3F0F8),
     surfaceVariant = Color(0xFF1A3141),
     onSurfaceVariant = Color(0xFF9DB7C7),
+    surfaceTint = Color(0xFF7CC4EA),
+    inverseSurface = Color(0xFFE3F0F8),
+    inverseOnSurface = Color(0xFF0E2230),
+    surfaceBright = Color(0xFF213A4B),
+    surfaceDim = Color(0xFF07131C),
+    surfaceContainerLowest = Color(0xFF040D13),
+    surfaceContainerLow = Color(0xFF0B1A24),
     surfaceContainer = Color(0xFF0F212D),
+    surfaceContainerHigh = Color(0xFF152A38),
+    surfaceContainerHighest = Color(0xFF1D3546),
     outline = Color(0xFF9DB7C7),
     outlineVariant = Color(0x26E3F0F8),
     error = Color(0xFFFF9C8F),
     onError = Color(0xFF2B0905),
     errorContainer = Color(0xFF4F1D16),
     onErrorContainer = Color(0xFFFFD9D2),
+    scrim = Color(0xFF000000),
 )
 
 val DiveAmoledColors by lazy {
-    DiveDarkColors.copy(background = Color(0xFF000000), surface = Color(0xFF0A1820), surfaceContainer = Color(0xFF0A1820), surfaceVariant = Color(0xFF142A38))
+    DiveDarkColors.copy(
+        background = Color(0xFF000000), surface = Color(0xFF0A1820), surfaceVariant = Color(0xFF142A38), surfaceDim = Color(0xFF000000), surfaceBright = Color(0xFF1B3242),
+        surfaceContainerLowest = Color(0xFF000000), surfaceContainerLow = Color(0xFF06111A), surfaceContainer = Color(0xFF0A1820),
+        surfaceContainerHigh = Color(0xFF10222E), surfaceContainerHighest = Color(0xFF172D3C),
+    )
 }

@@ -180,7 +180,7 @@ fun ChecklistScreen(vm: ChecklistViewModel, onBack: () -> Unit, onAdd: () -> Uni
                             Text(stringResource(R.string.categoria_riepilogo, group.packed, group.entries.size, weight(group.grams)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                    items(group.entries, key = { it.id }) { e -> EntryRow(e, onToggle = { vm.setPacked(e, it) }, onOpen = { openId = e.id }) }
+                    items(group.entries, key = { it.id }) { e -> Box(Modifier.animateItem()) { EntryRow(e, onToggle = { vm.setPacked(e, it) }, onOpen = { openId = e.id }) } }
                 }
             }
         }

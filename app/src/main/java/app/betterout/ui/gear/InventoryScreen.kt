@@ -123,13 +123,15 @@ fun InventoryScreen(vm: InventoryViewModel, onNew: () -> Unit, onOpen: (String) 
                             }
                         }
                         items(items, key = { it.id }) { item ->
-                            GearRow(presetIndexFor(item, names)?.let { GearPresets[it].icon } ?: AppIcons5.Box, item.name, gearSubtitle(item), item.weightGrams?.let { weight(it.toLong()) } ?: "—") { onOpen(item.id) }
+                            Box(Modifier.animateItem()) {
+                                GearRow(presetIndexFor(item, names)?.let { GearPresets[it].icon } ?: AppIcons5.Box, item.name, gearSubtitle(item), item.weightGrams?.let { weight(it.toLong()) } ?: "—") { onOpen(item.id) }
+                            }
                         }
                     }
                     val missing = GearPresets.indices.filter { it !in used }
                     if (missing.isNotEmpty()) {
                         item(key = "proposti") { Text(stringResource(R.string.attrezzatura_da_aggiungere), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 16.dp, bottom = 2.dp).semantics { heading() }) }
-                        items(missing, key = { "m$it" }) { i -> GearRow(GearPresets[i].icon, names[i], stringResource(R.string.attrezzatura_tocca), null) { onPreset(i) } }
+                        items(missing, key = { "m$it" }) { i -> Box(Modifier.animateItem()) { GearRow(GearPresets[i].icon, names[i], stringResource(R.string.attrezzatura_tocca), null) { onPreset(i) } } }
                     }
                 }
             }

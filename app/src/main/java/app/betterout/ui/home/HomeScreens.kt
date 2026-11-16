@@ -144,17 +144,28 @@ fun TripsScreen(vm: TripsViewModel, routes: List<Route>, weather: WeatherReposit
     var openId by rememberSaveable { mutableStateOf<String?>(null) }
     val today = LocalDate.now()
     val byId = remember(routes) { routes.associateBy { it.id } }
+    // Le temperature si leggono tutte insieme, una volta: lette scheda per scheda arriverebbero durante lo scorrimento
+    // e farebbero "saltare" le pillole.
+    val temperatures by produceState(emptyMap<String, String>(), trips) {
+        value = trips.orEmpty().mapNotNull { trip ->
+            val d = trip.startDate?.let { day -> weather.lastSaved(trip.id)?.points?.firstOrNull()?.day(day) } ?: return@mapNotNull null
+            if (d.tempMin != null && d.tempMax != null) trip.id to formatTemp(d.tempMin) + " / " + formatTemp(d.tempMax) else null
+        }.toMap()
+    }
+    val sorted = remember(trips) { trips?.let { TripRules.sorted(it, today) } }
     Column(Modifier.fillMaxSize()) {
         TabHeader(stringResource(R.string.le_tue_uscite), onSettings)
-        val list = trips
+        val list = sorted
         when {
             list == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             list.isEmpty() -> Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                 Text(stringResource(R.string.uscite_vuote), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             else -> LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(TripRules.sorted(list, today), key = { it.id }) { trip ->
-                    TripPill(trip, trip.routeId?.let(byId::get), weather, open = openId == trip.id, onToggle = { openId = if (openId == trip.id) null else trip.id }) { expanded(trip) }
+                items(list, key = { it.id }) { trip ->
+                    Box(Modifier.animateItem()) {
+                        TripPill(trip, trip.routeId?.let(byId::get), temperatures[trip.id], open = openId == trip.id, onToggle = { openId = if (openId == trip.id) null else trip.id }) { expanded(trip) }
+                    }
                 }
             }
         }
@@ -162,12 +173,9 @@ fun TripsScreen(vm: TripsViewModel, routes: List<Route>, weather: WeatherReposit
 }
 
 @Composable
-private fun TripPill(trip: Trip, route: Route?, weather: WeatherRepository, open: Boolean, onToggle: () -> Unit, expanded: @Composable () -> Unit) {
+/** [temperature]: l'ultima previsione salvata per il primo giorno dell'uscita, alla partenza. */
+private fun TripPill(trip: Trip, route: Route?, temperature: String?, open: Boolean, onToggle: () -> Unit, expanded: @Composable () -> Unit) {
     val locale = currentLocale()
-    // La temperatura è quella dell'ultima previsione salvata per il primo giorno dell'uscita, alla partenza.
-    val temperature by produceState(initialValue = null as String?, trip.id, trip.startDate) {
-        value = trip.startDate?.let { day -> weather.lastSaved(trip.id)?.points?.firstOrNull()?.day(day) }?.let { d -> if (d.tempMin != null && d.tempMax != null) formatTemp(d.tempMin) + " / " + formatTemp(d.tempMax) else null }
-    }
     val state = stringResource(if (open) R.string.pillola_aperta else R.string.pillola_chiusa)
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
         Column {

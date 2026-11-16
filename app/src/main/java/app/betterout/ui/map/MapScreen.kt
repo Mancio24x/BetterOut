@@ -108,7 +108,7 @@ fun RouteList(routes: List<Route>?, onOpen: (String) -> Unit, modifier: Modifier
             Spacer(Modifier.weight(1.6f))
         }
         else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(routes, key = { it.id }) { route -> RouteRow(route) { onOpen(route.id) } }
+            items(routes, key = { it.id }) { route -> Box(Modifier.animateItem()) { RouteRow(route) { onOpen(route.id) } } }
         }
     }
 }

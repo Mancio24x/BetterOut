@@ -71,6 +71,7 @@ import app.betterout.ui.components.AppCard
 import app.betterout.ui.components.ChoiceChips
 import app.betterout.ui.components.EmptyState
 import app.betterout.ui.components.FieldLabel
+import app.betterout.ui.components.NavMotion
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.home.SettingsScreen
@@ -92,7 +93,8 @@ import java.util.Locale
 @Composable
 fun DiveApp(app: BetterOutApplication) {
     val nav = rememberNavController()
-    NavHost(nav, startDestination = "logbook") {
+    val motion = remember { NavMotion(setOf("logbook")) }
+    NavHost(nav, startDestination = "logbook", enterTransition = motion.enter, exitTransition = motion.exit, popEnterTransition = motion.popEnter, popExitTransition = motion.popExit) {
         val settings = { nav.navigate("impostazioni") }
         composable("logbook") {
             DiveLogScreen(
@@ -160,7 +162,7 @@ fun DiveLogScreen(vm: DiveLogViewModel, onNew: () -> Unit, onOpen: (String) -> U
                 }
                 else -> LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 104.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     item { TotalsCard(dives) }
-                    items(DiveRules.sorted(dives), key = { it.id }) { DiveRow(it) { onOpen(it.id) } }
+                    items(DiveRules.sorted(dives), key = { it.id }) { Box(Modifier.animateItem()) { DiveRow(it) { onOpen(it.id) } } }
                 }
             }
         }

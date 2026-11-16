@@ -50,6 +50,12 @@ Scheda, riga d'elenco, campo, selettore segmentato (l'opzione attiva ha anche il
 
 **Mappa**: percorso su sentiero a linea piena; tratto manuale a linea punteggiata; partenza "P" in cerchio chiaro; arrivo bandierina in cerchio scuro; punto intermedio cerchio vuoto; punto selezionato cerchio pieno e più grande. L'attribuzione cartografica è sempre visibile.
 
+## Material 3
+
+- Tutti i ruoli colore di Material 3 sono definiti nei quattro temi (Rifugio chiaro e scuro, immersioni chiaro e scuro, più le varianti nere AMOLED), compresi i contenitori di superficie, il terziario e gli inversi: dialoghi, calendario, menu e fogli dal basso non prendono i toni viola predefiniti.
+- Forme del tema: 8, 12, 16, 26 e 28 dp, dai raggi qui sopra.
+- Movimento: fra le schede principali una dissolvenza rapida (300 ms); verso una schermata di secondo livello uno scorrimento breve con dissolvenza (350 ms), al contrario tornando indietro; curve "emphasized". Negli elenchi le righe aggiunte, tolte o spostate si animano.
+
 ## Accessibilità
 
 - Ogni controllo ha un'etichetta per TalkBack; le icone decorative sono nascoste ai lettori di schermo.

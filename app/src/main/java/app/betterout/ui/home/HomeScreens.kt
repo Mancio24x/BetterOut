@@ -52,6 +52,7 @@ import app.betterout.data.WeatherRepository
 import app.betterout.domain.TripRules
 import app.betterout.ui.components.StatusChip
 import app.betterout.ui.map.AppMap
+import app.betterout.ui.map.RoutePreview
 import app.betterout.ui.map.MapCamera
 import app.betterout.ui.map.StatTile
 import app.betterout.ui.map.endMarkers
@@ -98,16 +99,10 @@ fun RoundFab(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Mo
     ) { Box(contentAlignment = Alignment.Center) { Icon(icon, contentDescription = label, modifier = Modifier.size(36.dp)) } }
 }
 
-/** Mappa con il percorso dell'uscita; niente se l'uscita non ha un percorso. */
+/** Anteprima del percorso dell'uscita; niente se l'uscita non ha un percorso. Toccandola si apre la mappa. */
 @Composable
-fun TripMap(routes: RouteRepository, routeId: String?, modifier: Modifier = Modifier) {
-    val geometry by produceState(initialValue = null as app.betterout.data.RouteGeometry?, routeId) { value = routeId?.let { routes.geometry(it) } }
-    geometry?.let { g ->
-        val camera = remember(g) { MapCamera() }
-        LaunchedEffect(g) { camera.fit(g.lines.flatten()) }
-        AppMap(modifier.fillMaxWidth().clip(RoundedCornerShape(26.dp)), lines = remember(g) { g.mapLines(5.0) }, markers = remember(g) { g.endMarkers() }, camera = camera, gestures = false)
-    }
-}
+fun TripMap(routes: RouteRepository, routeId: String?, modifier: Modifier = Modifier, onOpen: (() -> Unit)? = null) =
+    RoutePreview(routes, routeId, modifier, onOpen)
 
 /**
  * Home: il prossimo itinerario in grande, con mappa, percorso, meteo e zaino; vuota finché non ce n'è uno.

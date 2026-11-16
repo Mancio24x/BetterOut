@@ -258,6 +258,7 @@
     <string name="elimina_testo_zaino">Elimino l’uscita e la sua checklist. Gli oggetti restano nell’inventario. Non si può annullare.</string>
     <string name="zaino_riga_home">Zaino: %1$d di %2$d pronti · %3$s</string>
 
+    <string name="apri_mappa">Apri la mappa</string>
     <string name="mappa_attribuzione">OpenFreeMap © OpenMapTiles · dati © OpenStreetMap</string>
     <string name="mappa_sfondo_assente">Sfondo della mappa non disponibile: controlla la connessione e tocca qui per riprovare.</string>
     <string name="mappa_descrizione">Mappa. Si sposta trascinando e si ingrandisce con due dita.</string>

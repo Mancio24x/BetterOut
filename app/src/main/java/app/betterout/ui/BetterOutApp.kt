@@ -137,7 +137,7 @@ fun BetterOutApp() {
             val backToTrip = { if (!nav.popBackStack("uscita/{id}", inclusive = false)) nav.popBackStack(Tab.Home.route, inclusive = false) }
             // Mappa, percorso e meteo di un'uscita: gli stessi pezzi in Home, nel dettaglio e nelle pillole aperte.
             val tripDetails: @Composable (Trip, Boolean) -> Unit = { trip, withActions ->
-                TripMap(app.routes, trip.routeId, Modifier.height(260.dp))
+                TripMap(app.routes, trip.routeId, Modifier.height(220.dp)) { trip.routeId?.let { nav.navigate("percorso/$it") } }
                 if (withActions) TripRouteCard(trip, app.routes, onOpenRoute = { nav.navigate("percorso/$it") }, onChoose = { nav.navigate("uscita/${trip.id}/percorso") }, onRemove = { scope.launch { app.routes.setTripRoute(trip.id, null) } })
                 TripWeatherCard(viewModel(key = "meteo-${trip.id}", factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, trip.id)), onOpen = { nav.navigate("uscita/${trip.id}/meteo") })
             }

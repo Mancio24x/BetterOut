@@ -44,6 +44,13 @@ class OfflinePlacesTest {
         assertEquals(steps.first().places, steps.last().places)
     }
 
+    @Test fun `il nome normalizzato del file è quello che calcolerebbe l'app`() {
+        File("src/main/assets/luoghi-alpi.tsv").readLines().forEach { line ->
+            val p = line.split('\t')
+            assertEquals(line, OfflinePlaces.normalize(p[3]), p[4])
+        }
+    }
+
     @Test fun `il file incluso nell'app si legge e contiene le cime e i rifugi principali`() {
         val file = File("src/main/assets/luoghi-alpi.tsv")
         val all = OfflinePlaces { file.inputStream() }

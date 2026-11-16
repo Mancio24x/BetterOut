@@ -274,7 +274,7 @@ private fun MapNote(text: String, modifier: Modifier = Modifier) {
 }
 
 /** Lo stile di OpenFreeMap: dalla rete, tenendone una copia; senza rete la copia; null se non c'è né l'una né l'altra. */
-private suspend fun styleJson(copy: File): String? = withContext(Dispatchers.IO) {
+internal suspend fun styleJson(copy: File): String? = withContext(Dispatchers.IO) {
     try { Http.get(STYLE_URL).also(copy::writeText) } catch (e: IOException) { copy.takeIf { it.exists() }?.readText() }
 }
 

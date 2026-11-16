@@ -27,7 +27,9 @@ class BetterOutApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // Il file si legge alla prima ricerca, non all'avvio.
-        PlaceSearch.offline = OfflinePlaces { assets.open("luoghi-alpi.tsv") }
+        val offline = OfflinePlaces { assets.open("luoghi-alpi.tsv") }
+        PlaceSearch.offline = offline
+        // Il file si prepara subito in background: la prima ricerca trova i luoghi già pronti.
+        Thread({ runCatching { offline.warmUp() } }, "luoghi-offline").apply { priority = Thread.MIN_PRIORITY }.start()
     }
 }

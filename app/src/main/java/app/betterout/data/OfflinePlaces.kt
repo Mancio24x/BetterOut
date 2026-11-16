@@ -11,7 +11,12 @@ class OfflinePlaces(private val open: () -> InputStream) {
     private class Entry(val place: Place, val key: String)
 
     private val entries: List<Entry> by lazy {
-        open().bufferedReader().useLines { lines -> parse(lines).map { Entry(it, normalize(it.name)) }.toList() }
+        open().bufferedReader().useLines { lines -> lines.mapNotNull(::entry).toList() }
+    }
+
+    /** Legge il file subito; l'app lo chiama in background all'avvio, così la prima ricerca non aspetta. */
+    fun warmUp() {
+        entries.size
     }
 
     /** I luoghi il cui nome contiene tutte le parole cercate, prima quelli che iniziano come la ricerca. */
@@ -38,13 +43,19 @@ class OfflinePlaces(private val open: () -> InputStream) {
             .replace(Regex("\\p{M}+"), "").replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim()
 
         /** Una riga per luogo: tipo (C cima, R rifugio), latitudine, longitudine, nome, separati da tabulazione. */
-        fun parse(lines: Sequence<String>): Sequence<Place> = lines.mapNotNull { line ->
+        fun parse(lines: Sequence<String>): Sequence<Place> = lines.mapNotNull { entry(it)?.place }
+
+        /**
+         * La quinta colonna, se c'è, è il nome già normalizzato: calcolarlo all'apertura per 30 000 luoghi
+         * richiedeva secondi sul telefono.
+         */
+        private fun entry(line: String): Entry? {
             val p = line.split('\t')
-            if (p.size != 4) return@mapNotNull null
-            val kind = when (p[0]) { "C" -> PlaceKind.CIMA; "R" -> PlaceKind.RIFUGIO; else -> return@mapNotNull null }
-            val lat = p[1].toDoubleOrNull() ?: return@mapNotNull null
-            val lon = p[2].toDoubleOrNull() ?: return@mapNotNull null
-            Place(p[3], lat, lon, kind = kind)
+            if (p.size != 4 && p.size != 5) return null
+            val kind = when (p[0]) { "C" -> PlaceKind.CIMA; "R" -> PlaceKind.RIFUGIO; else -> return null }
+            val lat = p[1].toDoubleOrNull() ?: return null
+            val lon = p[2].toDoubleOrNull() ?: return null
+            return Entry(Place(p[3], lat, lon, kind = kind), p.getOrNull(4) ?: normalize(p[3]))
         }
     }
 }

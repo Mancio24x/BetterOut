@@ -3,11 +3,12 @@
 Genera l'elenco offline delle cime e dei rifugi delle Alpi italiane, francesi e svizzere (Dolomiti comprese).
 
 Fonte: OpenStreetMap tramite l'API Overpass. Dati © OpenStreetMap contributors, licenza ODbL 1.0.
-Uscita: app/src/main/assets/luoghi-alpi.tsv (testo: l'APK lo comprime da sé), una riga per luogo: tipo (C cima, R rifugio), latitudine, longitudine, nome.
+Uscita: app/src/main/assets/luoghi-alpi.tsv (testo: l'APK lo comprime da sé), una riga per luogo: tipo (C cima, R rifugio), latitudine, longitudine, nome, nome normalizzato per la ricerca.
 
 Uso:  python3 tools/luoghi/genera.py
 """
 import os
+import unicodedata
 import sys
 import urllib.parse
 import urllib.request
@@ -34,6 +35,13 @@ out center;
 """.replace("{poly}", " ".join(f"{lat} {lon}" for lat, lon in ALPI))
 
 
+def search_key(name):
+    """Come OfflinePlaces.normalize nell'app: minuscole, senza accenti, lettere e cifre separate da uno spazio."""
+    s = unicodedata.normalize("NFD", name.lower())
+    s = "".join(c for c in s if not unicodedata.category(c).startswith("M"))
+    return " ".join("".join(c if c.isalnum() else " " for c in s).split())
+
+
 def main():
     body = urllib.parse.urlencode({"data": QUERY}).encode()
     request = urllib.request.Request(OVERPASS, data=body, headers={"User-Agent": "BetterOut-genera-luoghi/1.0"})
@@ -49,6 +57,9 @@ def main():
         kind = "C" if natural == "peak" else "R" if tourism else None
         if kind is None:
             continue
+        # Overpass mette tra virgolette (raddoppiando quelle interne) i nomi che contengono virgolette.
+        if len(name) >= 2 and name[0] == '"' and name[-1] == '"':
+            name = name[1:-1].replace('""', '"')
         name = " ".join(name.split())  # niente tabulazioni o a capo nel nome
         rows.add((kind, f"{float(lat):.5f}", f"{float(lon):.5f}", name))
 
@@ -56,7 +67,7 @@ def main():
         sys.exit(f"Troppo pochi luoghi ({len(rows)}): risposta di Overpass incompleta?\n{text[:500]}")
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    data = "".join("\t".join(r) + "\n" for r in sorted(rows, key=lambda r: (r[3].lower(), r[0], r[1], r[2])))
+    data = "".join("\t".join(r + (search_key(r[3]),)) + "\n" for r in sorted(rows, key=lambda r: (r[3].lower(), r[0], r[1], r[2])))
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:
         f.write(data)
     peaks = sum(1 for r in rows if r[0] == "C")

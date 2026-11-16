@@ -36,3 +36,12 @@ Cause probabili degli scatti percepiti, da eliminare:
 4. **Registrazione GPS** dell'uscita: servizio in primo piano, traccia live con distanza, dislivello, tempo e pause, salvata come percorso.
 5. **Navigazione del percorso**: posizione sulla mappa lungo il percorso, distanza mancante, avviso fuori percorso.
 6. **Immersioni complete**: siti, attrezzatura sub con checklist, pianificazione, calcolo nitrox (profondità massima operativa, miscela migliore), statistiche.
+
+## Avanzamento
+
+- 0.6.1 — profilo di base nell'APK (1131 voci del codice di BetterOut, 1546 della mappa).
+- 0.6.2 — anteprima statica del percorso al posto della mappa viva nelle pagine; ricerca dei luoghi: risultati in mezzo secondo invece di circa 8 (nome normalizzato nel file, caricamento all'avvio).
+- 0.7.0 — nuova Home (scheda piena della prossima uscita, anteprima, azioni rapide, altre uscite) e nuovo elenco delle uscite a sezioni; barra Material 3 che si comprime.
+- 0.7.1 — attrezzatura e logbook con la stessa barra; sfondo del tema anche sotto la barra di stato.
+
+Da rifare: dettaglio e modifica dell'uscita, checklist, meteo, percorsi, schermate delle immersioni oltre al logbook.

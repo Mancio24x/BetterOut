@@ -46,5 +46,7 @@ Cause probabili degli scatti percepiti, da eliminare:
 
 - 0.7.2 — dettaglio dell'uscita con il nome nella barra grande e "Prepara lo zaino" fisso in basso.
 - 0.8.0 — immersioni: barra in basso con Logbook, Siti e Strumenti; siti ricavati dal logbook con le loro immersioni; calcolo nitrox (profondità massima operativa, miscela migliore, profondità equivalente in aria, ppO₂); statistiche nei totali; dettaglio con il sito nella barra grande. Provato sull'emulatore con le 29 immersioni d'esempio di Subsurface.
+- 0.8.1 — nitrox: limiti di ppO₂ anche a 1,2 e 1,3.
+- 0.9.0 — attrezzatura sub (scheda dedicata nella modalità immersioni): kit con simboli e spunte di checklist, avanzamento, azzeramento delle spunte; pannello "Da aggiungere" con la griglia dei pezzi tipici e "Altro pezzo". Database alla versione 6 con migrazione (tabella `dive_gear`).
 
 Da rifare: modifica dell'uscita, checklist, meteo, percorsi, schermate delle immersioni oltre al logbook.

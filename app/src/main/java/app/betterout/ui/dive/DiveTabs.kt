@@ -75,6 +75,7 @@ import app.betterout.ui.home.SettingsScreen
 import app.betterout.ui.home.TabTopBar
 import app.betterout.ui.theme.AppIcons2
 import app.betterout.ui.theme.AppIcons5
+import app.betterout.ui.theme.AppIcons6
 import app.betterout.ui.trips.currentLocale
 import app.betterout.ui.trips.formatDate
 import kotlin.math.roundToInt
@@ -82,6 +83,7 @@ import kotlin.math.roundToInt
 private enum class DiveTab(val route: String, @param:StringRes val label: Int, val icon: ImageVector) {
     Logbook("logbook", R.string.nav_logbook, AppIcons5.Mask),
     Siti("siti", R.string.nav_siti, AppIcons2.Pin),
+    Attrezzatura("attrezzatura-sub", R.string.nav_attrezzatura, AppIcons6.Tank),
     Strumenti("strumenti", R.string.nav_strumenti, AppIcons5.Gauge),
 }
 
@@ -133,6 +135,7 @@ fun DiveApp(app: BetterOutApplication) {
             composable(DiveTab.Siti.route) {
                 SitesScreen(viewModel(factory = DiveLogViewModel.factory(app.dives)), onOpen = { nav.navigate("sito/${Uri.encode(it)}") }, onSettings = settings)
             }
+            composable(DiveTab.Attrezzatura.route) { DiveGearScreen(viewModel(factory = DiveGearViewModel.factory(app.diveGear)), onSettings = settings) }
             composable(DiveTab.Strumenti.route) { NitroxScreen(onSettings = settings) }
             composable("sito/{nome}", listOf(navArgument("nome") { type = NavType.StringType })) { e ->
                 SiteScreen(viewModel(factory = DiveLogViewModel.factory(app.dives)), e.arguments?.getString("nome").orEmpty(), onBack = { nav.popBackStack() }, onOpen = { nav.navigate("immersione/$it") })

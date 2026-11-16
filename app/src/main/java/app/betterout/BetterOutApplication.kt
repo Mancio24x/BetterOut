@@ -4,6 +4,7 @@ import android.app.Application
 import app.betterout.data.AppDatabase
 import app.betterout.data.AppSettings
 import app.betterout.data.BRouterService
+import app.betterout.data.DiveGearRepository
 import app.betterout.data.DiveRepository
 import app.betterout.data.GearRepository
 import app.betterout.data.OfflinePlaces
@@ -23,6 +24,7 @@ class BetterOutApplication : Application() {
     val routes: RouteRepository by lazy { RouteRepository(database, File(filesDir, "percorsi")) }
     val routing: RoutingService by lazy { BRouterService() }
     val weather: WeatherRepository by lazy { WeatherRepository(File(filesDir, "meteo")) }
+    val diveGear: DiveGearRepository by lazy { DiveGearRepository(database.diveGearDao()) }
     val dives: DiveRepository by lazy { DiveRepository(database.diveDao(), File(filesDir, "immersioni")) }
 
     override fun onCreate() {

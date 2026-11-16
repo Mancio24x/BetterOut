@@ -70,7 +70,7 @@ interface ChecklistDao {
     @Query("UPDATE checklist_entries SET gearItemId = NULL WHERE gearItemId = :itemId") suspend fun detachItem(itemId: String)
 }
 
-@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class, Route::class, Dive::class], version = 5, exportSchema = false)
+@Database(entities = [Trip::class, GearCategory::class, GearItem::class, ChecklistEntry::class, Route::class, Dive::class, DiveGear::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun tripDao(): TripDao
@@ -78,6 +78,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun checklistDao(): ChecklistDao
     abstract fun routeDao(): RouteDao
     abstract fun diveDao(): DiveDao
+    abstract fun diveGearDao(): DiveGearDao
 
     companion object {
         /** Dalla versione 0.3.0 pubblicata i dati non si cancellano più: ogni cambio di schema ha la sua migrazione. */
@@ -90,13 +91,21 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) = db.execSQL(CREATE_DIVES)
         }
 
+        /** L'attrezzatura sub: una tabella nuova, le altre non cambiano. */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) = db.execSQL(CREATE_DIVE_GEAR)
+        }
+
+        // Uguale a quella che Room genera per [DiveGear]: se non coincide, Room rifiuta il database all'apertura.
+        const val CREATE_DIVE_GEAR = "CREATE TABLE IF NOT EXISTS `dive_gear` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `preset` TEXT, `notes` TEXT NOT NULL, `packed` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
+
         // Uguale a quella che Room genera per [Dive]: se non coincide, Room rifiuta il database all'apertura.
         const val CREATE_DIVES = "CREATE TABLE IF NOT EXISTS `dives` (`id` TEXT NOT NULL, `number` INTEGER NOT NULL, `siteName` TEXT NOT NULL, `latitude` REAL, `longitude` REAL, `date` TEXT NOT NULL, `startTime` TEXT, `durationMinutes` INTEGER, `maxDepthMeters` REAL, `averageDepthMeters` REAL, `waterTempC` REAL, `visibilityMeters` REAL, `oxygenPercent` INTEGER NOT NULL, `tankLiters` REAL, `startBar` INTEGER, `endBar` INTEGER, `buddy` TEXT NOT NULL, `notes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))"
 
         // Finché non esiste una versione pubblicata lo schema può cambiare senza migrazioni.
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "betterout.db")
-                .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

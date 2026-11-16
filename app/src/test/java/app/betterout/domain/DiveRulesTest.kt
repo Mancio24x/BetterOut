@@ -61,6 +61,7 @@ class DiveRulesTest {
         val generated = File("build/generated/ksp/debug/kotlin/app/betterout/data/AppDatabase_Impl.kt")
         assertTrue("manca il codice generato da Room", generated.exists())
         assertTrue("CREATE_DIVES non coincide con lo schema di Dive", AppDatabase.CREATE_DIVES in generated.readText())
+        assertTrue("CREATE_DIVE_GEAR non coincide con lo schema di DiveGear", AppDatabase.CREATE_DIVE_GEAR in generated.readText())
     }
 
     @Test fun `i siti raggruppano per nome e partono dal più recente`() {

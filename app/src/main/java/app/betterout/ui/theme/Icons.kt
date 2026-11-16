@@ -126,3 +126,26 @@ object AppIcons5 {
     val Gauge by lazy { stroke("M20.500 13a8.500 8.500 0 1 0-17 0", "M12 13l4-4", "M5 18h14") }
     val Battery by lazy { stroke("M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z", "m13 8-3 4.500h4L11 17") }
 }
+
+/** Icone dell'attrezzatura sub, nello stesso stile delle altre (griglia 24, tratto 2). */
+object AppIcons6 {
+    private fun stroke(vararg paths: String): ImageVector =
+        ImageVector.Builder(defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f).apply {
+            paths.forEach {
+                addPath(pathData = addPathNodes(it), stroke = SolidColor(Color.Black), strokeLineWidth = 2f, strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round)
+            }
+        }.build()
+
+    val Fin by lazy { stroke("M9 3h6l-.5 4 3 11a2.500 2.500 0 0 1-2.400 3H8.900a2.500 2.500 0 0 1-2.400-3l3-11z", "M10 12h4") }
+    val Wetsuit by lazy { stroke("M8.500 3 4 6v5l3 1v9h10v-9l3-1V6l-4.500-3a3.500 3.500 0 0 1-7 0z", "M12 6.500V21") }
+    val Glove by lazy { stroke("M8 21v-6l-2.300-3.200a1.500 1.500 0 0 1 2.400-1.800L9 11V5.500a1.500 1.500 0 0 1 3 0V10V4.500a1.500 1.500 0 0 1 3 0V10V6.500a1.500 1.500 0 0 1 3 0V14a6 6 0 0 1-2 4.500V21") }
+    val Hood by lazy { stroke("M12 3a7 7 0 0 0-7 7v9h4v-5a3 3 0 0 1 6 0v5h4v-9a7 7 0 0 0-7-7z") }
+    val Bcd by lazy { stroke("M7 4h3l2 2 2-2h3l2 4v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8z", "M5 12.500h14", "M12 6v15") }
+    val Regulator by lazy { stroke("M15.500 9.500a3.500 3.500 0 1 1-7 0a3.500 3.500 0 1 1 7 0", "M12 13v3a3 3 0 0 0 3 3h5", "M8.500 9.500H4") }
+    val Octopus by lazy { stroke("M14 8a3 3 0 1 1-6 0a3 3 0 1 1 6 0", "M11 11v2a4 4 0 0 0 4 4h5", "M8 8H4", "M17 13.500a2 2 0 1 1-.1 0") }
+    val Computer by lazy { stroke("M8.500 3h7v3h-7zM8.500 18h7v3h-7z", "M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z", "M12 9v3l2 1.500") }
+    val Tank by lazy { stroke("M10 3h4v2.500h-4z", "M8.500 9a3.500 3.500 0 0 1 7 0v10a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z", "M8.500 12h7") }
+    val Weight by lazy { stroke("M7 9h10l2 11H5z", "M10 9V7a2 2 0 0 1 4 0v2") }
+    val Buoy by lazy { stroke("M10 3h4a1 1 0 0 1 1 1v12.500l-3 4.500-3-4.500V4a1 1 0 0 1 1-1z", "M9 8.500h6") }
+    val Bag by lazy { stroke("M5 8.500h14l-1.200 11.500H6.200z", "M9 8.500V6.500a3 3 0 0 1 6 0v2") }
+}

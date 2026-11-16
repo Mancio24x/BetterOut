@@ -23,6 +23,24 @@ object TripRules {
     }
 
     /** Giorni da oggi alla partenza: 0 oggi, negativo se passata, null senza data. */
+    /** Le sezioni dell'elenco delle uscite, nell'ordine in cui si mostrano. */
+    enum class Section { IN_PROGRAMMA, BOZZE, FATTE, ANNULLATE }
+
+    /** Le uscite divise per sezione, ognuna nell'ordine di [sorted]; le sezioni vuote non compaiono. */
+    fun sections(trips: List<Trip>, today: LocalDate): List<Pair<Section, List<Trip>>> {
+        val ordered = sorted(trips, today)
+        return Section.entries.map { section ->
+            section to ordered.filter {
+                when (section) {
+                    Section.IN_PROGRAMMA -> it.status == TripStatus.PROGRAMMATA
+                    Section.BOZZE -> it.status == TripStatus.BOZZA
+                    Section.FATTE -> it.status == TripStatus.COMPLETATA
+                    Section.ANNULLATE -> it.status == TripStatus.ANNULLATA
+                }
+            }
+        }.filter { it.second.isNotEmpty() }
+    }
+
     fun daysUntil(trip: Trip, today: LocalDate): Long? = trip.startDate?.let { ChronoUnit.DAYS.between(today, it) }
 
     /** Numero di giorni dell'uscita (1 se manca la data di fine). */

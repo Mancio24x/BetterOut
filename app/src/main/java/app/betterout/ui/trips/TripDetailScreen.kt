@@ -38,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -102,11 +103,15 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     var duplicating by rememberSaveable { mutableStateOf(false) }
     val trip = (state as? TripDetailViewModel.State.Ready)?.trip
+    // Material 3: la barra resta, e cambia tono quando il contenuto le scorre sotto.
+    val scroll = TopAppBarDefaults.pinnedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.uscita), style = MaterialTheme.typography.titleLarge) },
+                scrollBehavior = scroll,
                 navigationIcon = { IconButton(onClick = onBack) { Icon(AppIcons2.Back, contentDescription = stringResource(R.string.indietro)) } },
                 actions = {
                     if (trip != null) {
@@ -129,7 +134,7 @@ fun TripDetailScreen(vm: TripDetailViewModel, packVm: ChecklistViewModel, onPack
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer),
             )
         },
     ) { padding ->

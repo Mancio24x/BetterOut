@@ -3,9 +3,6 @@ package app.betterout.ui
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -61,22 +58,17 @@ import app.betterout.ui.trips.TripEditScreen
 import app.betterout.ui.trips.TripEditViewModel
 import app.betterout.ui.trips.TripsViewModel
 import app.betterout.ui.theme.AppIcons
-import app.betterout.ui.theme.AppIcons3
 import app.betterout.ui.theme.AppIcons5
 import app.betterout.data.GearItem
 import app.betterout.domain.WeightUnit
 import app.betterout.data.Trip
 import app.betterout.ui.components.NavMotion
-import app.betterout.ui.components.PrimaryButton
-import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.gear.GearPresets
-import app.betterout.ui.gear.shareTextFile
-import app.betterout.ui.home.HomeScreen
+import app.betterout.ui.home.HomeDashboard
 import app.betterout.ui.home.SettingsScreen
 import app.betterout.ui.home.TabHeader
 import app.betterout.ui.home.TripMap
-import app.betterout.ui.home.TripsScreen
-import app.betterout.ui.map.gpxFileName
+import app.betterout.ui.home.TripListScreen
 import androidx.compose.foundation.layout.height
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -142,20 +134,18 @@ fun BetterOutApp() {
                 TripWeatherCard(viewModel(key = "meteo-${trip.id}", factory = WeatherViewModel.factory(app.trips, app.routes, app.weather, trip.id)), onOpen = { nav.navigate("uscita/${trip.id}/meteo") })
             }
             composable(Tab.Home.route) {
-                HomeScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onPack = { nav.navigate("uscita/$it/zaino") }, onMap = { nav.navigate(MAPPA) }, onSettings = settings) { trip -> tripDetails(trip, true) }
+                val routes by viewModel<RoutesViewModel>(factory = RoutesViewModel.factory(app.routes)).routes.collectAsStateWithLifecycle()
+                HomeDashboard(
+                    viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), routes.orEmpty(), app.routes, app.weather,
+                    onNew = { nav.navigate("uscita/nuova") }, onOpen = { nav.navigate("uscita/$it") }, onPack = { nav.navigate("uscita/$it/zaino") },
+                    onWeather = { nav.navigate("uscita/$it/meteo") }, onRoute = { nav.navigate("percorso/$it") },
+                    onAllTrips = { nav.navigate(Tab.Uscite.route) { popUpTo(nav.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
+                    onMap = { nav.navigate(MAPPA) }, onSettings = settings,
+                )
             }
             composable(Tab.Uscite.route) {
                 val routes by viewModel<RoutesViewModel>(factory = RoutesViewModel.factory(app.routes)).routes.collectAsStateWithLifecycle()
-                val context = LocalContext.current
-                val manualNote = stringResource(R.string.gpx_nota_manuale)
-                val chooser = stringResource(R.string.condividi_con)
-                TripsScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), routes.orEmpty(), app.weather, onSettings = settings) { trip ->
-                    tripDetails(trip, false)
-                    val route = routes?.firstOrNull { it.id == trip.routeId }
-                    if (route != null) SecondaryButton(stringResource(R.string.esporta_gpx), { scope.launch { app.routes.gpx(route.id, manualNote)?.let { shareTextFile(context, gpxFileName(route.name), "application/gpx+xml", it, chooser, byteOrderMark = false) } } }, icon = AppIcons3.Download)
-                    SecondaryButton(stringResource(R.string.pillola_zaino), { nav.navigate("uscita/${trip.id}/zaino") }, icon = AppIcons.Backpack)
-                    PrimaryButton(stringResource(R.string.apri_uscita), { nav.navigate("uscita/${trip.id}") })
-                }
+                TripListScreen(viewModel(factory = TripsViewModel.factory(app.trips, app.gear)), routes.orEmpty(), app.weather, onOpen = { nav.navigate("uscita/$it") }, onSettings = settings)
             }
             composable("uscita/nuova") {
                 TripEditScreen(viewModel(factory = TripEditViewModel.factory(app.trips, null)), onClose = { nav.popBackStack() }, onSaved = { nav.popBackStack(Tab.Home.route, inclusive = false) })

@@ -528,7 +528,7 @@
     <!-- Home, uscite a pillole, impostazioni, attrezzatura proposta -->
     <string name="nav_home">Home</string>
     <string name="home_itinerario">Itinerario</string>
-    <string name="home_vuota">Nessun itinerario in programma. Tocca + per crearne uno.</string>
+    <string name="home_vuota">Crea la prima: nome, data, percorso, meteo e zaino in un posto solo.</string>
     <string name="home_mappa_percorsi">Mappa e percorsi</string>
     <string name="le_tue_uscite">Le tue uscite</string>
     <string name="uscite_vuote">Qui compaiono le tue uscite, una dopo l’altra. Creane una dalla Home.</string>
@@ -661,4 +661,9 @@
     <string name="impostazioni_modalita">Modalità</string>
     <string name="modalita_escursioni">Escursioni</string>
     <string name="modalita_immersioni">Immersioni</string>
+    <string name="uscite_vuote_titolo">Nessuna uscita</string>
+    <string name="sezione_in_programma">In programma</string>
+    <string name="sezione_bozze">Bozze</string>
+    <string name="sezione_fatte">Fatte</string>
+    <string name="sezione_annullate">Annullate</string>
 </resources>

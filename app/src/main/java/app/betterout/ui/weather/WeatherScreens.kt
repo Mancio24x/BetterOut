@@ -85,7 +85,7 @@ private fun dayMonth(date: LocalDate, locale: Locale) = date.format(DateTimeForm
 private fun joined(vararg parts: String?): String? = parts.filterNotNull().joinToString(" · ").ifEmpty { null }
 
 @Composable
-private fun skyLabel(code: Int?): String = stringResource(
+internal fun skyLabel(code: Int?): String = stringResource(
     when (WeatherRules.sky(code)) {
         Sky.SERENO -> R.string.meteo_cielo_sereno; Sky.POCO_NUVOLOSO -> R.string.meteo_cielo_poco_nuvoloso; Sky.PARZIALMENTE_NUVOLOSO -> R.string.meteo_cielo_parzialmente_nuvoloso
         Sky.COPERTO -> R.string.meteo_cielo_coperto; Sky.NEBBIA -> R.string.meteo_cielo_nebbia
@@ -98,7 +98,7 @@ private fun skyLabel(code: Int?): String = stringResource(
     },
 )
 
-private fun skyIcon(code: Int?, isDay: Boolean = true): ImageVector = when (WeatherRules.sky(code)) {
+internal fun skyIcon(code: Int?, isDay: Boolean = true): ImageVector = when (WeatherRules.sky(code)) {
     Sky.SERENO -> if (isDay) AppIcons4.Sun else AppIcons4.Moon
     Sky.POCO_NUVOLOSO, Sky.PARZIALMENTE_NUVOLOSO -> if (isDay) AppIcons4.CloudSun else AppIcons4.Cloud
     Sky.COPERTO -> AppIcons4.Cloud

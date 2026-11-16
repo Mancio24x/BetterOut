@@ -76,4 +76,15 @@ class TripRulesTest {
         assertFalse(TripRules.datesAreValid(today, today.minusDays(1)))
         assertFalse(TripRules.datesAreValid(null, today))
     }
+
+    @Test fun `le uscite si dividono per stato, senza sezioni vuote`() {
+        val today = LocalDate.of(2026, 11, 16)
+        val list = listOf(
+            trip("a", TripStatus.BOZZA), trip("b", TripStatus.PROGRAMMATA, today.plusDays(3)),
+            trip("c", TripStatus.COMPLETATA, today.minusDays(9)), trip("d", TripStatus.PROGRAMMATA, today.plusDays(1)),
+        )
+        val sections = TripRules.sections(list, today)
+        assertEquals(listOf(TripRules.Section.IN_PROGRAMMA, TripRules.Section.BOZZE, TripRules.Section.FATTE), sections.map { it.first })
+        assertEquals(listOf("d", "b"), sections[0].second.map { it.id })
+    }
 }

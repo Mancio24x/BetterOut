@@ -270,7 +270,10 @@ fun NitroxScreen(onSettings: () -> Unit) {
             AppCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.nitrox_limite), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-                    ChoiceChips(listOf(Nitrox.PPO2_LAVORO to stringResource(R.string.nitrox_lavoro), Nitrox.PPO2_LIMITE to stringResource(R.string.nitrox_emergenza)), limit, { limit = it })
+                    ChoiceChips(
+                        listOf(1.2 to one(1.2), 1.3 to one(1.3), Nitrox.PPO2_LAVORO to stringResource(R.string.nitrox_lavoro), Nitrox.PPO2_LIMITE to stringResource(R.string.nitrox_emergenza)),
+                        limit, { limit = it },
+                    )
                 }
             }
 
@@ -281,7 +284,9 @@ fun NitroxScreen(onSettings: () -> Unit) {
                     Text(stringResource(R.string.nitrox_ossigeno, oxygen), style = MaterialTheme.typography.bodyMedium)
                     Slider(value = oxygen.toFloat(), onValueChange = { oxygen = it.roundToInt() }, valueRange = 21f..60f)
                     ResultLine(stringResource(R.string.nitrox_mod), meters(Nitrox.mod(oxygen, limit), locale), big = true)
-                    ResultLine(stringResource(R.string.nitrox_mod_altro, one(if (limit == Nitrox.PPO2_LAVORO) Nitrox.PPO2_LIMITE else Nitrox.PPO2_LAVORO)), meters(Nitrox.mod(oxygen, if (limit == Nitrox.PPO2_LAVORO) Nitrox.PPO2_LIMITE else Nitrox.PPO2_LAVORO), locale))
+                    // Per confronto il limite massimo (1,6); scelto quello, il valore di fondo (1,4).
+                    val other = if (limit < Nitrox.PPO2_LIMITE) Nitrox.PPO2_LIMITE else Nitrox.PPO2_LAVORO
+                    ResultLine(stringResource(R.string.nitrox_mod_altro, one(other)), meters(Nitrox.mod(oxygen, other), locale))
                 }
             }
 

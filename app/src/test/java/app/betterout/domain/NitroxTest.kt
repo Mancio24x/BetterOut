@@ -10,6 +10,8 @@ class NitroxTest {
         assertEquals(28.89, Nitrox.mod(36), 0.01)        // EAN36 a 1,4: 28,9 m
         assertEquals(40.0, Nitrox.mod(32, 1.6), 0.01)    // EAN32 al limite 1,6: 40 m
         assertEquals(56.67, Nitrox.mod(21), 0.01)        // aria a 1,4: 56,7 m
+        assertEquals(30.63, Nitrox.mod(32, 1.3), 0.01)   // EAN32 a 1,3: 30,6 m
+        assertEquals(27.5, Nitrox.mod(32, 1.2), 0.01)    // EAN32 a 1,2: 27,5 m
     }
 
     @Test fun `miscela migliore arrotondata per difetto, mai sotto l'aria`() {
@@ -18,6 +20,7 @@ class NitroxTest {
         assertEquals(40, Nitrox.bestMix(25.0, 1.4))      // 1,4 / 3,5 = 40%
         assertEquals(21, Nitrox.bestMix(80.0))           // troppo profondo per il nitrox: resta l'aria
         assertEquals(100, Nitrox.bestMix(0.0, 1.6))
+        assertEquals(32, Nitrox.bestMix(30.0, 1.3))      // 1,3 / 4 = 32,5%
     }
 
     @Test fun `profondità equivalente in aria e pressione parziale`() {

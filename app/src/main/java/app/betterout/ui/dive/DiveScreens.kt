@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +45,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import java.time.LocalDate
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.foundation.layout.WindowInsets
 import app.betterout.ui.home.TabTopBar
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.derivedStateOf
@@ -61,12 +64,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import app.betterout.BetterOutApplication
 import app.betterout.R
 import app.betterout.data.Dive
 import app.betterout.domain.DiveRules
@@ -75,10 +72,8 @@ import app.betterout.ui.components.AppCard
 import app.betterout.ui.components.ChoiceChips
 import app.betterout.ui.components.EmptyState
 import app.betterout.ui.components.FieldLabel
-import app.betterout.ui.components.NavMotion
 import app.betterout.ui.components.PrimaryButton
 import app.betterout.ui.components.SecondaryButton
-import app.betterout.ui.home.SettingsScreen
 import app.betterout.ui.map.PlacePickerDialog
 import app.betterout.ui.map.StatTile
 import app.betterout.ui.theme.AppIcons2
@@ -91,40 +86,6 @@ import app.betterout.ui.trips.formatTime
 import java.time.LocalTime
 import java.time.format.DateTimeParseException
 import java.util.Locale
-
-/** La modalità immersioni: logbook, scheda dell'immersione e impostazioni, con il tema blu. */
-@Composable
-fun DiveApp(app: BetterOutApplication) {
-    val nav = rememberNavController()
-    val motion = remember { NavMotion(setOf("logbook")) }
-    NavHost(nav, startDestination = "logbook", enterTransition = motion.enter, exitTransition = motion.exit, popEnterTransition = motion.popEnter, popExitTransition = motion.popExit) {
-        val settings = { nav.navigate("impostazioni") }
-        composable("logbook") {
-            DiveLogScreen(
-                viewModel(factory = DiveLogViewModel.factory(app.dives)), onNew = { nav.navigate("immersione/nuova") }, onOpen = { nav.navigate("immersione/$it") },
-                onImport = { nav.navigate("importa?uri=${Uri.encode(it.toString())}") }, onSettings = settings,
-            )
-        }
-        composable("importa?uri={uri}", listOf(navArgument("uri") { type = NavType.StringType })) { e ->
-            val uri = Uri.parse(e.arguments?.getString("uri").orEmpty())
-            DiveImportScreen(viewModel(factory = DiveImportViewModel.factory(app, app.dives, uri)), onClose = { nav.popBackStack() }) { nav.popBackStack("logbook", inclusive = false) }
-        }
-        composable("immersione/nuova") {
-            DiveEditScreen(viewModel(factory = DiveEditViewModel.factory(app.dives, null)), onClose = { nav.popBackStack() }) { id ->
-                nav.navigate("immersione/$id") { popUpTo("logbook") }
-            }
-        }
-        composable("immersione/{id}", listOf(navArgument("id") { type = NavType.StringType })) { e ->
-            val id = e.arguments?.getString("id").orEmpty()
-            DiveDetailScreen(viewModel(factory = DiveDetailViewModel.factory(app.dives, id)), onBack = { nav.popBackStack() }, onEdit = { nav.navigate("immersione/$id/modifica") })
-        }
-        composable("immersione/{id}/modifica", listOf(navArgument("id") { type = NavType.StringType })) { e ->
-            val id = e.arguments?.getString("id").orEmpty()
-            DiveEditScreen(viewModel(factory = DiveEditViewModel.factory(app.dives, id)), onClose = { nav.popBackStack() }) { nav.popBackStack() }
-        }
-        composable("impostazioni") { SettingsScreen(app.settings, onBack = { nav.popBackStack() }, onImportGpx = null, onRoutes = null) }
-    }
-}
 
 // ---- Formati ----
 
@@ -158,10 +119,11 @@ fun DiveLogScreen(vm: DiveLogViewModel, onNew: () -> Unit, onOpen: (String) -> U
     val expandedFab by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 40 } }
     val sorted = remember(list) { list?.let(DiveRules::sorted) }
     Scaffold(
-        modifier = Modifier.statusBarsPadding().nestedScroll(scroll.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
-            TabTopBar(stringResource(R.string.nav_immersioni), onSettings, scroll) {
+            TabTopBar(stringResource(R.string.nav_logbook), onSettings, scroll) {
                 IconButton(onClick = { picker.launch(arrayOf("*/*")) }) { Icon(AppIcons3.Download, contentDescription = stringResource(R.string.imm_importa)) }
             }
         },
@@ -197,9 +159,14 @@ private fun TotalsCard(dives: List<Dive>) {
     AppCard(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(pluralStringResource(R.plurals.immersioni_conteggio, totals.count, totals.count), style = MaterialTheme.typography.headlineMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            val stats = remember(dives) { DiveRules.stats(dives, LocalDate.now().year) }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 TotalValue(hours(totals.minutes), stringResource(R.string.imm_tempo_sottacqua))
                 totals.deepestMeters?.let { TotalValue(meters(it, locale), stringResource(R.string.imm_record)) }
+                stats.longestMinutes?.let { TotalValue(minutes(it), stringResource(R.string.imm_piu_lunga)) }
+                stats.averageSac?.let { TotalValue(stringResource(R.string.imm_consumo_valore, String.format(locale, "%.1f", it)), stringResource(R.string.imm_consumo_medio)) }
+                TotalValue(stats.thisYear.toString(), stringResource(R.string.imm_questo_anno))
+                stats.coldestC?.let { TotalValue(celsius(it, locale), stringResource(R.string.imm_piu_fredda)) }
             }
         }
     }
@@ -214,7 +181,7 @@ private fun TotalValue(value: String, label: String) {
 }
 
 @Composable
-private fun DiveRow(dive: Dive, onClick: () -> Unit) {
+internal fun DiveRow(dive: Dive, onClick: () -> Unit) {
     val locale = currentLocale()
     Surface(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
         Row(Modifier.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -237,11 +204,15 @@ fun DiveDetailScreen(vm: DiveDetailViewModel, onBack: () -> Unit, onEdit: () -> 
     val profile by vm.profile.collectAsStateWithLifecycle()
     var askDelete by remember { mutableStateOf(false) }
     val locale = currentLocale()
+    // Barra grande con il sito: scorrendo si comprime e il nome resta visibile.
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text(dive?.let { stringResource(R.string.immersione_n, it.number) }.orEmpty(), style = MaterialTheme.typography.titleLarge) },
+            LargeTopAppBar(
+                title = { Text(dive?.let { it.siteName.ifBlank { stringResource(R.string.immersione_n, it.number) } }.orEmpty(), maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                scrollBehavior = scroll,
                 navigationIcon = { IconButton(onClick = onBack) { Icon(AppIcons2.Back, contentDescription = stringResource(R.string.indietro)) } },
                 actions = {
                     if (dive != null) {
@@ -249,14 +220,13 @@ fun DiveDetailScreen(vm: DiveDetailViewModel, onBack: () -> Unit, onEdit: () -> 
                         IconButton(onClick = { askDelete = true }) { Icon(AppIcons2.Trash, contentDescription = stringResource(R.string.elimina)) }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background, scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer),
             )
         },
     ) { padding ->
         val d = dive ?: return@Scaffold Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(d.siteName.ifBlank { stringResource(R.string.sito_vuoto) }, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
-            Text(listOfNotNull(formatDate(d.date, locale, withYear = true), d.startTime?.let(::formatTime)).joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(listOfNotNull(stringResource(R.string.immersione_n, d.number), formatDate(d.date, locale, withYear = true), d.startTime?.let(::formatTime)).joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 StatTile(d.maxDepthMeters?.let { meters(it, locale) }, stringResource(R.string.imm_stat_profondita), Modifier.weight(1f))
                 StatTile(d.durationMinutes?.let { minutes(it) }, stringResource(R.string.imm_stat_durata), Modifier.weight(1f))

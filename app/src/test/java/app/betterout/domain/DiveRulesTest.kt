@@ -62,4 +62,30 @@ class DiveRulesTest {
         assertTrue("manca il codice generato da Room", generated.exists())
         assertTrue("CREATE_DIVES non coincide con lo schema di Dive", AppDatabase.CREATE_DIVES in generated.readText())
     }
+
+    @Test fun `i siti raggruppano per nome e partono dal più recente`() {
+        val list = listOf(
+            dive(1, "2026-06-01", depth = 18.0).copy(siteName = "Secca di Capo Noli"),
+            dive(2, "2026-07-10", depth = 24.0).copy(siteName = " secca di capo noli ", latitude = 44.2, longitude = 8.4),
+            dive(3, "2026-08-02").copy(siteName = "Relitto Haven"),
+            dive(4, "2026-08-03"),
+        )
+        val sites = DiveRules.sites(list)
+        assertEquals(listOf("Relitto Haven", "secca di capo noli"), sites.map { it.name })
+        assertEquals(2, sites[1].count)
+        assertEquals(24.0, sites[1].deepestMeters!!, 0.0)
+        assertEquals(44.2, sites[1].latitude!!, 0.0)
+        assertEquals(2, sites[1].last.number)
+    }
+
+    @Test fun `statistiche con la più lunga, il consumo medio, quest’anno e l’acqua più fredda`() {
+        val sac = dive(1, "2026-08-01", minutes = 45).copy(tankLiters = 12.0, startBar = 200, endBar = 60, averageDepthMeters = 15.0, waterTempC = 18.0)
+        val other = dive(2, "2025-05-01", minutes = 60).copy(waterTempC = 14.0)
+        val stats = DiveRules.stats(listOf(sac, other), 2026)
+        assertEquals(60, stats.longestMinutes)
+        assertEquals(14.93, stats.averageSac!!, 0.01)
+        assertEquals(1, stats.thisYear)
+        assertEquals(14.0, stats.coldestC!!, 0.0)
+        assertEquals(DiveStats(null, null, 0, null), DiveRules.stats(emptyList(), 2026))
+    }
 }

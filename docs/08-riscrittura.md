@@ -44,4 +44,7 @@ Cause probabili degli scatti percepiti, da eliminare:
 - 0.7.0 — nuova Home (scheda piena della prossima uscita, anteprima, azioni rapide, altre uscite) e nuovo elenco delle uscite a sezioni; barra Material 3 che si comprime.
 - 0.7.1 — attrezzatura e logbook con la stessa barra; sfondo del tema anche sotto la barra di stato.
 
-Da rifare: dettaglio e modifica dell'uscita, checklist, meteo, percorsi, schermate delle immersioni oltre al logbook.
+- 0.7.2 — dettaglio dell'uscita con il nome nella barra grande e "Prepara lo zaino" fisso in basso.
+- 0.8.0 — immersioni: barra in basso con Logbook, Siti e Strumenti; siti ricavati dal logbook con le loro immersioni; calcolo nitrox (profondità massima operativa, miscela migliore, profondità equivalente in aria, ppO₂); statistiche nei totali; dettaglio con il sito nella barra grande. Provato sull'emulatore con le 29 immersioni d'esempio di Subsurface.
+
+Da rifare: modifica dell'uscita, checklist, meteo, percorsi, schermate delle immersioni oltre al logbook.

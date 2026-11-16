@@ -6,6 +6,16 @@ import java.time.temporal.ChronoUnit
 /** Totali del logbook: quante immersioni, quanto tempo sott'acqua, la profondità più grande. */
 data class DiveTotals(val count: Int, val minutes: Int, val deepestMeters: Double?)
 
+/** Statistiche del logbook oltre ai totali. Ogni valore è null se nessuna immersione ha il dato. */
+data class DiveStats(val longestMinutes: Int?, val averageSac: Double?, val thisYear: Int, val coldestC: Double?)
+
+/** Un sito ricavato dal logbook: le immersioni con lo stesso nome, con le loro coordinate se ne hanno. */
+data class DiveSite(val name: String, val latitude: Double?, val longitude: Double?, val dives: List<Dive>) {
+    val count get() = dives.size
+    val deepestMeters: Double? get() = dives.mapNotNull { it.maxDepthMeters }.maxOrNull()
+    val last: Dive get() = dives.maxWith(compareBy<Dive> { it.date }.thenBy { it.startTime })
+}
+
 object DiveRules {
     /** Il numero dopo il più alto già usato; la prima immersione è la 1. */
     fun nextNumber(dives: List<Dive>): Int = (dives.maxOfOrNull { it.number } ?: 0) + 1
@@ -15,6 +25,27 @@ object DiveRules {
         dives.sortedWith(compareByDescending<Dive> { it.date }.thenByDescending { it.startTime }.thenByDescending { it.number })
 
     fun totals(dives: List<Dive>) = DiveTotals(dives.size, dives.sumOf { it.durationMinutes ?: 0 }, dives.mapNotNull { it.maxDepthMeters }.maxOrNull())
+
+    fun stats(dives: List<Dive>, year: Int): DiveStats = DiveStats(
+        longestMinutes = dives.mapNotNull { it.durationMinutes }.maxOrNull(),
+        averageSac = dives.mapNotNull { sacLitersPerMinute(it) }.takeIf { it.isNotEmpty() }?.average(),
+        thisYear = dives.count { it.date.year == year },
+        coldestC = dives.mapNotNull { it.waterTempC }.minOrNull(),
+    )
+
+    /**
+     * I siti del logbook: immersioni raggruppate per nome (senza badare a maiuscole e spazi), dal sito usato più
+     * di recente. Le immersioni senza nome del sito non formano un sito.
+     */
+    fun sites(dives: List<Dive>): List<DiveSite> =
+        dives.filter { it.siteName.isNotBlank() }
+            .groupBy { it.siteName.trim().lowercase() }
+            .values.map { group ->
+                val sorted = sorted(group)
+                val located = sorted.firstOrNull { it.latitude != null && it.longitude != null }
+                DiveSite(sorted.first().siteName.trim(), located?.latitude, located?.longitude, sorted)
+            }
+            .sortedWith(compareByDescending<DiveSite> { it.last.date }.thenByDescending { it.last.startTime })
 
     /** Bar consumati, se si conoscono inizio e fine e la fine non supera l'inizio. */
     fun usedBar(dive: Dive): Int? {

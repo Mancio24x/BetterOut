@@ -588,7 +588,6 @@
     <string name="luogo_impianto">Impianto di risalita</string>
 
     <!-- Modalità immersioni -->
-    <string name="nav_immersioni">Immersioni</string>
     <string name="passa_immersioni">Passa alle immersioni</string>
     <string name="passa_escursioni">Passa alle escursioni</string>
     <string name="logbook_vuoto_titolo">Nessuna immersione</string>
@@ -666,4 +665,30 @@
     <string name="sezione_bozze">Bozze</string>
     <string name="sezione_fatte">Fatte</string>
     <string name="sezione_annullate">Annullate</string>
+    <string name="nav_logbook">Logbook</string>
+    <string name="nav_siti">Siti</string>
+    <string name="nav_strumenti">Strumenti</string>
+    <string name="siti_vuoti_titolo">Nessun sito</string>
+    <string name="siti_vuoti_testo">I siti compaiono qui quando scrivi il nome del sito nelle immersioni.</string>
+    <string name="sito_max">max %1$s</string>
+    <string name="sito_ultima">ultima %1$s</string>
+    <string name="sito_con_posizione">Posizione salvata</string>
+    <string name="imm_piu_lunga">la più lunga</string>
+    <string name="imm_consumo_medio">consumo medio</string>
+    <string name="imm_questo_anno">quest’anno</string>
+    <string name="imm_piu_fredda">acqua più fredda</string>
+    <string name="nitrox_titolo">Nitrox</string>
+    <string name="nitrox_avvertenza">Calcolo indicativo per acqua di mare (10 m = 1 bar). Non sostituisce il corso nitrox, l’analisi della miscela né il computer subacqueo.</string>
+    <string name="nitrox_limite">Limite di ossigeno (ppO₂)</string>
+    <string name="nitrox_lavoro">1,4 · fondo</string>
+    <string name="nitrox_emergenza">1,6 · limite massimo</string>
+    <string name="nitrox_miscela">Miscela</string>
+    <string name="nitrox_ossigeno">Ossigeno: %1$d%%</string>
+    <string name="nitrox_mod">Profondità massima operativa</string>
+    <string name="nitrox_mod_altro">Con ppO₂ %1$s</string>
+    <string name="nitrox_profondita">Profondità prevista</string>
+    <string name="nitrox_migliore">Miscela migliore</string>
+    <string name="nitrox_pp">ppO₂ con %1$s</string>
+    <string name="nitrox_ead">Equivalente in aria con %1$s</string>
+    <string name="nitrox_oltre">oltre il limite</string>
 </resources>

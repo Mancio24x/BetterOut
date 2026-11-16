@@ -42,12 +42,13 @@ import app.betterout.ui.theme.AppIcons3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: (Uri) -> Unit, onRoutes: () -> Unit) {
+/** [onImportGpx] e [onRoutes] null nascondono la sezione dei percorsi, che nella modalità immersioni non serve. */
+fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: ((Uri) -> Unit)?, onRoutes: (() -> Unit)?) {
     val theme by settings.theme.collectAsStateWithLifecycle()
     val unit by settings.weightUnit.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val version = remember { runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty() }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onImportGpx(uri) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onImportGpx?.invoke(uri) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -75,9 +76,11 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, onImportGpx: (Uri)
                     ChoiceChips(listOf(WeightUnit.G to stringResource(R.string.unita_grammi), WeightUnit.KG to stringResource(R.string.unita_chilogrammi)), unit, settings::setWeightUnit)
                 }
             }
-            Text(stringResource(R.string.impostazioni_dati), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
-            OptionRow(AppIcons3.Download, stringResource(R.string.importa_titolo), stringResource(R.string.importa_testo), { picker.launch(GPX_MIME_TYPES) })
-            OptionRow(AppIcons.Map, stringResource(R.string.impostazioni_percorsi), stringResource(R.string.impostazioni_percorsi_testo), onRoutes)
+            if (onImportGpx != null && onRoutes != null) {
+                Text(stringResource(R.string.impostazioni_dati), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+                OptionRow(AppIcons3.Download, stringResource(R.string.importa_titolo), stringResource(R.string.importa_testo), { picker.launch(GPX_MIME_TYPES) })
+                OptionRow(AppIcons.Map, stringResource(R.string.impostazioni_percorsi), stringResource(R.string.impostazioni_percorsi_testo), onRoutes)
+            }
             Text(stringResource(R.string.impostazioni_info), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp).semantics { heading() })
             Text(stringResource(R.string.impostazioni_versione, version), style = MaterialTheme.typography.bodyMedium)
             Text(stringResource(R.string.impostazioni_fonti), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

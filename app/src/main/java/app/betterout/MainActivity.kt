@@ -14,6 +14,9 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.betterout.data.ThemeMode
 import app.betterout.ui.BetterOutApp
+import app.betterout.ui.dive.DiveApp
+import app.betterout.ui.home.LocalModeSwitch
+import app.betterout.ui.home.ModeSwitch
 import app.betterout.ui.theme.BetterOutTheme
 
 class MainActivity : ComponentActivity() {
@@ -30,8 +33,12 @@ class MainActivity : ComponentActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             val unit by settings.weightUnit.collectAsStateWithLifecycle()
-            BetterOutTheme(mode) {
-                CompositionLocalProvider(LocalWeightUnit provides unit) { BetterOutApp() }
+            val diving by settings.diving.collectAsStateWithLifecycle()
+            BetterOutTheme(mode, diving) {
+                CompositionLocalProvider(LocalWeightUnit provides unit, LocalModeSwitch provides ModeSwitch(diving) { settings.setDiving(!diving) }) {
+                    // Ogni modalità ha la sua navigazione: passando dall'una all'altra si riparte dalla schermata principale.
+                    if (diving) DiveApp(application as BetterOutApplication) else BetterOutApp()
+                }
             }
         }
     }

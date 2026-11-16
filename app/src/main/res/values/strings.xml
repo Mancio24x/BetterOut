@@ -585,4 +585,54 @@
     <string name="luogo_belvedere">Belvedere</string>
     <string name="luogo_parcheggio">Parcheggio</string>
     <string name="luogo_impianto">Impianto di risalita</string>
+
+    <!-- Modalità immersioni -->
+    <string name="nav_immersioni">Immersioni</string>
+    <string name="passa_immersioni">Passa alle immersioni</string>
+    <string name="passa_escursioni">Passa alle escursioni</string>
+    <string name="logbook_vuoto_titolo">Nessuna immersione</string>
+    <string name="logbook_vuoto_testo">Registra la prima: sito, profondità, durata, gas e compagno.</string>
+    <string name="nuova_immersione">Nuova immersione</string>
+    <string name="modifica_immersione">Modifica immersione</string>
+    <string name="salva_immersione">Salva immersione</string>
+    <string name="immersione_n">Immersione n. %1$d</string>
+    <plurals name="immersioni_conteggio">
+        <item quantity="one">%1$d immersione</item>
+        <item quantity="other">%1$d immersioni</item>
+    </plurals>
+    <string name="imm_tempo_sottacqua">sott’acqua</string>
+    <string name="imm_record">profondità record</string>
+    <string name="imm_minuti">%1$d min</string>
+    <string name="imm_ore_minuti">%1$d h %2$d min</string>
+    <string name="imm_litri">%1$s l</string>
+    <string name="imm_bar">%1$d bar</string>
+    <string name="campo_sito">Sito</string>
+    <string name="sito_vuoto">Sito non indicato</string>
+    <string name="imm_numero">Numero</string>
+    <string name="imm_data">Data</string>
+    <string name="imm_ora">Ora di ingresso</string>
+    <string name="imm_ora_non_valida">Ora non valida: scrivi per esempio 09:30</string>
+    <string name="imm_durata">Durata</string>
+    <string name="imm_prof_max">Profondità massima</string>
+    <string name="imm_prof_media">Profondità media</string>
+    <string name="imm_temp">Temperatura dell’acqua</string>
+    <string name="imm_visibilita">Visibilità</string>
+    <string name="imm_gas">Gas</string>
+    <string name="imm_aria">Aria</string>
+    <string name="imm_ean">EAN%1$d</string>
+    <string name="imm_ossigeno">Ossigeno nella miscela</string>
+    <string name="imm_bombola">Bombola</string>
+    <string name="imm_bar_inizio">Pressione all’inizio</string>
+    <string name="imm_bar_fine">Pressione alla fine</string>
+    <string name="imm_compagno">Compagno</string>
+    <string name="imm_consumo">Consumo in superficie</string>
+    <string name="imm_consumo_valore">%1$s l/min</string>
+    <string name="imm_consumo_mancano">Per il consumo in superficie servono bombola, pressione all’inizio e alla fine, durata e profondità media.</string>
+    <string name="imm_valore_non_valido">Numero non valido</string>
+    <string name="imm_fuori_intervallo">Valore fuori dall’intervallo ammesso (21–100)</string>
+    <string name="imm_stat_profondita">profondità</string>
+    <string name="imm_stat_durata">durata</string>
+    <string name="imm_stat_acqua">acqua</string>
+    <string name="imm_elimina_titolo">Eliminare l’immersione n. %1$d?</string>
+    <string name="imm_elimina_testo">Sparisce dal logbook. I numeri delle altre immersioni non cambiano.</string>
 </resources>

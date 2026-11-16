@@ -121,5 +121,8 @@ object AppIcons5 {
     val FirstAid by lazy { stroke("M5 7h14a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z", "M9 7V4h6v3", "M12 11v5M9.500 13.500h5") }
     val SleepingBag by lazy { stroke("M8 3h8a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z", "M5 9h14M12 9v12") }
     val Tent by lazy { stroke("M12 4 3 20h18z", "m12 12-3 8M12 12l3 8") }
+    val Wave by lazy { stroke("M3 9.500c2-2 4-2 6 0s4 2 6 0 4-2 6 0", "M3 15.500c2-2 4-2 6 0s4 2 6 0 4-2 6 0") }
+    val Mask by lazy { stroke("M5 8h14a2 2 0 0 1 2 2v3a3 3 0 0 1-3 3h-2.500L12 14l-3.500 2H6a3 3 0 0 1-3-3v-3a2 2 0 0 1 2-2z", "M12 8V5") }
+    val Gauge by lazy { stroke("M20.500 13a8.500 8.500 0 1 0-17 0", "M12 13l4-4", "M5 18h14") }
     val Battery by lazy { stroke("M7 3h10a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z", "m13 8-3 4.500h4L11 17") }
 }

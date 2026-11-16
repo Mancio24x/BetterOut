@@ -23,6 +23,15 @@ class AppSettings(context: Context) {
         _weightUnit.value = unit
     }
 
+    private val _diving = MutableStateFlow(prefs.getBoolean("immersioni", false))
+    /** Modalità immersioni: tema blu e logbook al posto delle uscite. Si ricorda alla riapertura. */
+    val diving: StateFlow<Boolean> = _diving.asStateFlow()
+
+    fun setDiving(on: Boolean) {
+        prefs.edit().putBoolean("immersioni", on).apply()
+        _diving.value = on
+    }
+
     fun setTheme(mode: ThemeMode) {
         prefs.edit().putString("tema", mode.name).apply()
         _theme.value = mode

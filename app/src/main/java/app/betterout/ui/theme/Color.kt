@@ -59,3 +59,56 @@ val DarkColors = darkColorScheme(
     errorContainer = Color(0xFF4F1D16),
     onErrorContainer = Color(0xFFFFD9D2),
 )
+
+// Modalità immersioni: blu del mare, stessi ruoli e contrasti dei temi delle escursioni.
+val DiveLightColors = lightColorScheme(
+    primary = Color(0xFF0B5A86),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFCFE5F3),
+    onPrimaryContainer = Color(0xFF06324D),
+    secondary = Color(0xFF0F7FA8),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFBFE6F5),
+    onSecondaryContainer = Color(0xFF0E2230),
+    background = Color(0xFFE8F1F6),
+    onBackground = Color(0xFF0E2230),
+    surface = Color(0xFFFAFDFF),
+    onSurface = Color(0xFF0E2230),
+    surfaceVariant = Color(0xFFDCE9F1),
+    onSurfaceVariant = Color(0xFF465D6D),
+    surfaceContainer = Color(0xFFFAFDFF),
+    outline = Color(0xFF465D6D),
+    outlineVariant = Color(0x240E2230),
+    error = Color(0xFFA3271B),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFF4D3CC),
+    onErrorContainer = Color(0xFF5E130B),
+)
+
+val DiveDarkColors = darkColorScheme(
+    primary = Color(0xFF7CC4EA),
+    onPrimary = Color(0xFF032538),
+    primaryContainer = Color(0xFF134560),
+    onPrimaryContainer = Color(0xFFD3ECFA),
+    secondary = Color(0xFF4FC0E8),
+    onSecondary = Color(0xFF032538),
+    secondaryContainer = Color(0xFF1B5A78),
+    onSecondaryContainer = Color(0xFFE3F0F8),
+    background = Color(0xFF07131C),
+    onBackground = Color(0xFFE3F0F8),
+    surface = Color(0xFF0F212D),
+    onSurface = Color(0xFFE3F0F8),
+    surfaceVariant = Color(0xFF1A3141),
+    onSurfaceVariant = Color(0xFF9DB7C7),
+    surfaceContainer = Color(0xFF0F212D),
+    outline = Color(0xFF9DB7C7),
+    outlineVariant = Color(0x26E3F0F8),
+    error = Color(0xFFFF9C8F),
+    onError = Color(0xFF2B0905),
+    errorContainer = Color(0xFF4F1D16),
+    onErrorContainer = Color(0xFFFFD9D2),
+)
+
+val DiveAmoledColors by lazy {
+    DiveDarkColors.copy(background = Color(0xFF000000), surface = Color(0xFF0A1820), surfaceContainer = Color(0xFF0A1820), surfaceVariant = Color(0xFF142A38))
+}

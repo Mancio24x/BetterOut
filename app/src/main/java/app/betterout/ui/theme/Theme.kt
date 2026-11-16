@@ -6,12 +6,12 @@ import androidx.compose.runtime.Composable
 import app.betterout.data.ThemeMode
 
 @Composable
-fun BetterOutTheme(mode: ThemeMode = ThemeMode.SISTEMA, content: @Composable () -> Unit) {
+fun BetterOutTheme(mode: ThemeMode = ThemeMode.SISTEMA, diving: Boolean = false, content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = when (mode) {
-            ThemeMode.SISTEMA -> if (isSystemInDarkTheme()) DarkColors else LightColors
-            ThemeMode.CHIARO -> LightColors
-            ThemeMode.NERO -> AmoledColors
+            ThemeMode.SISTEMA -> if (isSystemInDarkTheme()) (if (diving) DiveDarkColors else DarkColors) else (if (diving) DiveLightColors else LightColors)
+            ThemeMode.CHIARO -> if (diving) DiveLightColors else LightColors
+            ThemeMode.NERO -> if (diving) DiveAmoledColors else AmoledColors
         },
         typography = AppTypography,
         content = content,

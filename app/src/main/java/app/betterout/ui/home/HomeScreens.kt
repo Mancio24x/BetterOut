@@ -29,6 +29,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,12 +67,22 @@ import app.betterout.ui.trips.tripWhen
 import app.betterout.ui.weather.formatTemp
 import java.time.LocalDate
 
+/** Passaggio fra escursioni e immersioni: il tasto sta accanto alle impostazioni in ogni scheda principale. */
+data class ModeSwitch(val diving: Boolean, val toggle: () -> Unit)
+
+val LocalModeSwitch = staticCompositionLocalOf<ModeSwitch?> { null }
+
 /** Titolo di una scheda principale, con le azioni in alto a destra (le impostazioni sono sempre l'ultima). */
 @Composable
 fun TabHeader(title: String, onSettings: () -> Unit, extra: @Composable () -> Unit = {}) {
     Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f).semantics { heading() })
         extra()
+        LocalModeSwitch.current?.let { mode ->
+            IconButton(onClick = mode.toggle) {
+                Icon(if (mode.diving) AppIcons.Mountain else AppIcons5.Wave, contentDescription = stringResource(if (mode.diving) R.string.passa_escursioni else R.string.passa_immersioni))
+            }
+        }
         IconButton(onClick = onSettings) { Icon(AppIcons5.Cog, contentDescription = stringResource(R.string.nav_impostazioni)) }
     }
 }

@@ -34,6 +34,16 @@ Richiesta dall'utente dopo la prima prova sul telefono, e diversa dalle bozze in
 
 Non ancora fatto di quanto richiesto: scelta della lingua (serve la traduzione inglese di tutti i testi), esportazione e importazione di tutti i dati (backup), meteo misurato a posteriori per le uscite passate.
 
+## Modalità immersioni (prima tappa)
+
+Il tasto con l'onda, accanto alla rotellina in ogni scheda principale, porta l'app nella modalità immersioni: tema blu (chiaro, scuro e nero AMOLED) e logbook al posto delle uscite. Il tasto con la montagna riporta alle escursioni. L'app riapre nell'ultima modalità usata.
+
+- Logbook compilato a mano: numero progressivo (modificabile), sito con punto sulla mappa, data e ora, durata, profondità massima e media, temperatura dell'acqua, visibilità, gas (aria o nitrox con la percentuale di ossigeno), bombola, pressione all'inizio e alla fine, compagno, note.
+- Totali: numero di immersioni, tempo sott'acqua, profondità record. Nel dettaglio il consumo in superficie (SAC), solo con tutti i dati necessari.
+- Database alla versione 5: la tabella `dives` arriva con una migrazione, le uscite già salvate restano. Un test controlla che la migrazione coincida con lo schema generato da Room.
+
+Prossime tappe: siti d'immersione, attrezzatura sub con checklist, immersioni pianificate, calcolo nitrox (profondità massima operativa, miscela migliore), importazione dal computer subacqueo.
+
 ## Mappe e GPX: cosa c'è e cosa manca
 
 Fatto e provato sull'emulatore (dettaglio in `07-compilazione-collaudo.md`):

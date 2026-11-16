@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.betterout.R
 import app.betterout.data.Route
 import app.betterout.data.RouteGeometry
@@ -96,7 +97,7 @@ fun StatTile(value: String?, label: String, modifier: Modifier = Modifier) {
     val spoken = label + ": " + (value ?: stringResource(R.string.non_disponibile))
     Surface(modifier.clearAndSetSemantics { contentDescription = spoken }, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
         Column(Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
-            Text(value ?: "—", style = MaterialTheme.typography.titleMedium)
+            Text(value ?: "—", style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp, lineHeight = 24.sp))
             Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

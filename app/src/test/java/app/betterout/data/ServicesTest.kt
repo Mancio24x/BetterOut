@@ -1,6 +1,8 @@
 package app.betterout.data
 
 import app.betterout.domain.GeoPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -96,6 +98,19 @@ class ServicesTest {
         var failed = false
         try { PlaceSearch.search("x") { throw IOException("senza rete") } } catch (e: IOException) { failed = true }
         assertTrue(failed)
+    }
+
+    @Test fun `i risultati della fonte veloce arrivano senza aspettare la lenta`() = runTest {
+        val steps = PlaceSearch.progressive("Lagazuoi") { url ->
+            when {
+                "nominatim" in url -> { delay(5_000); """[{"name":"Lagazuoi","category":"natural","type":"peak","lat":"46.53","lon":"12.01"}]""" }
+                "photon" in url -> """{"features":[{"geometry":{"coordinates":[12.008133,46.527754]},"properties":{"name":"Rifugio Lagazuoi","osm_key":"tourism","osm_value":"alpine_hut"}}]}"""
+                else -> throw IOException("non risponde")
+            }
+        }.toList()
+        assertEquals(listOf(listOf("Rifugio Lagazuoi") to false), steps.take(1).map { s -> s.places.map { it.name } to s.done })
+        // Alla fine l'ordine è quello delle fonti, come nella ricerca intera.
+        assertEquals(listOf("Lagazuoi", "Rifugio Lagazuoi") to true, steps.last().let { s -> s.places.map { it.name } to s.done })
     }
 
     @Test fun `i tipi di luogo utili a chi cammina sono riconosciuti`() {

@@ -215,11 +215,11 @@
     <string name="prepara_zaino">Prepara lo zaino</string>
     <string name="pronti_di">%1$d di %2$d pronti</string>
     <string name="tutto_pronto">Tutto pronto: %1$d di %2$d</string>
-    <string name="nello_zaino">%1$s nello zaino</string>
     <string name="peso_base">base</string>
     <string name="peso_consumabili">consumabili</string>
     <string name="peso_indossato">indossato</string>
     <string name="peso_totale">totale</string>
+    <string name="peso_nello_zaino">peso nello zaino</string>
     <plurals name="peso_parziale">
         <item quantity="one">Peso parziale: %1$d oggetto senza peso</item>
         <item quantity="other">Peso parziale: %1$d oggetti senza peso</item>
@@ -265,9 +265,10 @@
     <string name="cerca_localita">Paese, cima, valle…</string>
     <string name="cerca">Cerca</string>
     <string name="cerca_aiuto">Scrivi un nome e premi Cerca.</string>
+    <string name="cerca_altri_in_arrivo">Altri risultati in arrivo…</string>
     <string name="cerca_errore">Ricerca non riuscita: controlla la connessione.</string>
     <string name="cerca_nessun_risultato">Nessun risultato. Prova un altro nome, oppure trova il punto muovendo la mappa.</string>
-    <string name="cerca_fonte">Ricerca: Nominatim e Photon (dati © OpenStreetMap), Open-Meteo (GeoNames).</string>
+    <string name="cerca_fonte">Ricerca: cime e rifugi delle Alpi inclusi nell’app, Nominatim e Photon (dati © OpenStreetMap, ODbL), Open-Meteo (GeoNames).</string>
     <string name="riprova">Riprova</string>
     <string name="non_disponibile">non disponibile</string>
 
@@ -419,7 +420,6 @@
     <string name="coordinate">Coordinate: %1$s</string>
     <string name="senza_coordinate">Senza coordinate: cerca la località o scegli il punto sulla mappa.</string>
     <string name="togli_coordinate">Togli</string>
-    <string name="cerca_localita_azione">Cerca località</string>
     <string name="scegli_sulla_mappa">Scegli sulla mappa</string>
     <string name="usa_questo_punto">Usa questo punto</string>
 

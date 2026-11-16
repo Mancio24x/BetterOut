@@ -67,7 +67,12 @@ import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.components.statusLabel
 import app.betterout.domain.GeoPoint
 import app.betterout.ui.map.PlacePickerDialog
-import app.betterout.ui.map.PlaceSearchSheet
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
+import app.betterout.ui.theme.AppIcons3
+import app.betterout.ui.map.PlaceResults
+import app.betterout.ui.map.SearchState
+import app.betterout.ui.map.rememberPlaceSearcher
 import app.betterout.ui.theme.AppIcons2
 import java.time.LocalDate
 import java.time.LocalTime
@@ -125,8 +130,19 @@ private fun TripForm(draft: Trip, nameError: Boolean, datesValid: Boolean, isNew
             supportingText = if (nameError) ({ Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) { Icon(AppIcons2.Warn, contentDescription = null, modifier = Modifier.size(15.dp)); Text(stringResource(R.string.errore_nome)) } }) else null,
         )
         FieldLabel(stringResource(R.string.campo_localita))
-        OutlinedTextField(draft.placeName, { v -> edit { it.copy(placeName = v) } }, Modifier.fillMaxWidth(), singleLine = true, shape = shape, keyboardOptions = caps,
-            leadingIcon = { Icon(AppIcons2.Pin, contentDescription = null) }, supportingText = { Text(stringResource(R.string.aiuto_localita)) })
+        // Il campo stesso cerca: dalla tastiera o con la lente. Il nome resta libero anche senza scegliere un risultato.
+        val searcher = rememberPlaceSearcher()
+        val focus = LocalFocusManager.current
+        val searchPlace = { focus.clearFocus(); searcher.search(draft.placeName) }
+        OutlinedTextField(draft.placeName, { v -> edit { it.copy(placeName = v) }; searcher.clear() }, Modifier.fillMaxWidth(), singleLine = true, shape = shape,
+            keyboardOptions = caps.copy(imeAction = ImeAction.Search), keyboardActions = KeyboardActions(onSearch = { searchPlace() }),
+            leadingIcon = { Icon(AppIcons2.Pin, contentDescription = null) },
+            trailingIcon = { IconButton(onClick = searchPlace, enabled = draft.placeName.isNotBlank()) { Icon(AppIcons3.Search, contentDescription = stringResource(R.string.cerca)) } },
+            supportingText = { Text(stringResource(R.string.aiuto_localita)) })
+        if (searcher.state != SearchState.Idle) PlaceResults(searcher.state, hint = null, onRetry = searchPlace) { place ->
+            searcher.clear()
+            edit { it.copy(placeName = place.name, latitude = place.latitude, longitude = place.longitude, timeZoneId = place.timezone ?: it.timeZoneId) }
+        }
         PlaceCoordinates(draft, edit)
 
         FieldLabel(stringResource(R.string.campo_attivita))
@@ -217,7 +233,6 @@ private fun PickerField(label: String, value: String, modifier: Modifier = Modif
 /** Coordinate della località: servono al meteo. Si ottengono cercando un nome o scegliendo il punto sulla mappa. */
 @Composable
 private fun PlaceCoordinates(draft: Trip, edit: ((Trip) -> Trip) -> Unit) {
-    var searching by remember { mutableStateOf(false) }
     var picking by remember { mutableStateOf(false) }
     val focus = LocalFocusManager.current
     val lat = draft.latitude
@@ -229,16 +244,8 @@ private fun PlaceCoordinates(draft: Trip, edit: ((Trip) -> Trip) -> Unit) {
         )
         if (lat != null) TextButton(onClick = { edit { it.copy(latitude = null, longitude = null) } }) { Text(stringResource(R.string.togli_coordinate)) }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Con la tastiera aperta il foglio di ricerca non compare: prima si lascia il campo di testo.
-        SecondaryButton(stringResource(R.string.cerca_localita_azione), { focus.clearFocus(); searching = true }, Modifier.weight(1f))
-        SecondaryButton(stringResource(R.string.scegli_sulla_mappa), { focus.clearFocus(); picking = true }, Modifier.weight(1f))
-    }
-    // Dalla ricerca arrivano anche nome e fuso orario della località; dalla mappa solo il punto.
-    if (searching) PlaceSearchSheet({ searching = false }) { place ->
-        searching = false
-        edit { it.copy(placeName = place.name, latitude = place.latitude, longitude = place.longitude, timeZoneId = place.timezone ?: it.timeZoneId) }
-    }
+    // Dalla ricerca nel campo arrivano anche nome e fuso orario della località; dalla mappa solo il punto.
+    SecondaryButton(stringResource(R.string.scegli_sulla_mappa), { focus.clearFocus(); picking = true })
     if (picking) PlacePickerDialog(if (lat != null && lon != null) GeoPoint(lat, lon) else null, { picking = false }) { point ->
         picking = false
         edit { it.copy(latitude = point.lat, longitude = point.lon) }

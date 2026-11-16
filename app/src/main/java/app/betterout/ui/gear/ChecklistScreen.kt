@@ -3,6 +3,7 @@ package app.betterout.ui.gear
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -83,20 +85,22 @@ fun PackSummary(entries: List<ChecklistEntry>, totals: PackTotals, modifier: Mod
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (done) Icon(AppIcons2.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Text(stringResource(if (done) R.string.tutto_pronto else R.string.pronti_di, packed, entries.size), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
-            Text(stringResource(R.string.nello_zaino, weight(totals.packGrams)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         LinearProgressIndicator(progress = { if (entries.isEmpty()) 0f else packed.toFloat() / entries.size }, modifier = Modifier.fillMaxWidth().heightIn(min = 10.dp).clip(CircleShape), trackColor = MaterialTheme.colorScheme.surfaceVariant, drawStopIndicator = {})
-        // Due righe da due: le parole restano intere anche con il testo ingrandito.
-        listOf(R.string.peso_base to totals.baseGrams, R.string.peso_consumabili to totals.consumableWithWaterGrams, R.string.peso_indossato to totals.wornGrams, R.string.peso_totale to totals.totalGrams).chunked(2).forEach { pair ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                pair.forEach { (label, grams) ->
-                    Surface(Modifier.weight(1f), shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Row(Modifier.padding(horizontal = 12.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(label), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                            Text(weight(grams), style = MaterialTheme.typography.titleSmall)
-                        }
-                    }
+        // Tre colonne come nella bozza; con il testo ingrandito vanno a capo invece di spezzare le parole.
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(R.string.peso_base to totals.baseGrams, R.string.peso_consumabili to totals.consumableWithWaterGrams, R.string.peso_indossato to totals.wornGrams).forEach { (label, grams) ->
+                Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                    Text(weight(grams), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(label).replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+        }
+        listOf(R.string.peso_nello_zaino to totals.packGrams, R.string.peso_totale to totals.totalGrams).forEach { (label, grams) ->
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(label).replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                Text(weight(grams), style = MaterialTheme.typography.titleMedium)
             }
         }
         if (totals.isPartial) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {

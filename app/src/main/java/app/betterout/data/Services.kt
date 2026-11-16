@@ -10,9 +10,12 @@ import app.betterout.domain.PointForecast
 import app.betterout.domain.WeatherPoint
 import app.betterout.domain.WeatherRules
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -38,11 +41,11 @@ object Http {
     private const val USER_AGENT = "BetterOut/0.1 (Android; +https://github.com/Mancio24x/BetterOut)"
 
     /** Restituisce il corpo della risposta; qualunque problema di rete o risposta diversa da 200 è una [IOException]. */
-    suspend fun get(url: String): String = withContext(Dispatchers.IO) {
+    suspend fun get(url: String, connectTimeoutMs: Int = 10_000, readTimeoutMs: Int = 20_000): String = withContext(Dispatchers.IO) {
         val connection = URL(url).openConnection() as HttpURLConnection
         try {
-            connection.connectTimeout = 10_000
-            connection.readTimeout = 20_000
+            connection.connectTimeout = connectTimeoutMs
+            connection.readTimeout = readTimeoutMs
             connection.setRequestProperty("User-Agent", USER_AGENT)
             if (connection.responseCode != 200) throw IOException("HTTP ${connection.responseCode}")
             connection.inputStream.bufferedReader().use { it.readText() }
@@ -94,17 +97,48 @@ data class Place(
 object PlaceSearch {
     @Serializable private data class Response(val results: List<Place> = emptyList())
 
-    suspend fun search(query: String, language: String = "it", fetch: suspend (String) -> String = Http::get): List<Place> = coroutineScope {
+    /** Risultati uniti fin qui; [done] è vero quando hanno risposto tutte le fonti. */
+    data class Progress(val places: List<Place>, val done: Boolean)
+
+    /** Una fonte lenta non deve far aspettare: oltre questi tempi si rinuncia a lei e restano le altre. */
+    private val searchFetch: suspend (String) -> String = { Http.get(it, connectTimeoutMs = 5_000, readTimeoutMs = 7_000) }
+
+    /** Cime e rifugi delle Alpi inclusi nell'app; impostato all'avvio. */
+    @Volatile var offline: OfflinePlaces? = null
+
+    suspend fun search(query: String, language: String = "it", offline: OfflinePlaces? = this.offline, fetch: suspend (String) -> String = searchFetch): List<Place> =
+        progressive(query, language, offline, fetch).last().places
+
+    /**
+     * Come [search], ma dà i risultati man mano che arrivano: prima quelli inclusi nell'app, poi le fonti online
+     * senza aspettare la più lenta. L'ordine è sempre lo stesso, così la lista non si rimescola all'arrivo di una risposta.
+     */
+    fun progressive(query: String, language: String = "it", offline: OfflinePlaces? = this.offline, fetch: suspend (String) -> String = searchFetch): Flow<Progress> = channelFlow {
+        // Un file illeggibile non ferma la ricerca online.
+        val local = offline?.let { withContext(Dispatchers.IO) { try { it.search(query) } catch (e: IOException) { emptyList() } } }.orEmpty()
+        if (local.isNotEmpty()) send(Progress(merge(local), done = false))
         val q = URLEncoder.encode(query.trim(), "UTF-8")
         val sources: List<suspend () -> List<Place>> = listOf(
             { parseNominatim(fetch("https://nominatim.openstreetmap.org/search?q=$q&format=jsonv2&limit=10&addressdetails=1&accept-language=$language")) },
             { parsePhoton(fetch("https://photon.komoot.io/api/?q=$q&limit=10")) },
             { parse(fetch("https://geocoding-api.open-meteo.com/v1/search?name=$q&count=10&language=$language&format=json")) },
         )
-        // Una fonte che non risponde non ferma le altre: è un errore solo se non risponde nessuna.
-        val answers = sources.map { source -> async { try { source() } catch (e: IOException) { null } } }.awaitAll()
-        if (answers.all { it == null }) throw IOException("nessuna fonte di ricerca ha risposto")
-        merge(answers.filterNotNull().flatten())
+        val answers = arrayOfNulls<List<Place>>(sources.size)
+        var answered = 0
+        val lock = Mutex()
+        sources.forEachIndexed { i, source ->
+            launch {
+                val places = try { source() } catch (e: IOException) { null }
+                lock.withLock {
+                    answers[i] = places
+                    answered++
+                    val done = answered == sources.size
+                    // Una fonte che non risponde non ferma le altre: è un errore solo se non risponde nessuna e l'app non ha trovato nulla.
+                    if (done && local.isEmpty() && answers.all { it == null }) throw IOException("nessuna fonte di ricerca ha risposto")
+                    if (places != null || done) send(Progress(merge(local + answers.filterNotNull().flatten()), done))
+                }
+            }
+        }
     }
 
     /** Open-Meteo. */

@@ -181,7 +181,7 @@ private fun DaySummaryRow(title: String, day: DayWeather?) {
         }
         if (day != null) Column(horizontalAlignment = Alignment.End) {
             val spoken = minMaxSpoken(day)
-            Text(minMax(day) ?: "—", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { contentDescription = spoken })
+            Text(minMax(day) ?: "—", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { contentDescription = spoken })
             day.windKmh?.let { Text(stringResource(R.string.meteo_vento_breve, kmh(it, locale)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
     }

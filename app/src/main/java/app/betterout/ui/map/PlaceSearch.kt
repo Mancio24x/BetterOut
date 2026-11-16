@@ -1,11 +1,14 @@
 package app.betterout.ui.map
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,14 +43,75 @@ import app.betterout.data.PlaceSearch
 import app.betterout.ui.components.SecondaryButton
 import app.betterout.ui.theme.AppIcons3
 import app.betterout.ui.trips.currentLocale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-private sealed interface SearchState {
+internal sealed interface SearchState {
     data object Idle : SearchState
     data object Loading : SearchState
     data object Failed : SearchState
-    data class Results(val places: List<Place>) : SearchState
+    /** [more] è vero finché qualche fonte deve ancora rispondere. */
+    data class Results(val places: List<Place>, val more: Boolean) : SearchState
+}
+
+/** Una ricerca alla volta: una nuova annulla la precedente. I risultati arrivano man mano che le fonti rispondono. */
+internal class PlaceSearcher(private val scope: CoroutineScope) {
+    var state by mutableStateOf<SearchState>(SearchState.Idle)
+        private set
+    private var job: Job? = null
+
+    fun search(query: String) {
+        if (query.isBlank()) return
+        job?.cancel()
+        state = SearchState.Loading
+        job = scope.launch {
+            try { PlaceSearch.progressive(query).collect { state = SearchState.Results(it.places, more = !it.done) } }
+            catch (e: IOException) { state = SearchState.Failed }
+        }
+    }
+
+    fun clear() {
+        job?.cancel()
+        state = SearchState.Idle
+    }
+}
+
+@Composable
+internal fun rememberPlaceSearcher(): PlaceSearcher {
+    val scope = rememberCoroutineScope()
+    return remember { PlaceSearcher(scope) }
+}
+
+/** Risultati, attesa ed errore di una ricerca; [hint] è il testo mostrato prima di cercare (nessuno se null). */
+@Composable
+internal fun PlaceResults(state: SearchState, hint: String?, onRetry: () -> Unit, onPick: (Place) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        when (state) {
+            SearchState.Idle -> if (hint != null) Text(hint, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
+            SearchState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 24.dp))
+            SearchState.Failed -> {
+                Text(stringResource(R.string.cerca_errore), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(vertical = 12.dp))
+                SecondaryButton(stringResource(R.string.riprova), onRetry)
+            }
+            is SearchState.Results -> {
+                if (state.places.isEmpty() && !state.more) Text(stringResource(R.string.cerca_nessun_risultato), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 12.dp))
+                state.places.forEach { place ->
+                    Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { onPick(place) }.heightIn(min = 56.dp).padding(vertical = 8.dp)) {
+                        Text(place.name, style = MaterialTheme.typography.titleMedium)
+                        Text(placeSubtitle(place), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+                if (state.more) Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Text(stringResource(R.string.cerca_altri_in_arrivo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        Text(stringResource(R.string.cerca_fonte), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 12.dp))
+    }
 }
 
 @Composable
@@ -70,13 +134,8 @@ fun placeSubtitle(place: Place): String {
 @Composable
 fun PlaceSearchSheet(onDismiss: () -> Unit, onPick: (Place) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
-    var state by remember { mutableStateOf<SearchState>(SearchState.Idle) }
-    val scope = rememberCoroutineScope()
-    fun search() {
-        if (query.isBlank()) return
-        state = SearchState.Loading
-        scope.launch { state = try { SearchState.Results(PlaceSearch.search(query)) } catch (e: IOException) { SearchState.Failed } }
-    }
+    val searcher = rememberPlaceSearcher()
+    fun search() = searcher.search(query)
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.background) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 20.dp).navigationBarsPadding()) {
             OutlinedTextField(
@@ -86,25 +145,7 @@ fun PlaceSearchSheet(onDismiss: () -> Unit, onPick: (Place) -> Unit) {
                 trailingIcon = { IconButton(onClick = ::search) { Icon(AppIcons3.Search, contentDescription = stringResource(R.string.cerca)) } },
             )
             Column(Modifier.heightIn(min = 120.dp).verticalScroll(rememberScrollState()).padding(top = 8.dp)) {
-                when (val s = state) {
-                    SearchState.Idle -> Text(stringResource(R.string.cerca_aiuto), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
-                    SearchState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally).padding(top = 24.dp))
-                    SearchState.Failed -> {
-                        Text(stringResource(R.string.cerca_errore), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(vertical = 12.dp))
-                        SecondaryButton(stringResource(R.string.riprova), ::search)
-                    }
-                    is SearchState.Results -> {
-                        if (s.places.isEmpty()) Text(stringResource(R.string.cerca_nessun_risultato), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 12.dp))
-                        s.places.forEach { place ->
-                            Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { onPick(place) }.heightIn(min = 56.dp).padding(vertical = 8.dp)) {
-                                Text(place.name, style = MaterialTheme.typography.titleMedium)
-                                Text(placeSubtitle(place), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        }
-                    }
-                }
-                Text(stringResource(R.string.cerca_fonte), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 12.dp))
+                PlaceResults(searcher.state, stringResource(R.string.cerca_aiuto), ::search, onPick)
             }
         }
     }

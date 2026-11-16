@@ -5,6 +5,8 @@ import app.betterout.data.AppDatabase
 import app.betterout.data.AppSettings
 import app.betterout.data.BRouterService
 import app.betterout.data.GearRepository
+import app.betterout.data.OfflinePlaces
+import app.betterout.data.PlaceSearch
 import app.betterout.data.RouteRepository
 import app.betterout.data.RoutingService
 import app.betterout.data.TripRepository
@@ -20,4 +22,10 @@ class BetterOutApplication : Application() {
     val routes: RouteRepository by lazy { RouteRepository(database, File(filesDir, "percorsi")) }
     val routing: RoutingService by lazy { BRouterService() }
     val weather: WeatherRepository by lazy { WeatherRepository(File(filesDir, "meteo")) }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Il file si legge alla prima ricerca, non all'avvio.
+        PlaceSearch.offline = OfflinePlaces { assets.open("luoghi-alpi.tsv") }
+    }
 }

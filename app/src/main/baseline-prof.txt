@@ -1,0 +1,7 @@
+# Profilo di base dell'app: Android compila subito questo codice all'installazione, invece di aspettare giorni.
+# Serve soprattutto con Obtainium, che non riceve i profili dal Play Store: senza, ogni aggiornamento riparte lento.
+# Le librerie Compose e AndroidX includono già i loro profili; qui c'è il codice di BetterOut e la parte Java della mappa.
+HSPLapp/betterout/**;->**(**)**
+Lapp/betterout/**;
+HSPLorg/maplibre/android/**;->**(**)**
+Lorg/maplibre/android/**;

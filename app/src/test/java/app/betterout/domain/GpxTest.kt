@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Instant
 
 class GpxTest {
     private fun read(xml: String) = GpxReader.read(xml.byteInputStream())
@@ -88,5 +89,27 @@ class GpxTest {
 
     @Test fun `il nome del file non diventa nome del tracciato`() {
         assertNull(ok("""<gpx version="1.1"><metadata><name>File</name></metadata><trk><trkseg><trkpt lat="45" lon="7"/></trkseg></trk></gpx>""").tracks.single().name)
+    }
+
+    @Test fun `legge inizio e fine dagli orari dei punti, non dai metadati né dai punti di interesse`() {
+        val track = ok(
+            """<gpx version="1.1"><metadata><time>2030-01-01T00:00:00Z</time></metadata>
+            <wpt lat="45" lon="7"><time>2020-01-01T00:00:00Z</time></wpt>
+            <trk><trkseg>
+              <trkpt lat="45" lon="7"><time>2024-06-01T07:12:33Z</time></trkpt>
+              <trkpt lat="45.1" lon="7"><time>2024-06-01T09:30:00.250+02:00</time></trkpt>
+              <trkpt lat="45.2" lon="7"><time>non è un orario</time></trkpt>
+              <trkpt lat="45.3" lon="7"><time>2024-06-01T12:05:00</time></trkpt>
+            </trkseg></trk></gpx>""",
+        ).tracks.single()
+        assertEquals(Instant.parse("2024-06-01T07:12:33Z"), track.start)
+        assertEquals(Instant.parse("2024-06-01T12:05:00Z"), track.end)
+        assertEquals(4, track.segments.single().size)
+    }
+
+    @Test fun `senza orari inizio e fine restano assenti`() {
+        val track = ok(gpx11).tracks[0]
+        assertNull(track.start)
+        assertNull(track.end)
     }
 }

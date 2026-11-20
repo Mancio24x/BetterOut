@@ -12,11 +12,13 @@ import app.betterout.data.Route
 import app.betterout.data.RouteGeometry
 import app.betterout.data.RouteRepository
 import app.betterout.data.RoutingService
+import app.betterout.data.TripRepository
 import app.betterout.domain.GeoPoint
 import app.betterout.domain.GpxError
 import app.betterout.domain.GpxFile
 import app.betterout.domain.GpxReader
 import app.betterout.domain.GpxResult
+import app.betterout.domain.GpxTrip
 import app.betterout.domain.LegMode
 import app.betterout.domain.ProfilePoint
 import app.betterout.domain.RouteDraft
@@ -40,6 +42,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FilterInputStream
 import java.io.IOException
+import java.time.ZoneId
+import java.util.UUID
 import kotlin.coroutines.coroutineContext
 
 /** Archivio dei percorsi e loro tracce sulla mappa. */
@@ -90,7 +94,7 @@ class RouteDetailViewModel(private val repo: RouteRepository, private val id: St
     companion object { fun factory(repo: RouteRepository, id: String): ViewModelProvider.Factory = viewModelFactory { initializer { RouteDetailViewModel(repo, id) } } }
 }
 
-class GpxImportViewModel(private val app: Application, private val repo: RouteRepository, private val uri: Uri, private val tripId: String?) : ViewModel() {
+class GpxImportViewModel(private val app: Application, private val repo: RouteRepository, private val trips: TripRepository, private val uri: Uri, private val tripId: String?) : ViewModel() {
     sealed interface State {
         /** [fraction] è la parte di file già letta, da 0 a 1. */
         data class Reading(val fileName: String?, val fraction: Float) : State
@@ -145,22 +149,30 @@ class GpxImportViewModel(private val app: Application, private val repo: RouteRe
 
     fun toggle(index: Int) = _state.update { s -> if (s is State.Preview && !s.saving) s.copy(selected = if (index in s.selected) s.selected - index else s.selected + index) else s }
 
-    /** Salva i tracciati scelti nell'archivio; con [link] associa all'uscita il percorso, se è uno solo. */
-    fun save(link: Boolean, onDone: (List<String>) -> Unit) {
+    /**
+     * Salva i tracciati scelti nell'archivio. Se è uno solo ne fa anche l'uscita: completa quella di partenza,
+     * oppure ne crea una nuova. [onDone] riceve i percorsi salvati e l'uscita, se c'è.
+     */
+    fun save(onDone: (List<String>, String?) -> Unit) {
         val s = _state.value as? State.Preview ?: return
         if (s.saving || s.selected.isEmpty()) return
         _state.value = s.copy(saving = true)
         viewModelScope.launch {
             val ids = s.selected.sorted().map { i -> repo.saveImported(s.trackName(i), s.file.tracks[i], s.file.waypoints, s.fileName, copy) }
-            if (link && tripId != null && ids.size == 1) repo.setTripRoute(tripId, ids.single())
-            onDone(ids)
+            val trip = if (ids.size == 1) {
+                val track = s.file.tracks[s.selected.single()]
+                val result = if (tripId != null) trips.get(tripId)?.let { GpxTrip.fill(it, track, ids.single()) }
+                else GpxTrip.create(UUID.randomUUID().toString(), s.trackName(s.selected.single()), track, ids.single(), ZoneId.systemDefault(), System.currentTimeMillis())
+                result?.also { trips.save(it) }
+            } else null
+            onDone(ids, trip?.id)
         }
     }
 
     override fun onCleared() { copy.delete() }
 
     companion object {
-        fun factory(app: Application, repo: RouteRepository, uri: Uri, tripId: String?): ViewModelProvider.Factory = viewModelFactory { initializer { GpxImportViewModel(app, repo, uri, tripId) } }
+        fun factory(app: Application, repo: RouteRepository, trips: TripRepository, uri: Uri, tripId: String?): ViewModelProvider.Factory = viewModelFactory { initializer { GpxImportViewModel(app, repo, trips, uri, tripId) } }
     }
 }
 

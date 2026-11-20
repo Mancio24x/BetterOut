@@ -61,7 +61,7 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GpxImportScreen(vm: GpxImportViewModel, onBack: () -> Unit, onAnotherFile: (Uri) -> Unit, onDone: (List<String>, Boolean) -> Unit) {
+fun GpxImportScreen(vm: GpxImportViewModel, onBack: () -> Unit, onAnotherFile: (Uri) -> Unit, onDone: (List<String>, String?) -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) onAnotherFile(uri) }
     Scaffold(
@@ -81,12 +81,13 @@ fun GpxImportScreen(vm: GpxImportViewModel, onBack: () -> Unit, onAnotherFile: (
                     is GpxImportViewModel.State.Failed -> PrimaryButton(stringResource(R.string.scegli_altro_file), { picker.launch(GPX_MIME_TYPES) })
                     is GpxImportViewModel.State.Preview -> {
                         val count = s.selected.size
-                        if (vm.forTrip && count == 1) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            SecondaryButton(stringResource(R.string.solo_archivio), { vm.save(link = false) { onDone(it, false) } }, Modifier.weight(1f))
-                            PrimaryButton(stringResource(R.string.associa_uscita), { vm.save(link = true) { onDone(it, true) } }, Modifier.weight(1f), enabled = !s.saving)
-                        } else PrimaryButton(
-                            if (count <= 1) stringResource(R.string.salva_in_archivio) else pluralStringResource(R.plurals.importa_percorsi, count, count),
-                            { vm.save(link = false) { onDone(it, false) } }, enabled = count > 0 && !s.saving,
+                        PrimaryButton(
+                            when {
+                                count > 1 -> pluralStringResource(R.plurals.importa_percorsi, count, count)
+                                vm.forTrip -> stringResource(R.string.associa_uscita)
+                                else -> stringResource(R.string.salva_uscita)
+                            },
+                            { vm.save(onDone) }, enabled = count > 0 && !s.saving,
                         )
                     }
                 }

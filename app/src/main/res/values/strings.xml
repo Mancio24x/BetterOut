@@ -349,9 +349,7 @@
     <string name="gpx_nessuno_scelto">Scegli almeno un tracciato da importare.</string>
     <string name="cosa_importare">Cosa importare</string>
     <string name="scelti_di">%1$d di %2$d</string>
-    <string name="solo_archivio">Solo archivio</string>
     <string name="associa_uscita">Associa all’uscita</string>
-    <string name="salva_in_archivio">Salva nell’archivio</string>
     <string name="stima_nota_breve">durata stimata, ritmo medio</string>
     <plurals name="importa_percorsi">
         <item quantity="one">Importa %1$d percorso</item>

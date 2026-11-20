@@ -5,10 +5,17 @@ import org.xml.sax.SAXException
 import org.xml.sax.helpers.DefaultHandler
 import java.io.InputStream
 import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import javax.xml.parsers.SAXParserFactory
 
-/** Un tracciato (`trk`) o un itinerario (`rte`) del file. I segmenti restano separati. */
-data class GpxTrack(val name: String?, val segments: List<List<GeoPoint>>)
+/**
+ * Un tracciato (`trk`) o un itinerario (`rte`) del file. I segmenti restano separati.
+ * [start] e [end] sono il primo e l'ultimo orario dei punti, se il file li registra.
+ */
+data class GpxTrack(val name: String?, val segments: List<List<GeoPoint>>, val start: Instant? = null, val end: Instant? = null)
 
 @kotlinx.serialization.Serializable
 data class GpxWaypoint(val point: GeoPoint, val name: String?)
@@ -38,12 +45,16 @@ object GpxReader {
         } catch (e: SAXException) {
             return GpxResult.Error(if (handler.sawRoot) GpxError.XML_NON_VALIDO else GpxError.NON_GPX)
         }
-        val tracks = handler.tracks.mapNotNull { t -> t.segments.filter { it.isNotEmpty() }.takeIf { it.isNotEmpty() }?.let { GpxTrack(t.name, it) } }
+        val tracks = handler.tracks.mapNotNull { t -> t.segments.filter { it.isNotEmpty() }.takeIf { it.isNotEmpty() }?.let { GpxTrack(t.name, it, t.start, t.end) } }
         if (tracks.isEmpty()) return GpxResult.Error(GpxError.VUOTO)
         return GpxResult.Ok(GpxFile(handler.version, tracks, handler.waypoints, handler.discarded))
     }
 
-    private class MutableTrack(var name: String? = null, val segments: MutableList<MutableList<GeoPoint>> = mutableListOf())
+    private class MutableTrack(var name: String? = null, val segments: MutableList<MutableList<GeoPoint>> = mutableListOf(), var start: Instant? = null, var end: Instant? = null)
+
+    /** Orario ISO 8601 del GPX; senza fuso è inteso in UTC, come vuole lo standard. */
+    internal fun parseTime(s: String): Instant? =
+        runCatching { OffsetDateTime.parse(s).toInstant() }.recoverCatching { LocalDateTime.parse(s).toInstant(ZoneOffset.UTC) }.getOrNull()
 
     private class Handler : DefaultHandler() {
         var sawRoot = false
@@ -56,6 +67,7 @@ object GpxReader {
         private var pointKind: String? = null
         private var point: GeoPoint? = null
         private var pointName: String? = null
+        private var pointTime: Instant? = null
         private val text = StringBuilder()
 
         override fun startElement(uri: String?, localName: String?, qName: String, attributes: Attributes) {
@@ -76,6 +88,7 @@ object GpxReader {
                     val lon = attributes.getValue("lon")?.trim()?.toDoubleOrNull()
                     pointKind = name
                     pointName = null
+                    pointTime = null
                     point = if (lat != null && lon != null && Geo.isValid(lat, lon)) GeoPoint(lat, lon) else null
                     if (point == null) discarded++
                 }
@@ -90,11 +103,19 @@ object GpxReader {
             when (val name = qName.substringAfter(':')) {
                 "ele" -> point = point?.copy(ele = text.toString().trim().toDoubleOrNull()?.takeIf { it.isFinite() })
                 "name" -> text.toString().trim().takeIf { it.isNotEmpty() }.let { if (pointKind != null) pointName = it else if (track != null && track?.name == null) track?.name = it }
+                "time" -> if (pointKind != null) pointTime = parseTime(text.toString().trim())
                 "trk", "rte" -> track = null
                 "trkpt", "rtept", "wpt" -> {
                     val p = point
                     if (p != null) {
-                        if (name == "wpt") waypoints += GpxWaypoint(p, pointName) else track?.segments?.lastOrNull()?.add(p)
+                        if (name == "wpt") waypoints += GpxWaypoint(p, pointName) else track?.let { t ->
+                            t.segments.lastOrNull()?.add(p)
+                            pointTime?.let { time ->
+                                val (start, end) = t.start to t.end
+                                if (start == null || time < start) t.start = time
+                                if (end == null || time > end) t.end = time
+                            }
+                        }
                     }
                     pointKind = null
                     point = null

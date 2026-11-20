@@ -209,12 +209,12 @@ fun BetterOutApp() {
                 val uri = e.arguments?.getString("uri").orEmpty().toUri()
                 val tripId = e.arguments?.getString("uscita")
                 GpxImportScreen(
-                    viewModel(factory = GpxImportViewModel.factory(app, app.routes, uri, tripId)), onBack = { nav.popBackStack() },
+                    viewModel(factory = GpxImportViewModel.factory(app, app.routes, app.trips, uri, tripId)), onBack = { nav.popBackStack() },
                     onAnotherFile = { nav.popBackStack(); nav.navigate("gpx?uri=${Uri.encode(it.toString())}" + if (tripId != null) "&uscita=$tripId" else "") },
-                    onDone = { ids, linked ->
+                    onDone = { _, trip ->
                         when {
-                            linked -> backToTrip()
-                            tripId == null && ids.size == 1 -> nav.navigate("percorso/${ids.single()}") { popUpTo(MAPPA) }
+                            tripId != null -> backToTrip()
+                            trip != null -> { nav.popBackStack(); nav.navigate("uscita/$trip") }
                             else -> nav.popBackStack()
                         }
                     },
